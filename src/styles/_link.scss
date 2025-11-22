@@ -1,0 +1,34 @@
+.bb-link {
+  font-weight: 200;
+  color: var(--bb-color-primary);
+  position: relative;
+  white-space: nowrap;
+  padding-bottom: 3px;
+
+  i-feather {
+    stroke: var(--bb-color-primary);
+    vertical-align: bottom;
+  }
+
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background-color: var(--bb-color-primarySemiTransparent);
+    transform: scale(0);
+    transform-origin: center;
+    transition: transform 0.35s;
+  }
+
+  &:hover {
+    cursor: pointer;
+    color: var(--bb-color-primary);
+
+    &::after {
+      transform: scale(1);
+    }
+  }
+}

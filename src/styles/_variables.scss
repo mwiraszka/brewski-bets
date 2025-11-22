@@ -1,0 +1,28 @@
+:root {
+  /* Colour palette */
+  --bb-color-appMainBackground: #f8f8f8;
+  --bb-color-appFooterBackground: #ffffff;
+  --bb-color-appHeaderBackground: #ffffff;
+  --bb-color-appCard: #fafafa;
+
+  --bb-color-primary: #cba855;
+  --bb-color-primaryDark: #866925;
+  --bb-color-primarySemiTransparent: #cba8557f;
+  --bb-color-primaryHover: #4f5e7e36;
+
+  --bb-color-secondary: #8a3838;
+  --bb-color-secondaryLight: #ff8181;
+
+  --bb-color-textPrimaryDark: #444444;
+  --bb-color-textPrimaryLight: #eeeeee;
+  --bb-color-textSecondary: #777777;
+
+  /* Container widths & heights */
+  --bb-width-appContent: 1140px;
+  --bb-height-header: 74px;
+  --bb-height-mobileDropdown: 256px;
+
+  /* Other */
+  --bb-boxShadow: 0 4px 8px #0000001a;
+  --bb-boxShadowRaised: 0 6px 12px #0000001f;
+}

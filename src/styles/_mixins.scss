@@ -1,0 +1,60 @@
+@use 'sass:map';
+@use 'sass:math';
+@use 'sass:meta';
+
+/* Viewport breakpoint map */
+$breakpoints: (
+  'lt-xs': (
+    max-width: 430px,
+  ),
+  'gt-xs': (
+    min-width: 430px,
+  ),
+  'lt-sm': (
+    max-width: 500px,
+  ),
+  'gt-sm': (
+    min-width: 500px,
+  ),
+  'lt-md': (
+    max-width: 800px,
+  ),
+  'gt-md': (
+    min-width: 800px,
+  ),
+  'lt-lg': (
+    max-width: 1000px,
+  ),
+  'gt-lg': (
+    min-width: 1000px,
+  ),
+  'lt-xl': (
+    max-width: 1500px,
+  ),
+  'gt-xl': (
+    min-width: 1500px,
+  ),
+);
+
+/// Responsive breakpoint manager
+/// @access public
+/// @param {String} $breakpoint - Breakpoint
+/// @requires $breakpoints
+@mixin respond-to($breakpoint) {
+  $raw-query: map.get($breakpoints, $breakpoint);
+
+  @if $raw-query {
+    $query: if(
+      meta.type-of($raw-query) == 'string',
+      meta.unquote($raw-query),
+      meta.inspect($raw-query)
+    );
+
+    @media #{$query} {
+      @content;
+    }
+  } @else {
+    @error 'No value found for `#{$breakpoint}`. '
+         + 'Please make sure it is defined in `$breakpoints` map.';
+  }
+}

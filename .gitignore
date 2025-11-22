@@ -1,0 +1,29 @@
+# Generated code
+node_modules
+
+# Prettier config
+.prettierrc
+
+# Markdown lint config
+.markdownlint.json
+
+# System files
+.DS_Store
+Thumbs.db
+
+# Compiled output
+dist
+
+# Angular and Babel Webpack
+.angular
+
+# Vercel
+.vercel
+
+# IDE - VSCode
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+.history/*
