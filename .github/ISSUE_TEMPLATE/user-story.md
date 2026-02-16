@@ -1,9 +1,9 @@
 ---
 name: User story
 about: This template is for creating user stories
-title: ''
-labels: ''
-assignees: ''
+title: "[feat] New feature title"
+labels: feature
+assignees: mwiraszka
 
 ---
 
