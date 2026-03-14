@@ -1,6 +1,6 @@
 import { ButtonComponent, CardComponent, InputComponent } from '@eagami/ui';
 
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, OnDestroy, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 
@@ -12,7 +12,7 @@ import { ClerkService } from '@app/services/clerk.service';
   styleUrl: './change-password-page.component.scss',
   imports: [FormsModule, RouterLink, ButtonComponent, CardComponent, InputComponent],
 })
-export class ChangePasswordPageComponent {
+export class ChangePasswordPageComponent implements OnDestroy {
   private readonly clerk = inject(ClerkService);
   private readonly router = inject(Router);
 
@@ -22,6 +22,12 @@ export class ChangePasswordPageComponent {
 
   error = signal('');
   loading = signal(false);
+
+  ngOnDestroy(): void {
+    this.currentPassword.set('');
+    this.newPassword.set('');
+    this.confirmPassword.set('');
+  }
 
   async onSubmit(): Promise<void> {
     if (!this.currentPassword() || !this.newPassword() || !this.confirmPassword()) {

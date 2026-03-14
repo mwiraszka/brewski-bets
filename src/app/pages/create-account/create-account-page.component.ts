@@ -1,6 +1,6 @@
 import { ButtonComponent, CardComponent, InputComponent } from '@eagami/ui';
 
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, OnDestroy, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 
@@ -12,7 +12,7 @@ import { ClerkService } from '@app/services/clerk.service';
   styleUrl: './create-account-page.component.scss',
   imports: [FormsModule, RouterLink, ButtonComponent, CardComponent, InputComponent],
 })
-export class CreateAccountPageComponent {
+export class CreateAccountPageComponent implements OnDestroy {
   private readonly clerk = inject(ClerkService);
   private readonly router = inject(Router);
 
@@ -24,6 +24,11 @@ export class CreateAccountPageComponent {
   error = signal('');
   loading = signal(false);
   pendingVerification = signal(false);
+
+  ngOnDestroy(): void {
+    this.password.set('');
+    this.confirmPassword.set('');
+  }
 
   async onSubmit(): Promise<void> {
     if (!this.email() || !this.password() || !this.confirmPassword()) {

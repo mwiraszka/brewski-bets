@@ -52,10 +52,21 @@ ea-card {
   width: 100%;
 }
 
+.auth-footer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
 .auth-form {
   display: flex;
   flex-direction: column;
   gap: 20px;
+
+  ea-button {
+    margin-top: 8px;
+  }
 }
 
 .error {
