@@ -44,6 +44,13 @@ export const routes: Routes = [
     canActivate: [authGuard],
   },
   {
+    path: 'sso-callback',
+    loadComponent: () =>
+      import('./pages/sso-callback/sso-callback-page.component').then(
+        c => c.SSOCallbackPageComponent,
+      ),
+  },
+  {
     path: '**',
     redirectTo: '',
   },

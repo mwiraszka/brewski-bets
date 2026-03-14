@@ -4,6 +4,7 @@ import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 
+import { GoogleIconComponent } from '@app/icons/google-icon.component';
 import { ClerkService } from '@app/services/clerk.service';
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
@@ -12,7 +13,7 @@ const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
   selector: 'bb-login-page',
   templateUrl: './login-page.component.html',
   styleUrl: './login-page.component.scss',
-  imports: [FormsModule, RouterLink, ButtonComponent, CardComponent, InputComponent],
+  imports: [FormsModule, RouterLink, ButtonComponent, CardComponent, InputComponent, GoogleIconComponent],
 })
 export class LoginPageComponent {
   private readonly clerk = inject(ClerkService);
@@ -25,6 +26,7 @@ export class LoginPageComponent {
   passwordError = signal('');
   error = signal('');
   loading = signal(false);
+  googleLoading = signal(false);
 
   onEmailBlur(): void {
     if (!this.email()) return;
@@ -53,6 +55,16 @@ export class LoginPageComponent {
     }
 
     return !this.emailError() && !this.passwordError();
+  }
+
+  async onGoogleLogin(): Promise<void> {
+    this.googleLoading.set(true);
+    try {
+      await this.clerk.signInWithGoogle();
+    } catch (e: unknown) {
+      this.error.set(this.clerk.extractError(e));
+      this.googleLoading.set(false);
+    }
   }
 
   async onSubmit(): Promise<void> {

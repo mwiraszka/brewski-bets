@@ -13,41 +13,56 @@
       headerAlign="center">
       <h2 eaCardHeader>Log in</h2>
 
-      <form
-        class="auth-form"
-        (ngSubmit)="onSubmit()">
-        <ea-input
-          label="Email"
-          type="email"
-          autocomplete="email"
-          placeholder="you@example.com"
-          [autofocus]="true"
-          [required]="true"
-          [error]="emailError()"
-          (inputBlurred)="onEmailBlur()"
-          [(value)]="email" />
-
-        <ea-input
-          label="Password"
-          type="password"
-          autocomplete="current-password"
-          [required]="true"
-          [error]="passwordError()"
-          (inputBlurred)="onPasswordBlur()"
-          [(value)]="password" />
-
-        @if (error()) {
-          <p class="error">{{ error() }}</p>
-        }
-
+      <div class="auth-form">
         <ea-button
-          type="submit"
-          variant="primary"
+          variant="secondary"
           [fullWidth]="true"
-          [loading]="loading()">
-          Log in
+          [loading]="googleLoading()"
+          (clicked)="onGoogleLogin()">
+          <bb-google-icon slot="prefix" />
+          Continue with Google
         </ea-button>
-      </form>
+
+        <div class="divider">
+          <span>or</span>
+        </div>
+
+        <form
+          class="auth-form"
+          (ngSubmit)="onSubmit()">
+          <ea-input
+            label="Email"
+            type="email"
+            autocomplete="email"
+            placeholder="you@example.com"
+            [autofocus]="true"
+            [required]="true"
+            [error]="emailError()"
+            (inputBlurred)="onEmailBlur()"
+            [(value)]="email" />
+
+          <ea-input
+            label="Password"
+            type="password"
+            autocomplete="current-password"
+            [required]="true"
+            [error]="passwordError()"
+            (inputBlurred)="onPasswordBlur()"
+            [(value)]="password" />
+
+          @if (error()) {
+            <p class="error">{{ error() }}</p>
+          }
+
+          <ea-button
+            type="submit"
+            variant="primary"
+            [fullWidth]="true"
+            [loading]="loading()">
+            Log in
+          </ea-button>
+        </form>
+      </div>
 
       <div eaCardFooter class="auth-footer">
         <p class="auth-link">

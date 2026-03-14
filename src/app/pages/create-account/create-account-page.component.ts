@@ -4,6 +4,7 @@ import { Component, inject, OnDestroy, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 
+import { GoogleIconComponent } from '@app/icons/google-icon.component';
 import { ClerkService } from '@app/services/clerk.service';
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
@@ -12,7 +13,7 @@ const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
   selector: 'bb-create-account-page',
   templateUrl: './create-account-page.component.html',
   styleUrl: './create-account-page.component.scss',
-  imports: [FormsModule, RouterLink, ButtonComponent, CardComponent, InputComponent],
+  imports: [FormsModule, RouterLink, ButtonComponent, CardComponent, InputComponent, GoogleIconComponent],
 })
 export class CreateAccountPageComponent implements OnDestroy {
   private readonly clerk = inject(ClerkService);
@@ -29,6 +30,7 @@ export class CreateAccountPageComponent implements OnDestroy {
   verificationCodeError = signal('');
   error = signal('');
   loading = signal(false);
+  googleLoading = signal(false);
   pendingVerification = signal(false);
 
   ngOnDestroy(): void {
@@ -61,6 +63,16 @@ export class CreateAccountPageComponent implements OnDestroy {
 
   onVerificationCodeBlur(): void {
     // No format validation needed for code
+  }
+
+  async onGoogleSignUp(): Promise<void> {
+    this.googleLoading.set(true);
+    try {
+      await this.clerk.signInWithGoogle();
+    } catch (e: unknown) {
+      this.error.set(this.clerk.extractError(e));
+      this.googleLoading.set(false);
+    }
   }
 
   private validateAll(): boolean {

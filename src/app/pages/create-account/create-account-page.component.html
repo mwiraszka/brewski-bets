@@ -14,50 +14,64 @@
         headerAlign="center">
         <h2 eaCardHeader>Create account</h2>
 
-        <form
-          class="auth-form"
-          (ngSubmit)="onSubmit()">
-          <ea-input
-            label="Email"
-            type="email"
-            autocomplete="email"
-            placeholder="you@example.com"
-            [autofocus]="true"
-            [required]="true"
-            [error]="emailError()"
-            (inputBlurred)="onEmailBlur()"
-            [(value)]="email" />
-
-          <ea-input
-            label="Password"
-            type="password"
-            autocomplete="new-password"
-            [required]="true"
-            [error]="passwordError()"
-            (inputBlurred)="onPasswordBlur()"
-            [(value)]="password" />
-
-          <ea-input
-            label="Confirm Password"
-            type="password"
-            autocomplete="new-password"
-            [required]="true"
-            [error]="confirmPasswordError()"
-            (inputBlurred)="onConfirmPasswordBlur()"
-            [(value)]="confirmPassword" />
-
-          @if (error()) {
-            <p class="error">{{ error() }}</p>
-          }
-
+        <div class="auth-form">
           <ea-button
-            type="submit"
-            variant="primary"
+            variant="secondary"
             [fullWidth]="true"
-            [loading]="loading()">
-            Create account
+            [loading]="googleLoading()"
+            (clicked)="onGoogleSignUp()">
+            <bb-google-icon slot="prefix" />
+            Continue with Google
           </ea-button>
-        </form>
+
+          <div class="divider">
+            <span>or</span>
+          </div>
+
+          <form
+            class="auth-form"
+            (ngSubmit)="onSubmit()">
+            <ea-input
+              label="Email"
+              type="email"
+              autocomplete="email"
+              placeholder="you@example.com"
+              [required]="true"
+              [error]="emailError()"
+              (inputBlurred)="onEmailBlur()"
+              [(value)]="email" />
+
+            <ea-input
+              label="Password"
+              type="password"
+              autocomplete="new-password"
+              [required]="true"
+              [error]="passwordError()"
+              (inputBlurred)="onPasswordBlur()"
+              [(value)]="password" />
+
+            <ea-input
+              label="Confirm Password"
+              type="password"
+              autocomplete="new-password"
+              [required]="true"
+              [error]="confirmPasswordError()"
+              (inputBlurred)="onConfirmPasswordBlur()"
+              [(value)]="confirmPassword" />
+
+            @if (error()) {
+              <p class="error">{{ error() }}</p>
+            }
+
+            <ea-button
+              type="submit"
+              variant="primary"
+              [fullWidth]="true"
+              [loading]="loading()">
+              Create account
+            </ea-button>
+          </form>
+        </div>
 
         <p eaCardFooter class="auth-link">
           Already have an account?

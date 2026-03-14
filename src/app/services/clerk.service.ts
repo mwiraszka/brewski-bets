@@ -67,6 +67,18 @@ export class ClerkService {
     }
   }
 
+  async signInWithGoogle(): Promise<void> {
+    await this.clerk.client!.signIn.authenticateWithRedirect({
+      strategy: 'oauth_google',
+      redirectUrl: '/sso-callback',
+      redirectUrlComplete: '/',
+    });
+  }
+
+  async handleSSOCallback(): Promise<void> {
+    await this.clerk.handleRedirectCallback();
+  }
+
   async signOut(): Promise<void> {
     await this.clerk.signOut();
   }
