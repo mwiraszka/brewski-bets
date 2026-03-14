@@ -20,6 +20,9 @@ export class ChangePasswordPageComponent implements OnDestroy {
   newPassword = signal('');
   confirmPassword = signal('');
 
+  currentPasswordError = signal('');
+  newPasswordError = signal('');
+  confirmPasswordError = signal('');
   error = signal('');
   loading = signal(false);
 
@@ -29,19 +32,40 @@ export class ChangePasswordPageComponent implements OnDestroy {
     this.confirmPassword.set('');
   }
 
+  onCurrentPasswordBlur(): void {
+    if (!this.currentPassword()) {
+      this.currentPasswordError.set('Current password is required');
+    } else {
+      this.currentPasswordError.set('');
+    }
+  }
+
+  onNewPasswordBlur(): void {
+    if (!this.newPassword()) {
+      this.newPasswordError.set('New password is required');
+    } else if (this.newPassword().length < 8) {
+      this.newPasswordError.set('Must be at least 8 characters');
+    } else {
+      this.newPasswordError.set('');
+    }
+  }
+
+  onConfirmPasswordBlur(): void {
+    if (!this.confirmPassword()) {
+      this.confirmPasswordError.set('Please confirm your password');
+    } else if (this.newPassword() && this.confirmPassword() !== this.newPassword()) {
+      this.confirmPasswordError.set('Passwords do not match');
+    } else {
+      this.confirmPasswordError.set('');
+    }
+  }
+
   async onSubmit(): Promise<void> {
-    if (!this.currentPassword() || !this.newPassword() || !this.confirmPassword()) {
-      this.error.set('Please fill in all required fields');
-      return;
-    }
+    this.onCurrentPasswordBlur();
+    this.onNewPasswordBlur();
+    this.onConfirmPasswordBlur();
 
-    if (this.newPassword().length < 8) {
-      this.error.set('New password must be at least 8 characters');
-      return;
-    }
-
-    if (this.newPassword() !== this.confirmPassword()) {
-      this.error.set('Passwords do not match');
+    if (this.currentPasswordError() || this.newPasswordError() || this.confirmPasswordError()) {
       return;
     }
 

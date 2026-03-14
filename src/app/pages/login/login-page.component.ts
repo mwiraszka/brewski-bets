@@ -6,6 +6,8 @@ import { Router, RouterLink } from '@angular/router';
 
 import { ClerkService } from '@app/services/clerk.service';
 
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+
 @Component({
   selector: 'bb-login-page',
   templateUrl: './login-page.component.html',
@@ -19,17 +21,34 @@ export class LoginPageComponent {
   email = signal('');
   password = signal('');
 
+  emailError = signal('');
+  passwordError = signal('');
   error = signal('');
   loading = signal(false);
 
-  async onSubmit(): Promise<void> {
-    if (!this.email() || !this.password()) {
-      this.error.set('Please fill in all required fields');
-      return;
+  onEmailBlur(): void {
+    if (!this.email()) {
+      this.emailError.set('Email is required');
+    } else if (!EMAIL_REGEX.test(this.email())) {
+      this.emailError.set('Please enter a valid email address');
+    } else {
+      this.emailError.set('');
     }
+  }
 
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(this.email())) {
-      this.error.set('Please enter a valid email address');
+  onPasswordBlur(): void {
+    if (!this.password()) {
+      this.passwordError.set('Password is required');
+    } else {
+      this.passwordError.set('');
+    }
+  }
+
+  async onSubmit(): Promise<void> {
+    this.onEmailBlur();
+    this.onPasswordBlur();
+
+    if (this.emailError() || this.passwordError()) {
       return;
     }
 

@@ -24,6 +24,8 @@
             placeholder="you@example.com"
             [autofocus]="true"
             [required]="true"
+            [error]="emailError()"
+            (inputBlurred)="onEmailBlur()"
             [(value)]="email" />
 
           <ea-input
@@ -31,6 +33,8 @@
             type="password"
             autocomplete="new-password"
             [required]="true"
+            [error]="passwordError()"
+            (inputBlurred)="onPasswordBlur()"
             [(value)]="password" />
 
           <ea-input
@@ -38,6 +42,8 @@
             type="password"
             autocomplete="new-password"
             [required]="true"
+            [error]="confirmPasswordError()"
+            (inputBlurred)="onConfirmPasswordBlur()"
             [(value)]="confirmPassword" />
 
           @if (error()) {
@@ -75,6 +81,8 @@
             placeholder="Enter code"
             [autofocus]="true"
             [required]="true"
+            [error]="verificationCodeError()"
+            (inputBlurred)="onVerificationCodeBlur()"
             [(value)]="verificationCode" />
 
           @if (error()) {

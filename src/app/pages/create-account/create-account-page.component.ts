@@ -6,6 +6,8 @@ import { Router, RouterLink } from '@angular/router';
 
 import { ClerkService } from '@app/services/clerk.service';
 
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+
 @Component({
   selector: 'bb-create-account-page',
   templateUrl: './create-account-page.component.html',
@@ -21,6 +23,10 @@ export class CreateAccountPageComponent implements OnDestroy {
   confirmPassword = signal('');
   verificationCode = signal('');
 
+  emailError = signal('');
+  passwordError = signal('');
+  confirmPasswordError = signal('');
+  verificationCodeError = signal('');
   error = signal('');
   loading = signal(false);
   pendingVerification = signal(false);
@@ -30,24 +36,50 @@ export class CreateAccountPageComponent implements OnDestroy {
     this.confirmPassword.set('');
   }
 
+  onEmailBlur(): void {
+    if (!this.email()) {
+      this.emailError.set('Email is required');
+    } else if (!EMAIL_REGEX.test(this.email())) {
+      this.emailError.set('Please enter a valid email address');
+    } else {
+      this.emailError.set('');
+    }
+  }
+
+  onPasswordBlur(): void {
+    if (!this.password()) {
+      this.passwordError.set('Password is required');
+    } else if (this.password().length < 8) {
+      this.passwordError.set('Must be at least 8 characters');
+    } else {
+      this.passwordError.set('');
+    }
+  }
+
+  onConfirmPasswordBlur(): void {
+    if (!this.confirmPassword()) {
+      this.confirmPasswordError.set('Please confirm your password');
+    } else if (this.password() && this.confirmPassword() !== this.password()) {
+      this.confirmPasswordError.set('Passwords do not match');
+    } else {
+      this.confirmPasswordError.set('');
+    }
+  }
+
+  onVerificationCodeBlur(): void {
+    if (!this.verificationCode()) {
+      this.verificationCodeError.set('Verification code is required');
+    } else {
+      this.verificationCodeError.set('');
+    }
+  }
+
   async onSubmit(): Promise<void> {
-    if (!this.email() || !this.password() || !this.confirmPassword()) {
-      this.error.set('Please fill in all required fields');
-      return;
-    }
+    this.onEmailBlur();
+    this.onPasswordBlur();
+    this.onConfirmPasswordBlur();
 
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(this.email())) {
-      this.error.set('Please enter a valid email address');
-      return;
-    }
-
-    if (this.password().length < 8) {
-      this.error.set('Password must be at least 8 characters');
-      return;
-    }
-
-    if (this.password() !== this.confirmPassword()) {
-      this.error.set('Passwords do not match');
+    if (this.emailError() || this.passwordError() || this.confirmPasswordError()) {
       return;
     }
 
@@ -73,8 +105,9 @@ export class CreateAccountPageComponent implements OnDestroy {
   }
 
   async onVerify(): Promise<void> {
-    if (!this.verificationCode()) {
-      this.error.set('Please enter the verification code');
+    this.onVerificationCodeBlur();
+
+    if (this.verificationCodeError()) {
       return;
     }
 

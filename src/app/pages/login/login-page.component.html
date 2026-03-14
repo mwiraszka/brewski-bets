@@ -11,7 +11,7 @@
     <ea-card
       variant="outlined"
       headerAlign="center">
-      <h2 eaCardHeader>Login</h2>
+      <h2 eaCardHeader>Log in</h2>
 
       <form
         class="auth-form"
@@ -23,6 +23,8 @@
           placeholder="you@example.com"
           [autofocus]="true"
           [required]="true"
+          [error]="emailError()"
+          (inputBlurred)="onEmailBlur()"
           [(value)]="email" />
 
         <ea-input
@@ -30,6 +32,8 @@
           type="password"
           autocomplete="current-password"
           [required]="true"
+          [error]="passwordError()"
+          (inputBlurred)="onPasswordBlur()"
           [(value)]="password" />
 
         @if (error()) {

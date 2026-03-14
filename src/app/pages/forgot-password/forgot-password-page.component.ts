@@ -6,6 +6,8 @@ import { Router, RouterLink } from '@angular/router';
 
 import { ClerkService } from '@app/services/clerk.service';
 
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+
 @Component({
   selector: 'bb-forgot-password-page',
   templateUrl: './forgot-password-page.component.html',
@@ -21,6 +23,10 @@ export class ForgotPasswordPageComponent implements OnDestroy {
   newPassword = signal('');
   confirmPassword = signal('');
 
+  emailError = signal('');
+  codeError = signal('');
+  newPasswordError = signal('');
+  confirmPasswordError = signal('');
   error = signal('');
   loading = signal(false);
   codeSent = signal(false);
@@ -30,14 +36,48 @@ export class ForgotPasswordPageComponent implements OnDestroy {
     this.confirmPassword.set('');
   }
 
-  async onSendCode(): Promise<void> {
+  onEmailBlur(): void {
     if (!this.email()) {
-      this.error.set('Please enter your email address');
-      return;
+      this.emailError.set('Email is required');
+    } else if (!EMAIL_REGEX.test(this.email())) {
+      this.emailError.set('Please enter a valid email address');
+    } else {
+      this.emailError.set('');
     }
+  }
 
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(this.email())) {
-      this.error.set('Please enter a valid email address');
+  onCodeBlur(): void {
+    if (!this.code()) {
+      this.codeError.set('Reset code is required');
+    } else {
+      this.codeError.set('');
+    }
+  }
+
+  onNewPasswordBlur(): void {
+    if (!this.newPassword()) {
+      this.newPasswordError.set('Password is required');
+    } else if (this.newPassword().length < 8) {
+      this.newPasswordError.set('Must be at least 8 characters');
+    } else {
+      this.newPasswordError.set('');
+    }
+  }
+
+  onConfirmPasswordBlur(): void {
+    if (!this.confirmPassword()) {
+      this.confirmPasswordError.set('Please confirm your password');
+    } else if (this.newPassword() && this.confirmPassword() !== this.newPassword()) {
+      this.confirmPasswordError.set('Passwords do not match');
+    } else {
+      this.confirmPasswordError.set('');
+    }
+  }
+
+  async onSendCode(): Promise<void> {
+    this.onEmailBlur();
+
+    if (this.emailError()) {
       return;
     }
 
@@ -55,18 +95,11 @@ export class ForgotPasswordPageComponent implements OnDestroy {
   }
 
   async onResetPassword(): Promise<void> {
-    if (!this.code() || !this.newPassword() || !this.confirmPassword()) {
-      this.error.set('Please fill in all required fields');
-      return;
-    }
+    this.onCodeBlur();
+    this.onNewPasswordBlur();
+    this.onConfirmPasswordBlur();
 
-    if (this.newPassword().length < 8) {
-      this.error.set('Password must be at least 8 characters');
-      return;
-    }
-
-    if (this.newPassword() !== this.confirmPassword()) {
-      this.error.set('Passwords do not match');
+    if (this.codeError() || this.newPasswordError() || this.confirmPasswordError()) {
       return;
     }
 
