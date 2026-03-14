@@ -23,6 +23,16 @@ export class LoginPageComponent {
   loading = signal(false);
 
   async onSubmit(): Promise<void> {
+    if (!this.email() || !this.password()) {
+      this.error.set('Please fill in all required fields');
+      return;
+    }
+
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(this.email())) {
+      this.error.set('Please enter a valid email address');
+      return;
+    }
+
     this.error.set('');
     this.loading.set(true);
 

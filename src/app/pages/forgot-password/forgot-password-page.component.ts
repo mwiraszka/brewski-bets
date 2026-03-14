@@ -26,6 +26,16 @@ export class ForgotPasswordPageComponent {
   codeSent = signal(false);
 
   async onSendCode(): Promise<void> {
+    if (!this.email()) {
+      this.error.set('Please enter your email address');
+      return;
+    }
+
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(this.email())) {
+      this.error.set('Please enter a valid email address');
+      return;
+    }
+
     this.error.set('');
     this.loading.set(true);
 
@@ -40,6 +50,16 @@ export class ForgotPasswordPageComponent {
   }
 
   async onResetPassword(): Promise<void> {
+    if (!this.code() || !this.newPassword() || !this.confirmPassword()) {
+      this.error.set('Please fill in all required fields');
+      return;
+    }
+
+    if (this.newPassword().length < 8) {
+      this.error.set('Password must be at least 8 characters');
+      return;
+    }
+
     if (this.newPassword() !== this.confirmPassword()) {
       this.error.set('Passwords do not match');
       return;

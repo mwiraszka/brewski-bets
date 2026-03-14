@@ -24,6 +24,16 @@ export class ChangePasswordPageComponent {
   loading = signal(false);
 
   async onSubmit(): Promise<void> {
+    if (!this.currentPassword() || !this.newPassword() || !this.confirmPassword()) {
+      this.error.set('Please fill in all required fields');
+      return;
+    }
+
+    if (this.newPassword().length < 8) {
+      this.error.set('New password must be at least 8 characters');
+      return;
+    }
+
     if (this.newPassword() !== this.confirmPassword()) {
       this.error.set('Passwords do not match');
       return;

@@ -26,6 +26,21 @@ export class CreateAccountPageComponent {
   pendingVerification = signal(false);
 
   async onSubmit(): Promise<void> {
+    if (!this.email() || !this.password() || !this.confirmPassword()) {
+      this.error.set('Please fill in all required fields');
+      return;
+    }
+
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(this.email())) {
+      this.error.set('Please enter a valid email address');
+      return;
+    }
+
+    if (this.password().length < 8) {
+      this.error.set('Password must be at least 8 characters');
+      return;
+    }
+
     if (this.password() !== this.confirmPassword()) {
       this.error.set('Passwords do not match');
       return;
@@ -53,6 +68,11 @@ export class CreateAccountPageComponent {
   }
 
   async onVerify(): Promise<void> {
+    if (!this.verificationCode()) {
+      this.error.set('Please enter the verification code');
+      return;
+    }
+
     this.error.set('');
     this.loading.set(true);
 
