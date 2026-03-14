@@ -31,7 +31,7 @@ export class ForgotPasswordPageComponent {
       return;
     }
 
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(this.email())) {
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(this.email())) {
       this.error.set('Please enter a valid email address');
       return;
     }
