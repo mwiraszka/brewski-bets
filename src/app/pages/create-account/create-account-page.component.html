@@ -1,0 +1,89 @@
+<div class="auth-page">
+  <div class="auth-container">
+    <img
+      src="assets/bb.svg"
+      alt="Brewski Bets"
+      class="logo" />
+
+    @if (!pendingVerification()) {
+      <ea-card variant="outlined">
+        <span slot="header">
+          <h2>Create Account</h2>
+        </span>
+
+        <form
+          class="auth-form"
+          (ngSubmit)="onSubmit()">
+          <ea-input
+            label="Email"
+            type="email"
+            placeholder="you@example.com"
+            [required]="true"
+            [(value)]="email" />
+
+          <ea-input
+            label="Password"
+            type="password"
+            hint="At least 8 characters"
+            [required]="true"
+            [(value)]="password" />
+
+          <ea-input
+            label="Confirm Password"
+            type="password"
+            [required]="true"
+            [(value)]="confirmPassword" />
+
+          @if (error()) {
+            <p class="error">{{ error() }}</p>
+          }
+
+          <ea-button
+            type="submit"
+            variant="primary"
+            [fullWidth]="true"
+            [loading]="loading()">
+            Create Account
+          </ea-button>
+        </form>
+
+        <span slot="footer">
+          <p class="auth-link">
+            Already have an account?
+            <a routerLink="/login">Log in</a>
+          </p>
+        </span>
+      </ea-card>
+    } @else {
+      <ea-card variant="outlined">
+        <span slot="header">
+          <h2>Verify Email</h2>
+        </span>
+
+        <form
+          class="auth-form"
+          (ngSubmit)="onVerify()">
+          <p class="hint">We sent a verification code to {{ email() }}.</p>
+
+          <ea-input
+            label="Verification Code"
+            placeholder="Enter code"
+            [required]="true"
+            [(value)]="verificationCode" />
+
+          @if (error()) {
+            <p class="error">{{ error() }}</p>
+          }
+
+          <ea-button
+            type="submit"
+            variant="primary"
+            [fullWidth]="true"
+            [loading]="loading()">
+            Verify
+          </ea-button>
+        </form>
+      </ea-card>
+    }
+  </div>
+</div>

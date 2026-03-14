@@ -1,0 +1,53 @@
+<div class="auth-page">
+  <div class="auth-container">
+    <img
+      src="assets/bb.svg"
+      alt="Brewski Bets"
+      class="logo" />
+
+    <ea-card variant="outlined">
+      <span slot="header">
+        <h2>Log In</h2>
+      </span>
+
+      <form
+        class="auth-form"
+        (ngSubmit)="onSubmit()">
+        <ea-input
+          label="Email"
+          type="email"
+          placeholder="you@example.com"
+          [required]="true"
+          [(value)]="email" />
+
+        <ea-input
+          label="Password"
+          type="password"
+          [required]="true"
+          [(value)]="password" />
+
+        @if (error()) {
+          <p class="error">{{ error() }}</p>
+        }
+
+        <ea-button
+          type="submit"
+          variant="primary"
+          [fullWidth]="true"
+          [loading]="loading()">
+          Log In
+        </ea-button>
+      </form>
+
+      <span slot="footer">
+        <p class="auth-link">
+          <a routerLink="/forgot-password">Forgot password?</a>
+        </p>
+        <p class="auth-link">
+          Don't have an account?
+          <a routerLink="/create-account">Create account</a>
+        </p>
+      </span>
+    </ea-card>
+  </div>
+</div>

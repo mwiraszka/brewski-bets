@@ -1,18 +1,47 @@
 import { Routes } from '@angular/router';
 
-import { Page } from '@app/models';
-
-export const homePage: Page = {
-  title: 'brewski bets',
-  path: '',
-};
+import { authGuard, guestGuard } from '@app/guards/auth.guard';
 
 export const routes: Routes = [
   {
-    path: homePage.path,
+    path: '',
     loadComponent: () =>
-      import('./pages/home/home-page.component').then(c => c.HomePageComponent),
-    pathMatch: 'full',
+      import('./pages/home/home-page.component').then(
+        c => c.HomePageComponent,
+      ),
+    canActivate: [authGuard],
+  },
+  {
+    path: 'create-account',
+    loadComponent: () =>
+      import('./pages/create-account/create-account-page.component').then(
+        c => c.CreateAccountPageComponent,
+      ),
+    canActivate: [guestGuard],
+  },
+  {
+    path: 'login',
+    loadComponent: () =>
+      import('./pages/login/login-page.component').then(
+        c => c.LoginPageComponent,
+      ),
+    canActivate: [guestGuard],
+  },
+  {
+    path: 'forgot-password',
+    loadComponent: () =>
+      import('./pages/forgot-password/forgot-password-page.component').then(
+        c => c.ForgotPasswordPageComponent,
+      ),
+    canActivate: [guestGuard],
+  },
+  {
+    path: 'change-password',
+    loadComponent: () =>
+      import('./pages/change-password/change-password-page.component').then(
+        c => c.ChangePasswordPageComponent,
+      ),
+    canActivate: [authGuard],
   },
   {
     path: '**',
