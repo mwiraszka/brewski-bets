@@ -37,6 +37,33 @@ export class CreateAccountPageComponent implements OnDestroy {
   }
 
   onEmailBlur(): void {
+    if (!this.email()) return;
+    this.emailError.set(
+      EMAIL_REGEX.test(this.email()) ? '' : 'Please enter a valid email address',
+    );
+  }
+
+  onPasswordBlur(): void {
+    if (!this.password()) return;
+    this.passwordError.set(
+      this.password().length >= 8 ? '' : 'Must be at least 8 characters',
+    );
+  }
+
+  onConfirmPasswordBlur(): void {
+    if (!this.confirmPassword()) return;
+    this.confirmPasswordError.set(
+      !this.password() || this.confirmPassword() === this.password()
+        ? ''
+        : 'Passwords do not match',
+    );
+  }
+
+  onVerificationCodeBlur(): void {
+    // No format validation needed for code
+  }
+
+  private validateAll(): boolean {
     if (!this.email()) {
       this.emailError.set('Email is required');
     } else if (!EMAIL_REGEX.test(this.email())) {
@@ -44,9 +71,7 @@ export class CreateAccountPageComponent implements OnDestroy {
     } else {
       this.emailError.set('');
     }
-  }
 
-  onPasswordBlur(): void {
     if (!this.password()) {
       this.passwordError.set('Password is required');
     } else if (this.password().length < 8) {
@@ -54,9 +79,7 @@ export class CreateAccountPageComponent implements OnDestroy {
     } else {
       this.passwordError.set('');
     }
-  }
 
-  onConfirmPasswordBlur(): void {
     if (!this.confirmPassword()) {
       this.confirmPasswordError.set('Please confirm your password');
     } else if (this.password() && this.confirmPassword() !== this.password()) {
@@ -64,24 +87,12 @@ export class CreateAccountPageComponent implements OnDestroy {
     } else {
       this.confirmPasswordError.set('');
     }
-  }
 
-  onVerificationCodeBlur(): void {
-    if (!this.verificationCode()) {
-      this.verificationCodeError.set('Verification code is required');
-    } else {
-      this.verificationCodeError.set('');
-    }
+    return !this.emailError() && !this.passwordError() && !this.confirmPasswordError();
   }
 
   async onSubmit(): Promise<void> {
-    this.onEmailBlur();
-    this.onPasswordBlur();
-    this.onConfirmPasswordBlur();
-
-    if (this.emailError() || this.passwordError() || this.confirmPasswordError()) {
-      return;
-    }
+    if (!this.validateAll()) return;
 
     this.error.set('');
     this.loading.set(true);
@@ -105,12 +116,12 @@ export class CreateAccountPageComponent implements OnDestroy {
   }
 
   async onVerify(): Promise<void> {
-    this.onVerificationCodeBlur();
-
-    if (this.verificationCodeError()) {
+    if (!this.verificationCode()) {
+      this.verificationCodeError.set('Verification code is required');
       return;
     }
 
+    this.verificationCodeError.set('');
     this.error.set('');
     this.loading.set(true);
 

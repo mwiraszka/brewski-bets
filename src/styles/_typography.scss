@@ -3,6 +3,10 @@
   color: var(--bb-color-primarySemiTransparent);
 }
 
+.ea-input-field__message * {
+  color: inherit;
+}
+
 p,
 a,
 li {

@@ -33,14 +33,32 @@ export class ChangePasswordPageComponent implements OnDestroy {
   }
 
   onCurrentPasswordBlur(): void {
+    // No format validation needed
+  }
+
+  onNewPasswordBlur(): void {
+    if (!this.newPassword()) return;
+    this.newPasswordError.set(
+      this.newPassword().length >= 8 ? '' : 'Must be at least 8 characters',
+    );
+  }
+
+  onConfirmPasswordBlur(): void {
+    if (!this.confirmPassword()) return;
+    this.confirmPasswordError.set(
+      !this.newPassword() || this.confirmPassword() === this.newPassword()
+        ? ''
+        : 'Passwords do not match',
+    );
+  }
+
+  private validateAll(): boolean {
     if (!this.currentPassword()) {
       this.currentPasswordError.set('Current password is required');
     } else {
       this.currentPasswordError.set('');
     }
-  }
 
-  onNewPasswordBlur(): void {
     if (!this.newPassword()) {
       this.newPasswordError.set('New password is required');
     } else if (this.newPassword().length < 8) {
@@ -48,9 +66,7 @@ export class ChangePasswordPageComponent implements OnDestroy {
     } else {
       this.newPasswordError.set('');
     }
-  }
 
-  onConfirmPasswordBlur(): void {
     if (!this.confirmPassword()) {
       this.confirmPasswordError.set('Please confirm your password');
     } else if (this.newPassword() && this.confirmPassword() !== this.newPassword()) {
@@ -58,16 +74,12 @@ export class ChangePasswordPageComponent implements OnDestroy {
     } else {
       this.confirmPasswordError.set('');
     }
+
+    return !this.currentPasswordError() && !this.newPasswordError() && !this.confirmPasswordError();
   }
 
   async onSubmit(): Promise<void> {
-    this.onCurrentPasswordBlur();
-    this.onNewPasswordBlur();
-    this.onConfirmPasswordBlur();
-
-    if (this.currentPasswordError() || this.newPasswordError() || this.confirmPasswordError()) {
-      return;
-    }
+    if (!this.validateAll()) return;
 
     this.error.set('');
     this.loading.set(true);

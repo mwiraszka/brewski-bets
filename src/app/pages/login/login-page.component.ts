@@ -27,6 +27,17 @@ export class LoginPageComponent {
   loading = signal(false);
 
   onEmailBlur(): void {
+    if (!this.email()) return;
+    this.emailError.set(
+      EMAIL_REGEX.test(this.email()) ? '' : 'Please enter a valid email address',
+    );
+  }
+
+  onPasswordBlur(): void {
+    // No format validation needed for login password
+  }
+
+  private validateAll(): boolean {
     if (!this.email()) {
       this.emailError.set('Email is required');
     } else if (!EMAIL_REGEX.test(this.email())) {
@@ -34,23 +45,18 @@ export class LoginPageComponent {
     } else {
       this.emailError.set('');
     }
-  }
 
-  onPasswordBlur(): void {
     if (!this.password()) {
       this.passwordError.set('Password is required');
     } else {
       this.passwordError.set('');
     }
+
+    return !this.emailError() && !this.passwordError();
   }
 
   async onSubmit(): Promise<void> {
-    this.onEmailBlur();
-    this.onPasswordBlur();
-
-    if (this.emailError() || this.passwordError()) {
-      return;
-    }
+    if (!this.validateAll()) return;
 
     this.error.set('');
     this.loading.set(true);

@@ -37,49 +37,42 @@ export class ForgotPasswordPageComponent implements OnDestroy {
   }
 
   onEmailBlur(): void {
-    if (!this.email()) {
-      this.emailError.set('Email is required');
-    } else if (!EMAIL_REGEX.test(this.email())) {
-      this.emailError.set('Please enter a valid email address');
-    } else {
-      this.emailError.set('');
-    }
+    if (!this.email()) return;
+    this.emailError.set(
+      EMAIL_REGEX.test(this.email()) ? '' : 'Please enter a valid email address',
+    );
   }
 
   onCodeBlur(): void {
-    if (!this.code()) {
-      this.codeError.set('Reset code is required');
-    } else {
-      this.codeError.set('');
-    }
+    // No format validation needed for code
   }
 
   onNewPasswordBlur(): void {
-    if (!this.newPassword()) {
-      this.newPasswordError.set('Password is required');
-    } else if (this.newPassword().length < 8) {
-      this.newPasswordError.set('Must be at least 8 characters');
-    } else {
-      this.newPasswordError.set('');
-    }
+    if (!this.newPassword()) return;
+    this.newPasswordError.set(
+      this.newPassword().length >= 8 ? '' : 'Must be at least 8 characters',
+    );
   }
 
   onConfirmPasswordBlur(): void {
-    if (!this.confirmPassword()) {
-      this.confirmPasswordError.set('Please confirm your password');
-    } else if (this.newPassword() && this.confirmPassword() !== this.newPassword()) {
-      this.confirmPasswordError.set('Passwords do not match');
-    } else {
-      this.confirmPasswordError.set('');
-    }
+    if (!this.confirmPassword()) return;
+    this.confirmPasswordError.set(
+      !this.newPassword() || this.confirmPassword() === this.newPassword()
+        ? ''
+        : 'Passwords do not match',
+    );
   }
 
   async onSendCode(): Promise<void> {
-    this.onEmailBlur();
-
-    if (this.emailError()) {
+    if (!this.email()) {
+      this.emailError.set('Email is required');
       return;
     }
+    if (!EMAIL_REGEX.test(this.email())) {
+      this.emailError.set('Please enter a valid email address');
+      return;
+    }
+    this.emailError.set('');
 
     this.error.set('');
     this.loading.set(true);
@@ -94,14 +87,34 @@ export class ForgotPasswordPageComponent implements OnDestroy {
     }
   }
 
-  async onResetPassword(): Promise<void> {
-    this.onCodeBlur();
-    this.onNewPasswordBlur();
-    this.onConfirmPasswordBlur();
-
-    if (this.codeError() || this.newPasswordError() || this.confirmPasswordError()) {
-      return;
+  private validateReset(): boolean {
+    if (!this.code()) {
+      this.codeError.set('Reset code is required');
+    } else {
+      this.codeError.set('');
     }
+
+    if (!this.newPassword()) {
+      this.newPasswordError.set('Password is required');
+    } else if (this.newPassword().length < 8) {
+      this.newPasswordError.set('Must be at least 8 characters');
+    } else {
+      this.newPasswordError.set('');
+    }
+
+    if (!this.confirmPassword()) {
+      this.confirmPasswordError.set('Please confirm your password');
+    } else if (this.newPassword() && this.confirmPassword() !== this.newPassword()) {
+      this.confirmPasswordError.set('Passwords do not match');
+    } else {
+      this.confirmPasswordError.set('');
+    }
+
+    return !this.codeError() && !this.newPasswordError() && !this.confirmPasswordError();
+  }
+
+  async onResetPassword(): Promise<void> {
+    if (!this.validateReset()) return;
 
     this.error.set('');
     this.loading.set(true);
