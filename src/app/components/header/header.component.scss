@@ -1,0 +1,29 @@
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: var(--bb-height-header);
+  padding: 0 24px;
+  background: var(--bb-color-appHeaderBackground);
+  box-shadow: var(--bb-boxShadow);
+}
+
+.branding {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+}
+
+.logo {
+  width: 36px;
+  height: 36px;
+}
+
+.brand-name {
+  font-family: 'Righteous', sans-serif;
+  font-size: 22px;
+  line-height: 1;
+  color: var(--bb-color-primary);
+  letter-spacing: 1px;
+}
