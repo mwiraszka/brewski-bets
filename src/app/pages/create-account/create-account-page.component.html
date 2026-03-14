@@ -31,6 +31,22 @@
           <form
             class="auth-form"
             (ngSubmit)="onSubmit()">
+            <div class="name-row">
+              <ea-input
+                label="First name"
+                autocomplete="given-name"
+                [required]="true"
+                [error]="firstNameError()"
+                [(value)]="firstName" />
+
+              <ea-input
+                label="Last name"
+                autocomplete="family-name"
+                [required]="true"
+                [error]="lastNameError()"
+                [(value)]="lastName" />
+            </div>
+
             <ea-input
               label="Email"
               type="email"

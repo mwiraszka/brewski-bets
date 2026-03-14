@@ -29,10 +29,14 @@ export class ClerkService {
   async signUp(
     emailAddress: string,
     password: string,
+    firstName: string,
+    lastName: string,
   ): Promise<{ needsVerification: boolean }> {
     const signUp = await this.clerk.client!.signUp.create({
       emailAddress,
       password,
+      firstName,
+      lastName,
     });
 
     if (signUp.status === 'complete') {

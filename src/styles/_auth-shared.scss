@@ -69,6 +69,15 @@ ea-card {
   }
 }
 
+.name-row {
+  display: flex;
+  gap: 12px;
+
+  ea-input {
+    flex: 1;
+  }
+}
+
 .divider {
   display: flex;
   align-items: center;

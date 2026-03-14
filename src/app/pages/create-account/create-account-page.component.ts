@@ -19,11 +19,15 @@ export class CreateAccountPageComponent implements OnDestroy {
   private readonly clerk = inject(ClerkService);
   private readonly router = inject(Router);
 
+  firstName = signal('');
+  lastName = signal('');
   email = signal('');
   password = signal('');
   confirmPassword = signal('');
   verificationCode = signal('');
 
+  firstNameError = signal('');
+  lastNameError = signal('');
   emailError = signal('');
   passwordError = signal('');
   confirmPasswordError = signal('');
@@ -76,6 +80,9 @@ export class CreateAccountPageComponent implements OnDestroy {
   }
 
   private validateAll(): boolean {
+    this.firstNameError.set(!this.firstName() ? 'First name is required' : '');
+    this.lastNameError.set(!this.lastName() ? 'Last name is required' : '');
+
     if (!this.email()) {
       this.emailError.set('Email is required');
     } else if (!EMAIL_REGEX.test(this.email())) {
@@ -100,7 +107,8 @@ export class CreateAccountPageComponent implements OnDestroy {
       this.confirmPasswordError.set('');
     }
 
-    return !this.emailError() && !this.passwordError() && !this.confirmPasswordError();
+    return !this.firstNameError() && !this.lastNameError() &&
+      !this.emailError() && !this.passwordError() && !this.confirmPasswordError();
   }
 
   async onSubmit(): Promise<void> {
@@ -113,6 +121,8 @@ export class CreateAccountPageComponent implements OnDestroy {
       const { needsVerification } = await this.clerk.signUp(
         this.email(),
         this.password(),
+        this.firstName(),
+        this.lastName(),
       );
 
       if (needsVerification) {
