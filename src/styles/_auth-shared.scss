@@ -24,7 +24,7 @@
   flex-direction: column;
   align-items: center;
   width: 100%;
-  max-width: 420px;
+  max-width: 460px;
   padding: 16px;
 }
 
@@ -63,19 +63,21 @@ ea-card {
 }
 
 .error {
-  color: var(--bb-color-secondary);
-  font-size: 16px;
-  line-height: 22px;
+  color: #e53935;
+  font-size: 14px;
+  line-height: 20px;
+  text-align: center;
 }
 
 .hint {
-  font-size: 16px;
-  line-height: 22px;
+  font-size: 14px;
+  line-height: 20px;
+  text-align: center;
   color: var(--bb-color-textSecondary);
 }
 
 .auth-link {
-  font-size: 16px;
+  font-size: 14px;
   text-align: center;
   color: var(--bb-color-textSecondary);
 

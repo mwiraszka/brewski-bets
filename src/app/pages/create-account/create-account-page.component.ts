@@ -27,7 +27,7 @@ export class CreateAccountPageComponent {
 
   async onSubmit(): Promise<void> {
     if (this.password() !== this.confirmPassword()) {
-      this.error.set('Passwords do not match.');
+      this.error.set('Passwords do not match');
       return;
     }
 
@@ -46,7 +46,7 @@ export class CreateAccountPageComponent {
         await this.router.navigate(['/']);
       }
     } catch (e: unknown) {
-      this.error.set(this.extractError(e));
+      this.error.set(this.clerk.extractError(e));
     } finally {
       this.loading.set(false);
     }
@@ -60,17 +60,10 @@ export class CreateAccountPageComponent {
       await this.clerk.verifyEmail(this.verificationCode());
       await this.router.navigate(['/']);
     } catch (e: unknown) {
-      this.error.set(this.extractError(e));
+      this.error.set(this.clerk.extractError(e));
     } finally {
       this.loading.set(false);
     }
   }
 
-  private extractError(e: unknown): string {
-    if (e && typeof e === 'object' && 'errors' in e) {
-      const errors = (e as { errors: Array<{ longMessage?: string }> }).errors;
-      return errors[0]?.longMessage ?? 'An unexpected error occurred.';
-    }
-    return 'An unexpected error occurred.';
-  }
 }

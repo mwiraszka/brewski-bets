@@ -97,6 +97,42 @@ export class ClerkService {
     await this.clerk.user!.updatePassword({ currentPassword, newPassword });
   }
 
+  extractError(e: unknown): string {
+    if (e && typeof e === 'object' && 'errors' in e) {
+      const errors = (e as { errors: Array<{ code?: string; longMessage?: string }> })
+        .errors;
+      const error = errors[0];
+      return this.friendlyMessage(error?.code, error?.longMessage);
+    }
+    return 'Something went wrong, please try again';
+  }
+
+  private friendlyMessage(code?: string, fallback?: string): string {
+    const messages: Record<string, string> = {
+      form_identifier_not_found: 'No account found with that email',
+      form_password_incorrect: 'Incorrect password',
+      form_password_pwned:
+        'This password has been found in a data breach, please choose a different one',
+      form_password_length_too_short:
+        'Password must be at least 8 characters',
+      form_identifier_exists:
+        'An account with that email already exists',
+      form_code_incorrect: 'Incorrect verification code',
+      form_param_format_invalid: 'Please enter a valid email address',
+      form_password_not_strong_enough:
+        'Password is not strong enough, please choose a stronger one',
+      form_param_nil: 'Please fill in all required fields',
+      strategy_for_user_invalid: 'No account found with that email',
+      identifier_invalid: 'Please enter a valid email address',
+    };
+
+    if (code && messages[code]) {
+      return messages[code];
+    }
+
+    return fallback?.replace(/\.$/, '') ?? 'Something went wrong, please try again';
+  }
+
   private syncState(): void {
     this.isLoaded.set(true);
     this.isSignedIn.set(!!this.clerk.user);
