@@ -9,10 +9,10 @@
     </div>
 
     @if (!pendingVerification()) {
-      <ea-card variant="outlined">
-        <span slot="header">
-          <h2>Create Account</h2>
-        </span>
+      <ea-card
+        variant="outlined"
+        headerAlign="center">
+        <h2 eaCardHeader>Create Account</h2>
 
         <form
           class="auth-form"
@@ -20,13 +20,16 @@
           <ea-input
             label="Email"
             type="email"
+            autocomplete="email"
             placeholder="you@example.com"
+            [autofocus]="true"
             [required]="true"
             [(value)]="email" />
 
           <ea-input
             label="Password"
             type="password"
+            autocomplete="new-password"
             hint="At least 8 characters"
             [required]="true"
             [(value)]="password" />
@@ -34,6 +37,7 @@
           <ea-input
             label="Confirm Password"
             type="password"
+            autocomplete="new-password"
             [required]="true"
             [(value)]="confirmPassword" />
 
@@ -50,18 +54,16 @@
           </ea-button>
         </form>
 
-        <span slot="footer">
-          <p class="auth-link">
-            Already have an account?
-            <a routerLink="/login">Log in</a>
-          </p>
-        </span>
+        <p eaCardFooter class="auth-link">
+          Already have an account?
+          <a routerLink="/login">Log in</a>
+        </p>
       </ea-card>
     } @else {
-      <ea-card variant="outlined">
-        <span slot="header">
-          <h2>Verify Email</h2>
-        </span>
+      <ea-card
+        variant="outlined"
+        headerAlign="center">
+        <h2 eaCardHeader>Verify Email</h2>
 
         <form
           class="auth-form"
@@ -70,7 +72,9 @@
 
           <ea-input
             label="Verification Code"
+            autocomplete="one-time-code"
             placeholder="Enter code"
+            [autofocus]="true"
             [required]="true"
             [(value)]="verificationCode" />
 

@@ -8,10 +8,10 @@
       <span class="brand-name">brewski bets</span>
     </div>
 
-    <ea-card variant="outlined">
-      <span slot="header">
-        <h2>Log In</h2>
-      </span>
+    <ea-card
+      variant="outlined"
+      headerAlign="center">
+      <h2 eaCardHeader>Log In</h2>
 
       <form
         class="auth-form"
@@ -19,13 +19,16 @@
         <ea-input
           label="Email"
           type="email"
+          autocomplete="email"
           placeholder="you@example.com"
+          [autofocus]="true"
           [required]="true"
           [(value)]="email" />
 
         <ea-input
           label="Password"
           type="password"
+          autocomplete="current-password"
           [required]="true"
           [(value)]="password" />
 
@@ -42,7 +45,7 @@
         </ea-button>
       </form>
 
-      <span slot="footer">
+      <div eaCardFooter>
         <p class="auth-link">
           <a routerLink="/forgot-password">Forgot password?</a>
         </p>
@@ -50,7 +53,7 @@
           Don't have an account?
           <a routerLink="/create-account">Create account</a>
         </p>
-      </span>
+      </div>
     </ea-card>
   </div>
 </div>
