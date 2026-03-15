@@ -1,0 +1,78 @@
+<div class="auth-page">
+  <div class="auth-container">
+    <div class="branding">
+      <img
+        src="assets/bb.svg"
+        alt="Brewski Bets"
+        class="logo" />
+      <span class="brand-name">brewski bets</span>
+    </div>
+
+    <ea-card
+      variant="outlined"
+      headerAlign="center">
+      <h2 eaCardHeader>Log in</h2>
+
+      <div class="auth-form">
+        <ea-button
+          variant="secondary"
+          [fullWidth]="true"
+          [loading]="googleLoading()"
+          (clicked)="onGoogleLogin()">
+          <bb-google-icon slot="prefix" />
+          Log in with Google
+        </ea-button>
+
+        <div class="divider">
+          <span>or</span>
+        </div>
+
+        <form
+          class="auth-form"
+          (ngSubmit)="onSubmit()">
+          <ea-input
+            label="Email"
+            type="email"
+            autocomplete="email"
+            placeholder="you@example.com"
+            [autofocus]="true"
+            [required]="true"
+            [error]="emailError()"
+            (inputBlurred)="onEmailBlur()"
+            [(value)]="email" />
+
+          <ea-input
+            label="Password"
+            type="password"
+            autocomplete="current-password"
+            [required]="true"
+            [error]="passwordError()"
+            (inputBlurred)="onPasswordBlur()"
+            [(value)]="password" />
+
+          @if (error()) {
+            <p class="error">{{ error() }}</p>
+          }
+
+          <ea-button
+            type="submit"
+            variant="primary"
+            [fullWidth]="true"
+            [loading]="loading()">
+            Log in
+          </ea-button>
+        </form>
+      </div>
+
+      <div eaCardFooter class="auth-footer">
+        <p class="auth-link">
+          <a routerLink="/forgot-password">Forgot password?</a>
+        </p>
+        <p class="auth-link">
+          Don't have an account?
+          <a routerLink="/create-account">Create account</a>
+        </p>
+      </div>
+    </ea-card>
+  </div>
+</div>

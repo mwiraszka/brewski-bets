@@ -40,12 +40,19 @@
             ],
             "scripts": [],
             "styles": [
+              "node_modules/@eagami/ui/src/styles/eagami-ui.scss",
               "src/styles/main.scss"
             ],
             "tsConfig": "tsconfig.app.json"
           },
           "configurations": {
             "production": {
+              "fileReplacements": [
+                {
+                  "replace": "src/environments/environment.ts",
+                  "with": "src/environments/environment.prod.ts"
+                }
+              ],
               "budgets": [
                 {
                   "type": "initial",

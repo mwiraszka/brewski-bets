@@ -45,9 +45,9 @@ $breakpoints: (
 
   @if $raw-query {
     $query: if(
-      meta.type-of($raw-query) == 'string',
-      meta.unquote($raw-query),
-      meta.inspect($raw-query)
+      sass(meta.type-of($raw-query) == 'string'):
+        meta.unquote($raw-query);
+      else: meta.inspect($raw-query)
     );
 
     @media #{$query} {

@@ -1,20 +1,10 @@
-@font-face {
-  font-family: couture;
-  src: url(../assets/font/couture-bold.otf) format('opentype');
-  font-display: fallback;
-  font-weight: bold;
-}
-
-@font-face {
-  font-family: cinzel;
-  src: url(../assets/font/cinzel-bold.ttf) format('truetype');
-  font-display: fallback;
-  font-weight: bold;
-}
-
 * {
   font-family: 'arial', sans-serif;
   color: var(--bb-color-primarySemiTransparent);
+}
+
+.ea-input-field__message * {
+  color: inherit;
 }
 
 p,
@@ -25,34 +15,34 @@ li {
 }
 
 h1 {
-  font-family: 'cinzel';
+  font-family: 'Righteous', sans-serif;
   font-size: 44px;
   line-height: 36px;
 }
 
 h2 {
-  font-family: 'couture', 'helvetica', sans-serif;
   font-size: 22px;
   line-height: 32px;
 }
 
 h3 {
-  font-family: 'couture', 'helvetica', sans-serif;
   font-size: 18px;
   line-height: 28px;
 }
 
 h4 {
-  font-family: 'couture', 'helvetica', sans-serif;
-  font-size: 12px;
+  font-size: 16px;
 }
 
-h1,
+h1 {
+  font-weight: 100;
+  color: var(--bb-color-primary);
+}
+
 h2,
 h3,
 h4 {
   font-weight: 100;
-  color: var(--bb-color-primary);
 }
 
 sup {
