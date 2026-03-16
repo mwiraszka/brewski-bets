@@ -1,4 +1,4 @@
 export const environment = {
   production: false,
-  clerkPublishableKey: 'pk_test_bWFnbmV0aWMtZHJha2UtOTMuY2xlcmsuYWNjb3VudHMuZGV2JA',
+  clerkPublishableKey: 'pk_test_ZGFzaGluZy1nb2xkZmlzaC0zMy5jbGVyay5hY2NvdW50cy5kZXYk',
 };
