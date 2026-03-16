@@ -5,6 +5,25 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.0] - 2026-03-17
+
+### Added
+
+- Shared `AuthLayoutComponent` with child routes, eliminating layout duplication across auth pages
+- Background image fade-in transition on load
+- Horizontal divider lines flanking branding on auth pages
+- Clerk CAPTCHA element on create account form for bot protection
+- Radial gradient vignette on background image edges
+
+### Changed
+
+- Converted background image from PNG (11MB) to WebP (250KB)
+- Unified app background color across body, meta tags, and manifest
+- Consolidated brand-name font styling via `h1` typography rule
+- Darkened auth page gradient with subtle blue tint
+- Increased card box shadow for better depth contrast
+- Increased auth form button font size
+
 ## [0.2.0] - 2026-03-16
 
 ### Added
@@ -53,6 +72,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - PWA manifest and service worker configuration
 - GitHub issue templates
 
+[0.3.0]: https://github.com/mwiraszka/brewski-bets/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/mwiraszka/brewski-bets/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/mwiraszka/brewski-bets/releases/tag/v0.1.0
 [0.0.0]: https://github.com/mwiraszka/brewski-bets/releases/tag/v0.0.0
