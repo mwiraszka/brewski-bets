@@ -1,6 +1,6 @@
 {
   "name": "brewski-bets",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Frontend for brewski bets, built with Angular",
   "author": "Michal Wiraszka",
   "repository": {
@@ -8,7 +8,7 @@
     "url": "https://github.com/mwiraszka/brewski-bets.git"
   },
   "private": true,
-  "licence": "UNLICENSED",
+  "license": "UNLICENSED",
   "scripts": {
     "ng": "ng",
     "start": "ng serve -o",
@@ -29,8 +29,8 @@
     "@angular/platform-browser": "21.2.4",
     "@angular/platform-browser-dynamic": "21.2.4",
     "@angular/router": "21.2.4",
-    "@clerk/clerk-js": "^6.3.0",
-    "@eagami/ui": "^0.2.0",
+    "@clerk/clerk-js": "6.3.0",
+    "@eagami/ui": "0.2.0",
     "@ngneat/until-destroy": "10.0.0",
     "angular-feather": "6.5.1",
     "rxjs": "7.8.2",
@@ -41,13 +41,31 @@
     "@angular-devkit/build-angular": "21.2.2",
     "@angular/cli": "21.2.2",
     "@angular/compiler-cli": "21.2.4",
+    "@eslint/js": "10.0.1",
     "@trivago/prettier-plugin-sort-imports": "6.0.2",
-    "eslint-config-prettier": "10.1.8",
-    "eslint-plugin-prettier": "5.5.5",
+    "eslint": "10.0.3",
+    "globals": "17.4.0",
     "prettier": "3.8.1",
-    "prettier-eslint": "16.4.2",
     "ts-node": "10.9.2",
-    "typescript": "5.9.3"
+    "typescript": "5.9.3",
+    "typescript-eslint": "8.57.1"
+  },
+  "pnpm": {
+    "overrides": {
+      "@angular/common@21.2.1": "21.2.4",
+      "@angular/core@21.2.1": "21.2.4",
+      "@angular/compiler@21.2.1": "21.2.4",
+      "@angular/forms@21.2.1": "21.2.4",
+      "@angular/platform-browser@21.2.1": "21.2.4",
+      "@angular/platform-browser-dynamic@21.2.1": "21.2.4",
+      "@angular/router@21.2.1": "21.2.4"
+    },
+    "peerDependencyRules": {
+      "allowedVersions": {
+        "utf-8-validate": "6",
+        "bs58": "5"
+      }
+    }
   },
   "packageManager": "pnpm@10.32.1+sha512.a706938f0e89ac1456b6563eab4edf1d1faf3368d1191fc5c59790e96dc918e4456ab2e67d613de1043d2e8c81f87303e6b40d4ffeca9df15ef1ad567348f2be"
 }
