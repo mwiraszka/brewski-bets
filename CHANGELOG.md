@@ -14,6 +14,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Horizontal divider lines flanking branding on auth pages
 - Clerk CAPTCHA element on create account form for bot protection
 - Radial gradient vignette on background image edges
+- Preview environment with Clerk development key for Vercel preview deploys
+- `vercel.json` with environment-aware build command
 
 ### Changed
 
