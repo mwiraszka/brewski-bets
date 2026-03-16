@@ -17,32 +17,29 @@ li {
 h1 {
   font-family: 'Righteous', sans-serif;
   font-size: 44px;
+  font-weight: 100;
   line-height: 36px;
+  color: var(--bb-color-primary);
 }
 
 h2 {
   font-size: 22px;
+  font-weight: 100;
   line-height: 32px;
+  color: var(--bb-color-textPrimary);
 }
 
 h3 {
   font-size: 18px;
+  font-weight: 100;
   line-height: 28px;
+  color: var(--bb-color-textPrimary);
 }
 
 h4 {
   font-size: 16px;
-}
-
-h1 {
   font-weight: 100;
-  color: var(--bb-color-primary);
-}
-
-h2,
-h3,
-h4 {
-  font-weight: 100;
+  color: var(--bb-color-textPrimary);
 }
 
 sup {
