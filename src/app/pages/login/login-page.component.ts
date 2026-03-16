@@ -13,7 +13,14 @@ const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
   selector: 'bb-login-page',
   templateUrl: './login-page.component.html',
   styleUrl: './login-page.component.scss',
-  imports: [FormsModule, RouterLink, ButtonComponent, CardComponent, InputComponent, GoogleIconComponent],
+  imports: [
+    FormsModule,
+    RouterLink,
+    ButtonComponent,
+    CardComponent,
+    InputComponent,
+    GoogleIconComponent,
+  ],
 })
 export class LoginPageComponent {
   private readonly clerk = inject(ClerkService);
