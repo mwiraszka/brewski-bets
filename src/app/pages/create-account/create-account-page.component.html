@@ -1,138 +1,125 @@
-<div class="auth-page">
-  <div class="auth-panel">
-    <div class="auth-container">
-      <div class="branding">
-        <img
-          src="assets/bb.svg"
-          alt="Brewski Bets"
-          class="logo" />
-        <span class="brand-name">brewski bets</span>
+@if (!pendingVerification()) {
+  <ea-card
+    variant="outlined"
+    headerAlign="center">
+    <h2 eaCardHeader>Create account</h2>
+
+    <div class="auth-form">
+      <ea-button
+        variant="secondary"
+        [fullWidth]="true"
+        [loading]="googleLoading()"
+        (clicked)="onGoogleSignUp()">
+        <bb-google-icon slot="prefix" />
+        Continue with Google
+      </ea-button>
+
+      <div class="divider">
+        <span>or</span>
       </div>
 
-      @if (!pendingVerification()) {
-        <ea-card
-          variant="outlined"
-          headerAlign="center">
-          <h2 eaCardHeader>Create account</h2>
+      <form
+        class="auth-form"
+        (ngSubmit)="onSubmit()">
+        <div class="name-row">
+          <ea-input
+            label="First name"
+            autocomplete="given-name"
+            [required]="true"
+            [error]="firstNameError()"
+            [(value)]="firstName" />
 
-          <div class="auth-form">
-            <ea-button
-              variant="secondary"
-              [fullWidth]="true"
-              [loading]="googleLoading()"
-              (clicked)="onGoogleSignUp()">
-              <bb-google-icon slot="prefix" />
-              Continue with Google
-            </ea-button>
+          <ea-input
+            label="Last name"
+            autocomplete="family-name"
+            [required]="true"
+            [error]="lastNameError()"
+            [(value)]="lastName" />
+        </div>
 
-            <div class="divider">
-              <span>or</span>
-            </div>
+        <ea-input
+          label="Email"
+          type="email"
+          autocomplete="email"
+          placeholder="you@example.com"
+          [required]="true"
+          [error]="emailError()"
+          (inputBlurred)="onEmailBlur()"
+          [(value)]="email" />
 
-            <form
-              class="auth-form"
-              (ngSubmit)="onSubmit()">
-              <div class="name-row">
-                <ea-input
-                  label="First name"
-                  autocomplete="given-name"
-                  [required]="true"
-                  [error]="firstNameError()"
-                  [(value)]="firstName" />
+        <ea-input
+          label="Password"
+          type="password"
+          autocomplete="new-password"
+          [required]="true"
+          [error]="passwordError()"
+          (inputBlurred)="onPasswordBlur()"
+          [(value)]="password" />
 
-                <ea-input
-                  label="Last name"
-                  autocomplete="family-name"
-                  [required]="true"
-                  [error]="lastNameError()"
-                  [(value)]="lastName" />
-              </div>
+        <ea-input
+          label="Confirm Password"
+          type="password"
+          autocomplete="new-password"
+          [required]="true"
+          [error]="confirmPasswordError()"
+          (inputBlurred)="onConfirmPasswordBlur()"
+          [(value)]="confirmPassword" />
 
-              <ea-input
-                label="Email"
-                type="email"
-                autocomplete="email"
-                placeholder="you@example.com"
-                [required]="true"
-                [error]="emailError()"
-                (inputBlurred)="onEmailBlur()"
-                [(value)]="email" />
+        @if (error()) {
+          <p class="error">{{ error() }}</p>
+        }
 
-              <ea-input
-                label="Password"
-                type="password"
-                autocomplete="new-password"
-                [required]="true"
-                [error]="passwordError()"
-                (inputBlurred)="onPasswordBlur()"
-                [(value)]="password" />
+        <div id="clerk-captcha"></div>
 
-              <ea-input
-                label="Confirm Password"
-                type="password"
-                autocomplete="new-password"
-                [required]="true"
-                [error]="confirmPasswordError()"
-                (inputBlurred)="onConfirmPasswordBlur()"
-                [(value)]="confirmPassword" />
-
-              @if (error()) {
-                <p class="error">{{ error() }}</p>
-              }
-
-              <ea-button
-                type="submit"
-                variant="primary"
-                [fullWidth]="true"
-                [loading]="loading()">
-                Create account
-              </ea-button>
-            </form>
-          </div>
-
-          <p
-            eaCardFooter
-            class="auth-link">
-            Already have an account?
-            <a routerLink="/login">Log in</a>
-          </p>
-        </ea-card>
-      } @else {
-        <ea-card
-          variant="outlined"
-          headerAlign="center">
-          <h2 eaCardHeader>Verify email</h2>
-
-          <form
-            class="auth-form"
-            (ngSubmit)="onVerify()">
-            <p class="hint">We sent a verification code to {{ email() }}.</p>
-
-            <ea-input
-              label="Verification Code"
-              autocomplete="one-time-code"
-              placeholder="Enter code"
-              [autofocus]="true"
-              [required]="true"
-              [error]="verificationCodeError()"
-              (inputBlurred)="onVerificationCodeBlur()"
-              [(value)]="verificationCode" />
-
-            @if (error()) {
-              <p class="error">{{ error() }}</p>
-            }
-
-            <ea-button
-              type="submit"
-              variant="primary"
-              [fullWidth]="true"
-              [loading]="loading()">
-              Verify
-            </ea-button>
-          </form>
-        </ea-card>
-      }
+        <ea-button
+          type="submit"
+          variant="primary"
+          [fullWidth]="true"
+          [loading]="loading()">
+          Create account
+        </ea-button>
+      </form>
     </div>
-  </div>
-  <div class="bg-panel"></div>
-</div>
+
+    <p
+      eaCardFooter
+      class="auth-link">
+      Already have an account?
+      <a routerLink="/login">Log in</a>
+    </p>
+  </ea-card>
+} @else {
+  <ea-card
+    variant="outlined"
+    headerAlign="center">
+    <h2 eaCardHeader>Verify email</h2>
+
+    <form
+      class="auth-form"
+      (ngSubmit)="onVerify()">
+      <p class="hint">We sent a verification code to {{ email() }}.</p>
+
+      <ea-input
+        label="Verification Code"
+        autocomplete="one-time-code"
+        placeholder="Enter code"
+        [autofocus]="true"
+        [required]="true"
+        [error]="verificationCodeError()"
+        (inputBlurred)="onVerificationCodeBlur()"
+        [(value)]="verificationCode" />
+
+      @if (error()) {
+        <p class="error">{{ error() }}</p>
+      }
+
+      <ea-button
+        type="submit"
+        variant="primary"
+        [fullWidth]="true"
+        [loading]="loading()">
+        Verify
+      </ea-button>
+    </form>
+  </ea-card>
+}

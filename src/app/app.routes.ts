@@ -12,36 +12,45 @@ export const routes: Routes = [
     canActivate: [authGuard],
   },
   {
-    path: 'create-account',
+    path: '',
     loadComponent: () =>
-      import('./pages/create-account/create-account-page.component').then(
-        c => c.CreateAccountPageComponent,
+      import('./layouts/auth-layout/auth-layout.component').then(
+        c => c.AuthLayoutComponent,
       ),
-    canActivate: [guestGuard],
-  },
-  {
-    path: 'login',
-    loadComponent: () =>
-      import('./pages/login/login-page.component').then(
-        c => c.LoginPageComponent,
-      ),
-    canActivate: [guestGuard],
-  },
-  {
-    path: 'forgot-password',
-    loadComponent: () =>
-      import('./pages/forgot-password/forgot-password-page.component').then(
-        c => c.ForgotPasswordPageComponent,
-      ),
-    canActivate: [guestGuard],
-  },
-  {
-    path: 'change-password',
-    loadComponent: () =>
-      import('./pages/change-password/change-password-page.component').then(
-        c => c.ChangePasswordPageComponent,
-      ),
-    canActivate: [authGuard],
+    children: [
+      {
+        path: 'create-account',
+        loadComponent: () =>
+          import('./pages/create-account/create-account-page.component').then(
+            c => c.CreateAccountPageComponent,
+          ),
+        canActivate: [guestGuard],
+      },
+      {
+        path: 'login',
+        loadComponent: () =>
+          import('./pages/login/login-page.component').then(
+            c => c.LoginPageComponent,
+          ),
+        canActivate: [guestGuard],
+      },
+      {
+        path: 'forgot-password',
+        loadComponent: () =>
+          import('./pages/forgot-password/forgot-password-page.component').then(
+            c => c.ForgotPasswordPageComponent,
+          ),
+        canActivate: [guestGuard],
+      },
+      {
+        path: 'change-password',
+        loadComponent: () =>
+          import('./pages/change-password/change-password-page.component').then(
+            c => c.ChangePasswordPageComponent,
+          ),
+        canActivate: [authGuard],
+      },
+    ],
   },
   {
     path: 'sso-callback',
