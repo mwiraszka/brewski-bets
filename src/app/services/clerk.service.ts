@@ -80,7 +80,10 @@ export class ClerkService {
   }
 
   async handleSSOCallback(): Promise<void> {
-    await this.clerk.handleRedirectCallback();
+    await this.clerk.handleRedirectCallback({
+      signInForceRedirectUrl: '/',
+      signUpForceRedirectUrl: '/',
+    });
   }
 
   async signOut(): Promise<void> {
