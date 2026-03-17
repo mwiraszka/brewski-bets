@@ -53,6 +53,20 @@ export const routes: Routes = [
     ],
   },
   {
+    path: 'privacy-policy',
+    loadComponent: () =>
+      import('./pages/privacy-policy/privacy-policy-page.component').then(
+        c => c.PrivacyPolicyPageComponent,
+      ),
+  },
+  {
+    path: 'terms-of-service',
+    loadComponent: () =>
+      import('./pages/terms-of-service/terms-of-service-page.component').then(
+        c => c.TermsOfServicePageComponent,
+      ),
+  },
+  {
     path: 'sso-callback',
     loadComponent: () =>
       import('./pages/sso-callback/sso-callback-page.component').then(

@@ -3,7 +3,9 @@
   color: var(--bb-color-primarySemiTransparent);
 }
 
-.ea-input-field__message * {
+.ea-input-field__message *,
+.ea-input-wrapper__password-toggle,
+.ea-input-wrapper__password-toggle * {
   color: inherit;
 }
 
