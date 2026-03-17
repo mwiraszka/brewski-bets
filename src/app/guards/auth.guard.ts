@@ -11,7 +11,7 @@ export const authGuard: CanActivateFn = () => {
     return true;
   }
 
-  return router.createUrlTree(['/create-account']);
+  return router.createUrlTree(['/login']);
 };
 
 export const guestGuard: CanActivateFn = () => {
