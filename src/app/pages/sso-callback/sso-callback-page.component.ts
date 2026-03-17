@@ -14,6 +14,7 @@ export class SSOCallbackPageComponent implements OnInit {
   async ngOnInit(): Promise<void> {
     try {
       await this.clerk.handleSSOCallback();
+      await this.router.navigate(['/']);
     } catch {
       await this.router.navigate(['/login']);
     }
