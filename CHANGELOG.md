@@ -16,12 +16,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Replaced auth page gradient with plain background color
 - Adjusted auth layout spacing and branding margins
+- Default route for unauthenticated users changed from create account to login
+- Title case for browser tab text
 
 ### Fixed
 
 - Primary button text appearing black on mobile dark mode (forced `--color-text-inverse` to white)
 - Password toggle eye icons now fully opaque, darken to link color on hover
 - Card clipped by mobile browser toolbar (`dvh`/`vh` declaration order)
+- Header log out button invisible on mobile dark mode
 - Preview deployment workflow using correct build command
 
 ## [0.3.0] - 2026-03-17
