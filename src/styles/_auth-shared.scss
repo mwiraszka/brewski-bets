@@ -42,16 +42,8 @@ ea-card {
   flex-direction: column;
   gap: 16px;
 
-  @include respond-to('lt-md') {
-    gap: 8px;
-  }
-
   ea-button {
     margin-top: 16px;
-
-    @include respond-to('lt-md') {
-      margin-top: 8px;
-    }
 
     ::ng-deep .ea-button {
       font-size: 16px;
