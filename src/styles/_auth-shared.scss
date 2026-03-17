@@ -11,12 +11,22 @@ ea-card {
     --color-bg-base: #ffffff;
     --color-text-primary: #1a1a1a;
     --color-text-secondary: #555555;
+    --color-text-inverse: #ffffff;
     --color-border-default: #e0e0e0;
     box-shadow: 0 16px 64px #000000cc;
   }
 
   ::ng-deep .ea-card__header {
     padding-bottom: 0 !important;
+  }
+
+  ::ng-deep .ea-input-wrapper__password-toggle {
+    color: #555555;
+    opacity: 1;
+
+    &:hover {
+      color: var(--bb-color-primaryDark);
+    }
   }
 }
 
