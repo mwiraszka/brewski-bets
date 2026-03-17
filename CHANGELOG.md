@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Preview build configuration for Vercel preview deploys with Clerk development key
 - Automatic git tag and GitHub release creation on merge to main
+- Additional 120x120 PNG logo asset
 
 ### Changed
 
