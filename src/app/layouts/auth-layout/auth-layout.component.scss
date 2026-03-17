@@ -74,9 +74,9 @@
     &::before {
       content: '';
       position: absolute;
-      inset: -16px;
+      inset: -64px;
       background: url('/assets/beers-due.webp') center / cover no-repeat;
-      filter: blur(4px);
+      filter: blur(2.5px);
       opacity: 0;
       transition: opacity 0.5s ease-in;
     }
