@@ -5,6 +5,24 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.0] - 2026-03-17
+
+### Added
+
+- Preview build configuration for Vercel preview deploys with Clerk development key
+- Automatic git tag and GitHub release creation on merge to main
+
+### Changed
+
+- Replaced auth page gradient with plain background color
+- Adjusted auth layout spacing and branding margins
+
+### Fixed
+
+- Primary button text appearing black on mobile dark mode (forced `--color-text-inverse` to white)
+- Password toggle eye icons now fully opaque, darken to link color on hover
+- Preview deployment workflow using correct build command
+
 ## [0.3.0] - 2026-03-17
 
 ### Added
@@ -74,6 +92,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - PWA manifest and service worker configuration
 - GitHub issue templates
 
+[0.4.0]: https://github.com/mwiraszka/brewski-bets/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/mwiraszka/brewski-bets/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/mwiraszka/brewski-bets/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/mwiraszka/brewski-bets/compare/v0.0.0...v0.1.0
