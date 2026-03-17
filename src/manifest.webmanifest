@@ -1,8 +1,8 @@
 {
   "name": "brewski bets",
   "description": "Because betting with money is for losers.",
-  "theme_color": "#ffffff",
-  "background_color": "#ffffff",
+  "theme_color": "#313843",
+  "background_color": "#313843",
   "display": "standalone",
   "scope": "./",
   "start_url": "./",
