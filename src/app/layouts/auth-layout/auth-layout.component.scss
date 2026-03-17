@@ -9,14 +9,7 @@
   width: 100%;
   height: 100%;
   display: flex;
-  background: linear-gradient(
-    135deg,
-    #2e3440 0%,
-    #353c48 25%,
-    #313843 50%,
-    #383f4b 75%,
-    #2e3440 100%
-  );
+  background-color: var(--bb-color-appBackground);
 }
 
 .auth-panel {
@@ -25,7 +18,7 @@
   align-items: safe center;
   justify-content: center;
   overflow-y: auto;
-  padding: 32px 16px;
+  padding: 24px 16px;
 
   @include respond-to('gt-lg') {
     flex: none;
@@ -45,12 +38,8 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  margin-bottom: 16px;
+  margin-bottom: 24px;
   width: 100%;
-
-  @include respond-to('lt-md') {
-    margin-bottom: 8px;
-  }
 
   &::before,
   &::after {

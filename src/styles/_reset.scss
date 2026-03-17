@@ -70,8 +70,8 @@ video {
 }
 
 body {
+  height: 100vh;
   height: 100dvh;
-  height: 100vh; /* Fallback for browsers that don't support dvh */
   overflow: hidden;
   background-color: var(--bb-color-appBackground);
 }
