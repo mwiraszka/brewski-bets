@@ -21,6 +21,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Primary button text appearing black on mobile dark mode (forced `--color-text-inverse` to white)
 - Password toggle eye icons now fully opaque, darken to link color on hover
+- Card clipped by mobile browser toolbar (`dvh`/`vh` declaration order)
 - Preview deployment workflow using correct build command
 
 ## [0.3.0] - 2026-03-17
