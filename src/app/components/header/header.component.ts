@@ -16,7 +16,7 @@ export class HeaderComponent {
   private readonly router = inject(Router);
 
   async onLogOut(): Promise<void> {
-    await this.clerk.signOut();
+    await this.clerk.logOut();
     await this.router.navigate(['/login']);
   }
 }

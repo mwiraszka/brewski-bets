@@ -67,7 +67,7 @@ export class LoginPageComponent {
   async onGoogleLogin(): Promise<void> {
     this.googleLoading.set(true);
     try {
-      await this.clerk.signInWithGoogle();
+      await this.clerk.logInWithGoogle();
     } catch (e: unknown) {
       this.error.set(this.clerk.extractError(e));
       this.googleLoading.set(false);
@@ -81,7 +81,7 @@ export class LoginPageComponent {
     this.loading.set(true);
 
     try {
-      await this.clerk.signIn(this.email(), this.password());
+      await this.clerk.logIn(this.email(), this.password());
       await this.router.navigate(['/']);
     } catch (e: unknown) {
       this.error.set(this.clerk.extractError(e));

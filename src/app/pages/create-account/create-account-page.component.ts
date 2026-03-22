@@ -69,10 +69,10 @@ export class CreateAccountPageComponent implements OnDestroy {
     // No format validation needed for code
   }
 
-  async onGoogleSignUp(): Promise<void> {
+  async onGoogleCreateAccount(): Promise<void> {
     this.googleLoading.set(true);
     try {
-      await this.clerk.signInWithGoogle();
+      await this.clerk.logInWithGoogle();
     } catch (e: unknown) {
       this.error.set(this.clerk.extractError(e));
       this.googleLoading.set(false);
@@ -118,7 +118,7 @@ export class CreateAccountPageComponent implements OnDestroy {
     this.loading.set(true);
 
     try {
-      const { needsVerification } = await this.clerk.signUp(
+      const { needsVerification } = await this.clerk.createAccount(
         this.email(),
         this.password(),
         this.firstName(),

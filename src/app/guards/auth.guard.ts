@@ -7,7 +7,7 @@ export const authGuard: CanActivateFn = () => {
   const clerk = inject(ClerkService);
   const router = inject(Router);
 
-  if (clerk.isSignedIn()) {
+  if (clerk.isLoggedIn()) {
     return true;
   }
 
@@ -18,7 +18,7 @@ export const guestGuard: CanActivateFn = () => {
   const clerk = inject(ClerkService);
   const router = inject(Router);
 
-  if (!clerk.isSignedIn()) {
+  if (!clerk.isLoggedIn()) {
     return true;
   }
 
