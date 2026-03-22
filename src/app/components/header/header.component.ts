@@ -1,7 +1,7 @@
 import { AvatarComponent, ButtonComponent } from '@eagami/ui';
 
 import { Component, computed, inject, signal } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 
 import { ClerkService } from '@app/services/clerk.service';
 
@@ -13,8 +13,10 @@ import { ClerkService } from '@app/services/clerk.service';
 })
 export class HeaderComponent {
   private readonly clerk = inject(ClerkService);
+  private readonly router = inject(Router);
 
   readonly isLoggedIn = computed(() => this.clerk.isLoggedIn());
+  readonly showLoginButton = computed(() => !this.isLoggedIn() && this.router.url !== '/login');
   readonly menuOpen = signal(false);
 
   readonly avatarSrc = computed(() => {
