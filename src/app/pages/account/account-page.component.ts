@@ -5,6 +5,7 @@ import {
   ButtonComponent,
   CardComponent,
   InputComponent,
+  ToastService,
 } from '@eagami/ui';
 
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
@@ -27,13 +28,14 @@ import { ClerkService } from '@app/services/clerk.service';
 export class AccountPageComponent implements OnInit {
   private readonly clerk = inject(ClerkService);
   private readonly router = inject(Router);
+  private readonly toast = inject(ToastService);
 
   readonly firstName = signal('');
   readonly lastName = signal('');
+  readonly firstNameError = signal('');
+  readonly lastNameError = signal('');
   readonly editingAvatar = signal(false);
   readonly saving = signal(false);
-  readonly error = signal('');
-  readonly success = signal('');
 
   readonly avatarSrc = computed(() => {
     const user = this.clerk.user();
@@ -53,6 +55,16 @@ export class AccountPageComponent implements OnInit {
   readonly previewSrc = computed(() => {
     if (this.removeAvatar()) return undefined;
     return this.croppedPreview() ?? this.avatarSrc();
+  });
+  readonly hasPhoto = computed(() => !!this.previewSrc());
+  readonly hasChanges = computed(() => {
+    const user = this.clerk.user();
+    return (
+      this.firstName() !== (user?.firstName ?? '') ||
+      this.lastName() !== (user?.lastName ?? '') ||
+      !!this.croppedBlob() ||
+      (this.removeAvatar() && !!this.avatarSrc())
+    );
   });
 
   ngOnInit(): void {
@@ -79,25 +91,52 @@ export class AccountPageComponent implements OnInit {
   }
 
   async onSave(): Promise<void> {
-    this.error.set('');
-    this.success.set('');
+    this.firstNameError.set('');
+    this.lastNameError.set('');
+
+    const firstEmpty = !this.firstName().trim();
+    const lastEmpty = !this.lastName().trim();
+
+    if (firstEmpty) this.firstNameError.set('First name is required');
+    if (lastEmpty) this.lastNameError.set('Last name is required');
+    if (firstEmpty || lastEmpty) return;
+
     this.saving.set(true);
 
     try {
+      const user = this.clerk.user();
+      const changes: string[] = [];
+
+      const firstChanged = this.firstName() !== (user?.firstName ?? '');
+      const lastChanged = this.lastName() !== (user?.lastName ?? '');
+      const photoAdded = !!this.croppedBlob();
+      const photoRemoved = this.removeAvatar() && this.avatarSrc();
+
       await this.clerk.updateProfile(this.firstName(), this.lastName());
 
-      if (this.croppedBlob()) {
+      if (photoAdded) {
         await this.clerk.setProfileImage(this.croppedBlob());
         this.croppedBlob.set(null);
         this.croppedPreview.set(null);
-      } else if (this.removeAvatar()) {
+      } else if (photoRemoved) {
         await this.clerk.setProfileImage(null);
         this.removeAvatar.set(false);
       }
 
-      this.success.set('Changes saved');
+      if (firstChanged) changes.push('first name');
+      if (lastChanged) changes.push('last name');
+      if (photoAdded) changes.push('photo');
+      if (photoRemoved) changes.push('photo');
+
+      if (changes.length) {
+        const label =
+          changes.length <= 2
+            ? changes.join(' and ')
+            : `${changes.slice(0, -1).join(', ')} and ${changes.at(-1)}`;
+        this.toast.success(`${label.charAt(0).toUpperCase()}${label.slice(1)} updated`);
+      }
     } catch (e: unknown) {
-      this.error.set(this.clerk.extractError(e));
+      this.toast.error(this.clerk.extractError(e));
     } finally {
       this.saving.set(false);
     }

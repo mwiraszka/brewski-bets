@@ -20,6 +20,11 @@ ea-card {
     --color-border-default: #e0e0e0;
     --color-neutral-400: #555555;
   }
+
+  ::ng-deep .ea-avatar-editor svg,
+  ::ng-deep .ea-avatar-editor svg * {
+    color: inherit;
+  }
 }
 
 .avatar-section {
@@ -36,20 +41,6 @@ ea-card {
   gap: 16px;
 }
 
-.error {
-  margin-top: 16px;
-  font-size: 14px;
-  text-align: center;
-  color: #e53935;
-}
-
-.success {
-  margin-top: 16px;
-  font-size: 14px;
-  text-align: center;
-  color: #4caf50;
-}
-
 .actions {
   margin-top: 24px;
 }
@@ -61,6 +52,7 @@ ea-card {
 
 .avatar-editor-actions {
   display: flex;
+  align-items: center;
   justify-content: center;
   gap: 8px;
   margin-top: 16px;

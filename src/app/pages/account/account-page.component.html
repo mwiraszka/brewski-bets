@@ -21,24 +21,19 @@
         <ea-input
           label="First name"
           [required]="true"
+          [error]="firstNameError()"
           [(value)]="firstName" />
         <ea-input
           label="Last name"
           [required]="true"
+          [error]="lastNameError()"
           [(value)]="lastName" />
       </div>
-
-      @if (error()) {
-        <p class="error">{{ error() }}</p>
-      }
-
-      @if (success()) {
-        <p class="success">{{ success() }}</p>
-      }
 
       <div class="actions">
         <ea-button
           [fullWidth]="true"
+          [disabled]="!hasChanges()"
           [loading]="saving()"
           (clicked)="onSave()">
           Save
@@ -56,7 +51,15 @@
         <ea-button
           variant="ghost"
           size="sm"
+          [disabled]="!hasPhoto()"
           (clicked)="onRemoveAvatar()">
+          @if (hasPhoto()) {
+            <ea-avatar
+              slot="prefix"
+              [src]="previewSrc()"
+              [initials]="initials()"
+              size="xs" />
+          }
           Remove photo
         </ea-button>
         <ea-button
