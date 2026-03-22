@@ -4,11 +4,9 @@ node_modules
 # Prettier config
 .prettierrc
 
-# Markdown lint config
-.markdownlint.json
-
-# Claude Code
-CLAUDE.md
+# Environment variables
+.env
+.env.local
 
 # System files
 .DS_Store
