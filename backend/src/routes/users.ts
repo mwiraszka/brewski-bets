@@ -7,6 +7,9 @@ import { users } from '../db/schema.js';
 import { deleteAvatar, uploadAvatar } from '../services/storage.js';
 import type { AppContext } from '../types/index.js';
 
+const MAX_AVATAR_SIZE = 5 * 1024 * 1024; // 5 MB
+const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
+
 const createUserSchema = z.object({
   email: z.string().email(),
   firstName: z.string().min(1),
@@ -50,6 +53,10 @@ export const userRoutes = new Hono<AppContext>()
     }
 
     const [user] = await db.select().from(users).where(eq(users.id, userId)).limit(1);
+    if (!user) {
+      return c.json({ error: 'User not found' }, 404);
+    }
+
     return c.json(user);
   })
 
@@ -67,6 +74,10 @@ export const userRoutes = new Hono<AppContext>()
       .where(eq(users.id, userId))
       .returning();
 
+    if (!user) {
+      return c.json({ error: 'User not found' }, 404);
+    }
+
     return c.json(user);
   })
 
@@ -83,12 +94,24 @@ export const userRoutes = new Hono<AppContext>()
       return c.json({ error: 'File is required' }, 400);
     }
 
+    if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {
+      return c.json({ error: 'File must be a JPEG, PNG, or WebP image' }, 400);
+    }
+
+    if (file.size > MAX_AVATAR_SIZE) {
+      return c.json({ error: 'File must be under 5 MB' }, 400);
+    }
+
     const url = await uploadAvatar(c.env, userId, await file.arrayBuffer(), file.type);
     const [user] = await db
       .update(users)
       .set({ avatarOriginalUrl: url, lastModifiedDate: new Date() })
       .where(eq(users.id, userId))
       .returning();
+
+    if (!user) {
+      return c.json({ error: 'User not found' }, 404);
+    }
 
     return c.json(user);
   })
@@ -106,6 +129,10 @@ export const userRoutes = new Hono<AppContext>()
       .set({ avatarOriginalUrl: null, lastModifiedDate: new Date() })
       .where(eq(users.id, userId))
       .returning();
+
+    if (!user) {
+      return c.json({ error: 'User not found' }, 404);
+    }
 
     return c.json(user);
   })

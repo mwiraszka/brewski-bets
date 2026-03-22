@@ -14,7 +14,7 @@ export interface AppContext {
   Bindings: AppBindings;
   Variables: {
     clerkId: string;
-    userId: string;
+    userId: string | undefined;
     db: Db;
   };
 }

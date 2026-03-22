@@ -123,7 +123,7 @@ export const betRoutes = new Hono<AppContext>()
       return c.json({ error: 'Bet not found' }, 404);
     }
 
-    const updates: Record<string, unknown> = {
+    const updates: Partial<typeof bets.$inferInsert> = {
       lastModifiedDate: new Date(),
       lastModifiedBy: userId,
     };
@@ -142,6 +142,10 @@ export const betRoutes = new Hono<AppContext>()
     }
 
     const [bet] = await db.update(bets).set(updates).where(eq(bets.id, id)).returning();
+
+    if (!bet) {
+      return c.json({ error: 'Bet not found' }, 404);
+    }
 
     return c.json(bet);
   })

@@ -2,20 +2,15 @@ import { DeleteObjectCommand, PutObjectCommand, S3Client } from '@aws-sdk/client
 
 import type { AppBindings } from '../types/index.js';
 
-let client: S3Client | null = null;
-
-function getClient(env: AppBindings): S3Client {
-  if (!client) {
-    client = new S3Client({
-      region: 'auto',
-      endpoint: `https://${env.R2_ACCOUNT_ID}.r2.cloudflarestorage.com`,
-      credentials: {
-        accessKeyId: env.R2_ACCESS_KEY_ID,
-        secretAccessKey: env.R2_SECRET_ACCESS_KEY,
-      },
-    });
-  }
-  return client;
+function createClient(env: AppBindings): S3Client {
+  return new S3Client({
+    region: 'auto',
+    endpoint: `https://${env.R2_ACCOUNT_ID}.r2.cloudflarestorage.com`,
+    credentials: {
+      accessKeyId: env.R2_ACCESS_KEY_ID,
+      secretAccessKey: env.R2_SECRET_ACCESS_KEY,
+    },
+  });
 }
 
 export async function uploadAvatar(
@@ -24,7 +19,7 @@ export async function uploadAvatar(
   file: ArrayBuffer,
   contentType: string,
 ): Promise<string> {
-  const s3 = getClient(env);
+  const s3 = createClient(env);
   const key = `avatars/${userId}/original`;
 
   await s3.send(
@@ -43,7 +38,7 @@ export async function deleteAvatar(
   env: AppBindings,
   userId: string,
 ): Promise<void> {
-  const s3 = getClient(env);
+  const s3 = createClient(env);
 
   await s3.send(
     new DeleteObjectCommand({
