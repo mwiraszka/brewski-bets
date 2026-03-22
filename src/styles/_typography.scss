@@ -1,12 +1,5 @@
 * {
   font-family: 'arial', sans-serif;
-  color: var(--bb-color-primarySemiTransparent);
-}
-
-.ea-input-field__message *,
-.ea-input-wrapper__password-toggle,
-.ea-input-wrapper__password-toggle * {
-  color: inherit;
 }
 
 p,
@@ -28,20 +21,20 @@ h2 {
   font-size: 22px;
   font-weight: 100;
   line-height: 32px;
-  color: var(--bb-color-textPrimary);
+  color: var(--bb-color-textPrimaryDark);
 }
 
 h3 {
   font-size: 18px;
   font-weight: 100;
   line-height: 28px;
-  color: var(--bb-color-textPrimary);
+  color: var(--bb-color-textPrimaryDark);
 }
 
 h4 {
   font-size: 16px;
   font-weight: 100;
-  color: var(--bb-color-textPrimary);
+  color: var(--bb-color-textPrimaryDark);
 }
 
 sup {

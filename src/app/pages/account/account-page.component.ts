@@ -1,5 +1,4 @@
 import {
-  AvatarComponent,
   AvatarEditorComponent,
   AvatarEditorCropEvent,
   ButtonComponent,
@@ -8,8 +7,7 @@ import {
   ToastService,
 } from '@eagami/ui';
 
-import { Component, computed, inject, OnInit, signal } from '@angular/core';
-import { Router } from '@angular/router';
+import { Component, computed, effect, inject, OnInit, signal, viewChild } from '@angular/core';
 
 import { ClerkService } from '@app/services/clerk.service';
 
@@ -18,7 +16,6 @@ import { ClerkService } from '@app/services/clerk.service';
   templateUrl: './account-page.component.html',
   styleUrl: './account-page.component.scss',
   imports: [
-    AvatarComponent,
     AvatarEditorComponent,
     ButtonComponent,
     CardComponent,
@@ -27,45 +24,51 @@ import { ClerkService } from '@app/services/clerk.service';
 })
 export class AccountPageComponent implements OnInit {
   private readonly clerk = inject(ClerkService);
-  private readonly router = inject(Router);
   private readonly toast = inject(ToastService);
+
+  private readonly avatarEditor = viewChild(AvatarEditorComponent);
 
   readonly firstName = signal('');
   readonly lastName = signal('');
   readonly firstNameError = signal('');
   readonly lastNameError = signal('');
-  readonly editingAvatar = signal(false);
   readonly saving = signal(false);
+  readonly avatarDirty = signal(false);
 
   readonly avatarSrc = computed(() => {
     const user = this.clerk.user();
     return user?.hasImage ? user.imageUrl : undefined;
   });
-  readonly initials = computed(() => {
-    const user = this.clerk.user();
-    const first = user?.firstName?.[0] ?? '';
-    const last = user?.lastName?.[0] ?? '';
-    return (first + last).toUpperCase() || undefined;
-  });
 
-  private readonly croppedBlob = signal<Blob | null>(null);
-  private readonly croppedPreview = signal<string | null>(null);
   private readonly removeAvatar = signal(false);
+  private cropResolver: ((blob: Blob) => void) | null = null;
+  private initialLoadDone = false;
 
-  readonly previewSrc = computed(() => {
-    if (this.removeAvatar()) return undefined;
-    return this.croppedPreview() ?? this.avatarSrc();
-  });
-  readonly hasPhoto = computed(() => !!this.previewSrc());
   readonly hasChanges = computed(() => {
     const user = this.clerk.user();
     return (
       this.firstName() !== (user?.firstName ?? '') ||
       this.lastName() !== (user?.lastName ?? '') ||
-      !!this.croppedBlob() ||
-      (this.removeAvatar() && !!this.avatarSrc())
+      this.avatarDirty()
     );
   });
+
+  constructor() {
+    effect(() => {
+      const editor = this.avatarEditor();
+      if (!editor) return;
+      const hasImage = editor.hasImage();
+
+      if (!this.initialLoadDone) {
+        this.initialLoadDone = true;
+        return;
+      }
+
+      this.avatarDirty.set(true);
+      if (!hasImage) return;
+      this.removeAvatar.set(false);
+    });
+  }
 
   ngOnInit(): void {
     const user = this.clerk.user();
@@ -74,20 +77,15 @@ export class AccountPageComponent implements OnInit {
   }
 
   onCropped(event: AvatarEditorCropEvent): void {
-    this.croppedBlob.set(event.blob);
-    this.croppedPreview.set(event.dataUrl);
-    this.editingAvatar.set(false);
+    if (this.cropResolver) {
+      this.cropResolver(event.blob);
+      this.cropResolver = null;
+    }
   }
 
   onRemoveAvatar(): void {
-    this.croppedBlob.set(null);
-    this.croppedPreview.set(null);
+    this.avatarDirty.set(true);
     this.removeAvatar.set(true);
-    this.editingAvatar.set(false);
-  }
-
-  onCancelAvatarEdit(): void {
-    this.editingAvatar.set(false);
   }
 
   async onSave(): Promise<void> {
@@ -109,24 +107,22 @@ export class AccountPageComponent implements OnInit {
 
       const firstChanged = this.firstName() !== (user?.firstName ?? '');
       const lastChanged = this.lastName() !== (user?.lastName ?? '');
-      const photoAdded = !!this.croppedBlob();
-      const photoRemoved = this.removeAvatar() && this.avatarSrc();
+      const photoRemoved = this.removeAvatar() && !!this.avatarSrc();
+      const editor = this.avatarEditor();
+      const photoChanged = this.avatarDirty() && !this.removeAvatar() && !!editor?.hasImage();
 
       await this.clerk.updateProfile(this.firstName(), this.lastName());
 
-      if (photoAdded) {
-        await this.clerk.setProfileImage(this.croppedBlob());
-        this.croppedBlob.set(null);
-        this.croppedPreview.set(null);
+      if (photoChanged) {
+        const blob = await this.exportCrop();
+        await this.clerk.setProfileImage(blob);
       } else if (photoRemoved) {
         await this.clerk.setProfileImage(null);
-        this.removeAvatar.set(false);
       }
 
       if (firstChanged) changes.push('first name');
       if (lastChanged) changes.push('last name');
-      if (photoAdded) changes.push('photo');
-      if (photoRemoved) changes.push('photo');
+      if (photoChanged || photoRemoved) changes.push('photo');
 
       if (changes.length) {
         const label =
@@ -135,6 +131,9 @@ export class AccountPageComponent implements OnInit {
             : `${changes.slice(0, -1).join(', ')} and ${changes.at(-1)}`;
         this.toast.success(`${label.charAt(0).toUpperCase()}${label.slice(1)} updated`);
       }
+
+      this.avatarDirty.set(false);
+      this.removeAvatar.set(false);
     } catch (e: unknown) {
       this.toast.error(this.clerk.extractError(e));
     } finally {
@@ -142,7 +141,10 @@ export class AccountPageComponent implements OnInit {
     }
   }
 
-  onBack(): void {
-    this.router.navigate(['/']);
+  private exportCrop(): Promise<Blob> {
+    return new Promise(resolve => {
+      this.cropResolver = resolve;
+      this.avatarEditor()!.exportCrop();
+    });
   }
 }

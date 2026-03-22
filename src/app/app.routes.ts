@@ -1,6 +1,6 @@
 import { Routes } from '@angular/router';
 
-import { authGuard, guestGuard } from '@app/guards/auth.guard';
+import { authGuard, guestGuard, ssoCallbackGuard } from '@app/guards/auth.guard';
 
 export const routes: Routes = [
   {
@@ -76,6 +76,7 @@ export const routes: Routes = [
   },
   {
     path: 'sso-callback',
+    canActivate: [ssoCallbackGuard],
     loadComponent: () =>
       import('./pages/sso-callback/sso-callback-page.component').then(
         c => c.SSOCallbackPageComponent,

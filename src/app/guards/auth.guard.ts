@@ -24,3 +24,15 @@ export const guestGuard: CanActivateFn = () => {
 
   return router.createUrlTree(['/']);
 };
+
+export const ssoCallbackGuard: CanActivateFn = async () => {
+  const clerk = inject(ClerkService);
+  const router = inject(Router);
+
+  try {
+    await clerk.handleSSOCallback();
+    return router.createUrlTree(['/']);
+  } catch {
+    return router.createUrlTree(['/login']);
+  }
+};
