@@ -12,7 +12,7 @@ export class ClerkService {
 
   readonly isLoaded = signal(false);
   readonly isLoggedIn = signal(false);
-  readonly user = signal<Clerk['user']>(null);
+  readonly user = signal<Clerk['user']>(null, { equal: () => false });
 
   async load(): Promise<void> {
     this.clerk = new Clerk(environment.clerkPublishableKey);
