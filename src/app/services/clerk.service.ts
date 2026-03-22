@@ -109,6 +109,14 @@ export class ClerkService {
     }
   }
 
+  async updateProfile(firstName: string, lastName: string): Promise<void> {
+    await this.clerk.user!.update({ firstName, lastName });
+  }
+
+  async setProfileImage(file: Blob | null): Promise<void> {
+    await this.clerk.user!.setProfileImage({ file });
+  }
+
   async changePassword(
     currentPassword: string,
     newPassword: string,
