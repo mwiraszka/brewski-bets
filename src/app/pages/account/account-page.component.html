@@ -1,0 +1,71 @@
+<div class="account-page">
+  <ea-card variant="outlined">
+    <h2 eaCardHeader>Account</h2>
+
+    @if (!editingAvatar()) {
+      <div class="avatar-section">
+        <ea-avatar
+          [src]="previewSrc()"
+          [initials]="initials()"
+          [alt]="firstName() + ' ' + lastName()"
+          size="xl" />
+        <ea-button
+          variant="ghost"
+          size="sm"
+          (clicked)="editingAvatar.set(true)">
+          Change photo
+        </ea-button>
+      </div>
+
+      <div class="name-fields">
+        <ea-input
+          label="First name"
+          [required]="true"
+          [(value)]="firstName" />
+        <ea-input
+          label="Last name"
+          [required]="true"
+          [(value)]="lastName" />
+      </div>
+
+      @if (error()) {
+        <p class="error">{{ error() }}</p>
+      }
+
+      @if (success()) {
+        <p class="success">{{ success() }}</p>
+      }
+
+      <div class="actions">
+        <ea-button
+          [fullWidth]="true"
+          [loading]="saving()"
+          (clicked)="onSave()">
+          Save
+        </ea-button>
+      </div>
+    } @else {
+      <div class="avatar-editor-wrapper">
+        <ea-avatar-editor
+          shape="circle"
+          [canvasSize]="240"
+          [currentSrc]="avatarSrc()"
+          (cropped)="onCropped($event)" />
+      </div>
+      <div class="avatar-editor-actions">
+        <ea-button
+          variant="ghost"
+          size="sm"
+          (clicked)="onRemoveAvatar()">
+          Remove photo
+        </ea-button>
+        <ea-button
+          variant="ghost"
+          size="sm"
+          (clicked)="onCancelAvatarEdit()">
+          Cancel
+        </ea-button>
+      </div>
+    }
+  </ea-card>
+</div>

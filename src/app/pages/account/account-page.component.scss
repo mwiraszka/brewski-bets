@@ -1,0 +1,67 @@
+:host {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+}
+
+.account-page {
+  width: 100%;
+  max-width: 460px;
+  padding: 24px;
+}
+
+ea-card {
+  ::ng-deep .ea-card {
+    --color-bg-base: #ffffff;
+    --color-text-primary: #1a1a1a;
+    --color-text-secondary: #555555;
+    --color-text-inverse: #ffffff;
+    --color-border-default: #e0e0e0;
+    --color-neutral-400: #555555;
+  }
+}
+
+.avatar-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 24px;
+}
+
+.name-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.error {
+  margin-top: 16px;
+  font-size: 14px;
+  text-align: center;
+  color: #e53935;
+}
+
+.success {
+  margin-top: 16px;
+  font-size: 14px;
+  text-align: center;
+  color: #4caf50;
+}
+
+.actions {
+  margin-top: 24px;
+}
+
+.avatar-editor-wrapper {
+  display: flex;
+  justify-content: center;
+}
+
+.avatar-editor-actions {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 16px;
+}
