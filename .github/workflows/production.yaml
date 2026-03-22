@@ -40,11 +40,13 @@ jobs:
       contents: write
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Extract Version from Changelog
         id: version
         run: |
-          version=$(grep -m1 -oP '## \[\K[0-9]+\.[0-9]+\.[0-9]+' frontend/CHANGELOG.md)
+          version=$(grep -m1 -oP '## \[\K[0-9]+\.[0-9]+\.[0-9]+' CHANGELOG.md)
           echo "version=$version" >> "$GITHUB_OUTPUT"
           echo "tag=v$version" >> "$GITHUB_OUTPUT"
 
@@ -62,7 +64,7 @@ jobs:
         id: notes
         run: |
           # Extract content between first and second ## headers
-          awk '/^## \[/{if(n++)exit}n' frontend/CHANGELOG.md | tail -n +2 > release_notes.md
+          awk '/^## \[/{if(n++)exit}n' CHANGELOG.md | tail -n +2 > release_notes.md
 
       - name: Create Tag and Release
         if: steps.check_tag.outputs.exists == 'false'
