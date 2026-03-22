@@ -10,10 +10,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Add autofocus to first name field on create account page
+- Add avatar with initials fallback to header
+- Add dropdown menu with Account and Log out options to header
+- Add account page with avatar editor and name editing
+
+### Changed
+
+- Upgrade `@eagami/ui` to 0.4.1
 
 ### Fixed
 
 - Use "log in" instead of "sign in" in privacy policy
+- Add scrolling and min-height to legal page layout
 
 ## [0.5.2] - 2026-03-17
 
