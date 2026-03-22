@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Autofocus on first name field when opening the create account page
 
+### Fixed
+
+- Privacy policy using "sign in" instead of "log in" for Google authentication
+
 ## [0.5.2] - 2026-03-17
 
 ### Changed
