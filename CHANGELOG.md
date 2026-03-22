@@ -13,15 +13,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add avatar with initials fallback to header
 - Add dropdown menu with Account and Log out options to header
 - Add account page with avatar editor and name editing
+- Show header on all pages with "Log in" button for unauthenticated users
+- Add toast notifications for account page save feedback
+- Add per-field validation errors on account page
+- Add current avatar preview to "Remove photo" button
+- Disable "Save" button until there are actual changes
+- Disable "Remove photo" button when no photo exists
 
 ### Changed
 
 - Upgrade `@eagami/ui` to 0.4.1
+- Replace custom dividers with `ea-divider` component on auth pages
+- Remove branding from auth layout and legal pages (header handles it)
+- Use anchor links for header menu items
 
 ### Fixed
 
 - Use "log in" instead of "sign in" in privacy policy
-- Add scrolling and min-height to legal page layout
+- Fix legal page card overflow so card body scrolls internally
+- Fix avatar editor icon colours inside account page card
 
 ## [0.5.2] - 2026-03-17
 
