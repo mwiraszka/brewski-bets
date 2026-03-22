@@ -18,6 +18,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fix global color override breaking library component colors
 - Fix SSO callback page briefly flashing before redirect
 - Fix header avatar not updating after photo change
+- Fix heading color falling back to inheritance due to undefined CSS variable
+- Fix login button visibility not updating on route navigation
 - Hide login button when already on login page
 
 ## [0.6.0] - 2026-03-22
