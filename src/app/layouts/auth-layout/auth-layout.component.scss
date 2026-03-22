@@ -34,33 +34,6 @@
   max-width: 460px;
 }
 
-.branding {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  width: 100%;
-  margin-bottom: 24px;
-
-  &::before,
-  &::after {
-    opacity: 0.3;
-    flex: 1;
-    height: 1px;
-    background: var(--bb-color-textSecondary);
-    content: '';
-  }
-}
-
-.logo {
-  width: 48px;
-  height: 48px;
-}
-
-.brand-name {
-  font-size: 28px;
-  letter-spacing: 1px;
-}
-
 .bg-panel {
   display: none;
 
