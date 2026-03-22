@@ -21,17 +21,11 @@ ea-card {
     --color-neutral-400: #555555;
   }
 
-  ::ng-deep .ea-avatar-editor svg,
-  ::ng-deep .ea-avatar-editor svg * {
-    color: inherit;
-  }
 }
 
 .avatar-section {
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
+  justify-content: center;
   margin-bottom: 24px;
 }
 
@@ -43,17 +37,4 @@ ea-card {
 
 .actions {
   margin-top: 24px;
-}
-
-.avatar-editor-wrapper {
-  display: flex;
-  justify-content: center;
-}
-
-.avatar-editor-actions {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  margin-top: 16px;
 }
