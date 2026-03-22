@@ -7,10 +7,33 @@
     <h1 class="brand-name">brewski bets</h1>
   </a>
 
-  <ea-button
-    variant="ghost"
-    size="sm"
-    (clicked)="onLogOut()">
-    Log out
-  </ea-button>
+  @if (isLoggedIn()) {
+    <div class="user-menu">
+      <button
+        class="avatar-button"
+        (click)="toggleMenu()"
+        aria-label="Account menu">
+        <ea-avatar
+          [src]="avatarSrc()"
+          [initials]="initials()"
+          alt="Your avatar"
+          size="sm" />
+      </button>
+
+      @if (menuOpen()) {
+        <div class="menu-backdrop" (click)="closeMenu()"></div>
+        <div class="menu-popover">
+          <a class="menu-item" routerLink="/account" (click)="closeMenu()">Account</a>
+          <a class="menu-item menu-item--danger" routerLink="/login" (click)="onLogOut()">Log out</a>
+        </div>
+      }
+    </div>
+  } @else {
+    <ea-button
+      variant="ghost"
+      size="sm"
+      routerLink="/login">
+      Log in
+    </ea-button>
+  }
 </header>

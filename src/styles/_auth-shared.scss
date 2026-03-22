@@ -23,8 +23,8 @@ ea-card {
 }
 
 ::ng-deep .ea-input-wrapper__password-toggle {
-  color: #555555 !important;
   opacity: 1 !important;
+  color: #555555 !important;
 
   &:hover {
     color: #333333 !important;
@@ -62,28 +62,11 @@ ea-card {
   }
 }
 
-.divider {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  color: var(--bb-color-textSecondary);
-  font-size: 13px;
-
-  &::before,
-  &::after {
-    content: '';
-    flex: 1;
-    height: 1px;
-    background: var(--bb-color-textSecondary);
-    opacity: 0.3;
-  }
-}
-
 .error {
-  color: #e53935;
   font-size: 14px;
   line-height: 20px;
   text-align: center;
+  color: #e53935;
 }
 
 .hint {
@@ -104,12 +87,12 @@ ea-card {
 
   a {
     font-size: inherit;
-    color: var(--bb-color-textSecondary);
     text-decoration: none;
+    color: var(--bb-color-textSecondary);
 
     &:hover {
-      color: #999999;
       text-decoration: underline;
+      color: #999999;
     }
   }
 }
@@ -123,8 +106,8 @@ ea-card {
   a {
     font-size: inherit;
     line-height: inherit;
-    color: var(--bb-color-primary);
     text-decoration: underline;
+    color: var(--bb-color-primary);
 
     &:hover {
       color: #d4be82;

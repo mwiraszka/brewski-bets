@@ -1,4 +1,4 @@
-import { ButtonComponent, CardComponent, InputComponent } from '@eagami/ui';
+import { ButtonComponent, CardComponent, DividerComponent, InputComponent } from '@eagami/ui';
 
 import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -18,6 +18,7 @@ const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
     RouterLink,
     ButtonComponent,
     CardComponent,
+    DividerComponent,
     InputComponent,
     GoogleIconComponent,
   ],
@@ -64,10 +65,10 @@ export class LoginPageComponent {
     return !this.emailError() && !this.passwordError();
   }
 
-  async onGoogleLogin(): Promise<void> {
+  async onContinueWithGoogle(): Promise<void> {
     this.googleLoading.set(true);
     try {
-      await this.clerk.signInWithGoogle();
+      await this.clerk.continueWithGoogle();
     } catch (e: unknown) {
       this.error.set(this.clerk.extractError(e));
       this.googleLoading.set(false);
@@ -81,7 +82,7 @@ export class LoginPageComponent {
     this.loading.set(true);
 
     try {
-      await this.clerk.signIn(this.email(), this.password());
+      await this.clerk.logIn(this.email(), this.password());
       await this.router.navigate(['/']);
     } catch (e: unknown) {
       this.error.set(this.clerk.extractError(e));

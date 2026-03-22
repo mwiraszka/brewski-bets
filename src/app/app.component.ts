@@ -1,15 +1,14 @@
-import { Component, inject } from '@angular/core';
+import { ToastComponent } from '@eagami/ui';
+
+import { Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 
 import { HeaderComponent } from '@app/components/header/header.component';
-import { ClerkService } from '@app/services/clerk.service';
 
 @Component({
-  selector: 'app-root',
+  selector: 'bb-root',
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss',
-  imports: [RouterOutlet, HeaderComponent],
+  imports: [RouterOutlet, HeaderComponent, ToastComponent],
 })
-export class AppComponent {
-  readonly clerk = inject(ClerkService);
-}
+export class AppComponent {}

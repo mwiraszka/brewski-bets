@@ -5,6 +5,34 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.6.0] - 2026-03-22
+
+### Added
+
+- Add autofocus to first name field on create account page
+- Add avatar with initials fallback to header
+- Add dropdown menu with Account and Log out options to header
+- Add account page with avatar editor and name editing
+- Show header on all pages with "Log in" button for unauthenticated users
+- Add toast notifications for account page save feedback
+- Add per-field validation errors on account page
+- Add current avatar preview to "Remove photo" button
+- Disable "Save" button until there are actual changes
+- Disable "Remove photo" button when no photo exists
+
+### Changed
+
+- Upgrade `@eagami/ui` to 0.4.1
+- Replace custom dividers with `ea-divider` component on auth pages
+- Remove branding from auth layout and legal pages (header handles it)
+- Use anchor links for header menu items
+
+### Fixed
+
+- Use "log in" instead of "sign in" in privacy policy
+- Fix legal page card overflow so card body scrolls internally
+- Fix avatar editor icon colours inside account page card
+
 ## [0.5.2] - 2026-03-17
 
 ### Changed
@@ -125,6 +153,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - PWA manifest and service worker configuration
 - GitHub issue templates
 
+[0.6.0]: https://github.com/mwiraszka/brewski-bets/compare/v0.5.2...v0.6.0
 [0.5.2]: https://github.com/mwiraszka/brewski-bets/compare/v0.5.1...v0.5.2
 [0.5.1]: https://github.com/mwiraszka/brewski-bets/compare/v0.5.0...v0.5.1
 [0.5.0]: https://github.com/mwiraszka/brewski-bets/compare/v0.4.0...v0.5.0

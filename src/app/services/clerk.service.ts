@@ -11,7 +11,7 @@ export class ClerkService {
   private clerk!: Clerk;
 
   readonly isLoaded = signal(false);
-  readonly isSignedIn = signal(false);
+  readonly isLoggedIn = signal(false);
   readonly user = signal<Clerk['user']>(null);
 
   async load(): Promise<void> {
@@ -26,7 +26,7 @@ export class ClerkService {
     return this.clerk;
   }
 
-  async signUp(
+  async createAccount(
     emailAddress: string,
     password: string,
     firstName: string,
@@ -59,7 +59,7 @@ export class ClerkService {
     }
   }
 
-  async signIn(identifier: string, password: string): Promise<void> {
+  async logIn(identifier: string, password: string): Promise<void> {
     const result = await this.clerk.client!.signIn.create({
       strategy: 'password',
       identifier,
@@ -71,7 +71,7 @@ export class ClerkService {
     }
   }
 
-  async signInWithGoogle(): Promise<void> {
+  async continueWithGoogle(): Promise<void> {
     await this.clerk.client!.signIn.authenticateWithRedirect({
       strategy: 'oauth_google',
       redirectUrl: '/sso-callback',
@@ -86,7 +86,7 @@ export class ClerkService {
     });
   }
 
-  async signOut(): Promise<void> {
+  async logOut(): Promise<void> {
     await this.clerk.signOut();
   }
 
@@ -107,6 +107,14 @@ export class ClerkService {
     if (result.status === 'complete') {
       await this.clerk.setActive({ session: result.createdSessionId });
     }
+  }
+
+  async updateProfile(firstName: string, lastName: string): Promise<void> {
+    await this.clerk.user!.update({ firstName, lastName });
+  }
+
+  async setProfileImage(file: Blob | null): Promise<void> {
+    await this.clerk.user!.setProfileImage({ file });
   }
 
   async changePassword(
@@ -154,7 +162,7 @@ export class ClerkService {
 
   private syncState(): void {
     this.isLoaded.set(true);
-    this.isSignedIn.set(!!this.clerk.user);
+    this.isLoggedIn.set(!!this.clerk.user);
     this.user.set(this.clerk.user ?? null);
   }
 }

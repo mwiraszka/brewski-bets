@@ -57,28 +57,28 @@ nav,
 section,
 article,
 video {
+  vertical-align: baseline;
   margin: 0;
   padding: 0;
-  border: 0;
   font-size: 100%;
-  vertical-align: baseline;
   text-align: inherit;
   text-rendering: optimizeLegibility;
   text-size-adjust: none;
   -webkit-font-smoothing: antialiased;
+  border: 0;
   color: inherit;
 }
 
 body {
+  overflow: hidden;
   height: 100vh;
   height: 100dvh;
-  overflow: hidden;
   background-color: var(--bb-color-appBackground);
 }
 
 a {
-  text-decoration: none;
   font-style: normal;
+  text-decoration: none;
 
   &:hover,
   & > *:hover {

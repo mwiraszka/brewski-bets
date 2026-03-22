@@ -6,18 +6,18 @@
 }
 
 .auth-page {
+  display: flex;
   width: 100%;
   height: 100%;
-  display: flex;
   background-color: var(--bb-color-appBackground);
 }
 
 .auth-panel {
-  flex: 1;
+  overflow-y: auto;
   display: flex;
+  flex: 1;
   align-items: safe center;
   justify-content: center;
-  overflow-y: auto;
   padding: 24px 16px;
 
   @include respond-to('gt-lg') {
@@ -34,55 +34,27 @@
   max-width: 460px;
 }
 
-.branding {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 24px;
-  width: 100%;
-
-  &::before,
-  &::after {
-    content: '';
-    flex: 1;
-    height: 1px;
-    background: var(--bb-color-textSecondary);
-    opacity: 0.3;
-  }
-}
-
-.logo {
-  width: 48px;
-  height: 48px;
-}
-
-.brand-name {
-  font-size: 28px;
-  letter-spacing: 1px;
-}
-
 .bg-panel {
   display: none;
 
   @include respond-to('gt-lg') {
-    display: block;
     position: relative;
+    overflow: hidden;
+    display: block;
     width: 50%;
     border-left: 1px solid var(--bb-color-primarySemiTransparent);
-    overflow: hidden;
 
     &::before {
-      content: '';
       position: absolute;
       inset: -64px;
+      opacity: 0;
       background: url('/assets/beers-due.webp') center / cover no-repeat;
       filter: blur(2.5px);
-      opacity: 0;
       transition: opacity 0.5s ease-in;
+      content: '';
     }
 
     &::after {
-      content: '';
       position: absolute;
       inset: 0;
       background: radial-gradient(
@@ -91,6 +63,7 @@
         #2e344080 70%,
         #2e3440 100%
       );
+      content: '';
     }
 
     &.bg-loaded::before {

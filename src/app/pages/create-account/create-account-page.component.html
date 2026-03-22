@@ -9,14 +9,12 @@
         variant="secondary"
         [fullWidth]="true"
         [loading]="googleLoading()"
-        (clicked)="onGoogleSignUp()">
+        (clicked)="onContinueWithGoogle()">
         <bb-google-icon slot="prefix" />
         Continue with Google
       </ea-button>
 
-      <div class="divider">
-        <span>or</span>
-      </div>
+      <ea-divider label="or" />
 
       <form
         class="auth-form"
@@ -25,6 +23,7 @@
           <ea-input
             label="First name"
             autocomplete="given-name"
+            [autofocus]="true"
             [required]="true"
             [error]="firstNameError()"
             [(value)]="firstName" />

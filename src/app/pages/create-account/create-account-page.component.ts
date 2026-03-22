@@ -1,4 +1,4 @@
-import { ButtonComponent, CardComponent, InputComponent } from '@eagami/ui';
+import { ButtonComponent, CardComponent, DividerComponent, InputComponent } from '@eagami/ui';
 
 import { Component, inject, OnDestroy, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -13,7 +13,7 @@ const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
   selector: 'bb-create-account-page',
   templateUrl: './create-account-page.component.html',
   styleUrl: './create-account-page.component.scss',
-  imports: [FormsModule, RouterLink, ButtonComponent, CardComponent, InputComponent, GoogleIconComponent],
+  imports: [FormsModule, RouterLink, ButtonComponent, CardComponent, DividerComponent, InputComponent, GoogleIconComponent],
 })
 export class CreateAccountPageComponent implements OnDestroy {
   private readonly clerk = inject(ClerkService);
@@ -69,10 +69,10 @@ export class CreateAccountPageComponent implements OnDestroy {
     // No format validation needed for code
   }
 
-  async onGoogleSignUp(): Promise<void> {
+  async onContinueWithGoogle(): Promise<void> {
     this.googleLoading.set(true);
     try {
-      await this.clerk.signInWithGoogle();
+      await this.clerk.continueWithGoogle();
     } catch (e: unknown) {
       this.error.set(this.clerk.extractError(e));
       this.googleLoading.set(false);
@@ -118,7 +118,7 @@ export class CreateAccountPageComponent implements OnDestroy {
     this.loading.set(true);
 
     try {
-      const { needsVerification } = await this.clerk.signUp(
+      const { needsVerification } = await this.clerk.createAccount(
         this.email(),
         this.password(),
         this.firstName(),
