@@ -107,9 +107,9 @@ export class AccountPageComponent implements OnInit {
 
       const firstChanged = this.firstName() !== (user?.firstName ?? '');
       const lastChanged = this.lastName() !== (user?.lastName ?? '');
-      const photoRemoved = this.removeAvatar() && this.avatarSrc();
+      const photoRemoved = this.removeAvatar() && !!this.avatarSrc();
       const editor = this.avatarEditor();
-      const photoChanged = this.avatarDirty() && !this.removeAvatar() && editor?.hasImage();
+      const photoChanged = this.avatarDirty() && !this.removeAvatar() && !!editor?.hasImage();
 
       await this.clerk.updateProfile(this.firstName(), this.lastName());
 
