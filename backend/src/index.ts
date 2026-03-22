@@ -2,19 +2,23 @@ import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 import { handle } from 'hono/vercel';
 
-import { createDb } from './db/index.js';
+import { createDb, type Db } from './db/index.js';
 import { authMiddleware } from './middleware/auth.js';
 import { betRoutes } from './routes/bets.js';
 import { userRoutes } from './routes/users.js';
 import type { AppContext } from './types/index.js';
+
+let cachedDb: Db | null = null;
 
 const app = new Hono<AppContext>().basePath('/api');
 
 app.use('*', cors());
 
 app.use('*', async (c, next) => {
-  const db = createDb(c.env.DATABASE_URL);
-  c.set('db', db);
+  if (!cachedDb) {
+    cachedDb = createDb(c.env.DATABASE_URL);
+  }
+  c.set('db', cachedDb);
   return next();
 });
 
