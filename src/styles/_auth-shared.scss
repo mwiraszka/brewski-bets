@@ -62,23 +62,6 @@ ea-card {
   }
 }
 
-.divider {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  font-size: 13px;
-  color: var(--bb-color-textSecondary);
-
-  &::before,
-  &::after {
-    opacity: 0.3;
-    flex: 1;
-    height: 1px;
-    background: var(--bb-color-textSecondary);
-    content: '';
-  }
-}
-
 .error {
   font-size: 14px;
   line-height: 20px;
