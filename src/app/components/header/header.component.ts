@@ -1,7 +1,7 @@
-import { AvatarComponent } from '@eagami/ui';
+import { AvatarComponent, ButtonComponent } from '@eagami/ui';
 
 import { Component, computed, inject, signal } from '@angular/core';
-import { Router, RouterLink } from '@angular/router';
+import { RouterLink } from '@angular/router';
 
 import { ClerkService } from '@app/services/clerk.service';
 
@@ -9,12 +9,12 @@ import { ClerkService } from '@app/services/clerk.service';
   selector: 'bb-header',
   templateUrl: './header.component.html',
   styleUrl: './header.component.scss',
-  imports: [RouterLink, AvatarComponent],
+  imports: [RouterLink, AvatarComponent, ButtonComponent],
 })
 export class HeaderComponent {
   private readonly clerk = inject(ClerkService);
-  private readonly router = inject(Router);
 
+  readonly isLoggedIn = computed(() => this.clerk.isLoggedIn());
   readonly menuOpen = signal(false);
 
   readonly avatarSrc = computed(() => {
@@ -36,14 +36,8 @@ export class HeaderComponent {
     this.menuOpen.set(false);
   }
 
-  onAccount(): void {
-    this.menuOpen.set(false);
-    this.router.navigate(['/account']);
-  }
-
   async onLogOut(): Promise<void> {
     this.menuOpen.set(false);
     await this.clerk.logOut();
-    await this.router.navigate(['/login']);
   }
 }
