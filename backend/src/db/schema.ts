@@ -30,10 +30,10 @@ export const bets = pgTable('bets', {
   user2Id: uuid('user2_id')
     .notNull()
     .references(() => users.id),
-  user1WagerBeers: integer('user1_wager_beers').notNull(),
-  user1WagerType: text('user1_wager_type').notNull(),
-  user2WagerBeers: integer('user2_wager_beers').notNull(),
-  user2WagerType: text('user2_wager_type').notNull(),
+  user1WagerBrewskis: integer('user1_wager_brewskis').notNull(),
+  user1WagerBrewskiType: text('user1_wager_brewski_type').notNull(),
+  user2WagerBrewskis: integer('user2_wager_brewskis').notNull(),
+  user2WagerBrewskiType: text('user2_wager_brewski_type').notNull(),
   status: betStatusEnum('status').notNull().default('pending'),
   outcome: betOutcomeEnum('outcome').notNull().default('open'),
   createdDate: timestamp('created_date', { withTimezone: true }).notNull().defaultNow(),

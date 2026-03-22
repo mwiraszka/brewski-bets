@@ -7,8 +7,8 @@ import { bets } from '../db/schema.js';
 import type { AppContext } from '../types/index.js';
 
 const wagerSchema = z.object({
-  numberOfBeers: z.number().int().min(1),
-  beerType: z.string().min(1),
+  numberOfBrewskis: z.number().int().min(1),
+  brewskiType: z.string().min(1),
 });
 
 const createBetSchema = z.object({
@@ -45,10 +45,10 @@ export const betRoutes = new Hono<AppContext>()
         description: body.description,
         user1Id: userId,
         user2Id: body.user2Id,
-        user1WagerBeers: body.user1Wager.numberOfBeers,
-        user1WagerType: body.user1Wager.beerType,
-        user2WagerBeers: body.user2Wager.numberOfBeers,
-        user2WagerType: body.user2Wager.beerType,
+        user1WagerBrewskis: body.user1Wager.numberOfBrewskis,
+        user1WagerBrewskiType: body.user1Wager.brewskiType,
+        user2WagerBrewskis: body.user2Wager.numberOfBrewskis,
+        user2WagerBrewskiType: body.user2Wager.brewskiType,
         createdBy: userId,
         lastModifiedBy: userId,
       })
@@ -133,12 +133,12 @@ export const betRoutes = new Hono<AppContext>()
     if (body.status !== undefined) updates.status = body.status;
     if (body.outcome !== undefined) updates.outcome = body.outcome;
     if (body.user1Wager !== undefined) {
-      updates.user1WagerBeers = body.user1Wager.numberOfBeers;
-      updates.user1WagerType = body.user1Wager.beerType;
+      updates.user1WagerBrewskis = body.user1Wager.numberOfBrewskis;
+      updates.user1WagerBrewskiType = body.user1Wager.brewskiType;
     }
     if (body.user2Wager !== undefined) {
-      updates.user2WagerBeers = body.user2Wager.numberOfBeers;
-      updates.user2WagerType = body.user2Wager.beerType;
+      updates.user2WagerBrewskis = body.user2Wager.numberOfBrewskis;
+      updates.user2WagerBrewskiType = body.user2Wager.brewskiType;
     }
 
     const [bet] = await db.update(bets).set(updates).where(eq(bets.id, id)).returning();
