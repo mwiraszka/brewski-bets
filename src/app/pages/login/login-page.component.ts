@@ -64,10 +64,10 @@ export class LoginPageComponent {
     return !this.emailError() && !this.passwordError();
   }
 
-  async onGoogleLogin(): Promise<void> {
+  async onContinueWithGoogle(): Promise<void> {
     this.googleLoading.set(true);
     try {
-      await this.clerk.logInWithGoogle();
+      await this.clerk.continueWithGoogle();
     } catch (e: unknown) {
       this.error.set(this.clerk.extractError(e));
       this.googleLoading.set(false);
