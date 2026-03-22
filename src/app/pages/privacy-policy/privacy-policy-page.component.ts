@@ -1,5 +1,4 @@
 import { Component } from '@angular/core';
-import { RouterLink } from '@angular/router';
 
 import { CardComponent } from '@eagami/ui';
 
@@ -7,6 +6,6 @@ import { CardComponent } from '@eagami/ui';
   selector: 'bb-privacy-policy-page',
   templateUrl: './privacy-policy-page.component.html',
   styleUrl: './privacy-policy-page.component.scss',
-  imports: [CardComponent, RouterLink],
+  imports: [CardComponent],
 })
 export class PrivacyPolicyPageComponent {}
