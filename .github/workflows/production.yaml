@@ -40,8 +40,6 @@ jobs:
       contents: write
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
       - name: Extract Version from Changelog
         id: version
@@ -50,29 +48,30 @@ jobs:
           echo "version=$version" >> "$GITHUB_OUTPUT"
           echo "tag=v$version" >> "$GITHUB_OUTPUT"
 
-      - name: Check if Tag Exists
-        id: check_tag
+      - name: Check if Release Exists
+        id: check_release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          if git rev-parse "v${{ steps.version.outputs.version }}" >/dev/null 2>&1; then
+          if gh release view "v${{ steps.version.outputs.version }}" > /dev/null 2>&1; then
             echo "exists=true" >> "$GITHUB_OUTPUT"
           else
             echo "exists=false" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Extract Release Notes
-        if: steps.check_tag.outputs.exists == 'false'
+        if: steps.check_release.outputs.exists == 'false'
         id: notes
         run: |
           # Extract content between first and second ## headers
           awk '/^## \[/{if(n++)exit}n' CHANGELOG.md | tail -n +2 > release_notes.md
 
       - name: Create Tag and Release
-        if: steps.check_tag.outputs.exists == 'false'
+        if: steps.check_release.outputs.exists == 'false'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          git tag ${{ steps.version.outputs.tag }}
-          git push origin ${{ steps.version.outputs.tag }}
           gh release create ${{ steps.version.outputs.tag }} \
+            --target ${{ github.sha }} \
             --title "${{ steps.version.outputs.tag }}" \
             --notes-file release_notes.md
