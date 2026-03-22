@@ -9,11 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Autofocus on first name field when opening the create account page
+- Add autofocus to first name field on create account page
 
 ### Fixed
 
-- Privacy policy using "sign in" instead of "log in" for Google authentication
+- Use "log in" instead of "sign in" in privacy policy
 
 ## [0.5.2] - 2026-03-17
 
