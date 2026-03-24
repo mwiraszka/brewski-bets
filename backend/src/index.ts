@@ -27,6 +27,8 @@ app.use('*', async (c, next) => {
   return next();
 });
 
+app.get('/health', (c) => c.json({ status: 'ok' }));
+
 app.route('/webhooks', webhookRoutes);
 
 app.use('/users/*', authMiddleware);
