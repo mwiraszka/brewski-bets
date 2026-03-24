@@ -6,6 +6,7 @@ import { createDb, type Db } from './db/index.js';
 import { authMiddleware } from './middleware/auth.js';
 import { betRoutes } from './routes/bets.js';
 import { userRoutes } from './routes/users.js';
+import { webhookRoutes } from './routes/webhooks.js';
 import type { AppContext } from './types/index.js';
 
 let cachedDb: Db | null = null;
@@ -22,7 +23,10 @@ app.use('*', async (c, next) => {
   return next();
 });
 
-app.use('*', authMiddleware);
+app.route('/webhooks', webhookRoutes);
+
+app.use('/users/*', authMiddleware);
+app.use('/bets/*', authMiddleware);
 
 app.route('/users', userRoutes);
 app.route('/bets', betRoutes);

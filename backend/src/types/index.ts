@@ -3,6 +3,7 @@ import type { Db } from '../db/index.js';
 export interface AppBindings {
   DATABASE_URL: string;
   CLERK_SECRET_KEY: string;
+  CLERK_WEBHOOK_SECRET: string;
   R2_ACCOUNT_ID: string;
   R2_ACCESS_KEY_ID: string;
   R2_SECRET_ACCESS_KEY: string;
