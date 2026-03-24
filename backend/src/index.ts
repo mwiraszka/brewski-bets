@@ -13,7 +13,11 @@ let cachedDb: Db | null = null;
 
 const app = new Hono<AppContext>().basePath('/api');
 
-app.use('*', cors());
+app.use('*', cors({
+  origin: '*',
+  allowHeaders: ['Authorization', 'Content-Type'],
+  allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+}));
 
 app.use('*', async (c, next) => {
   if (!cachedDb) {
