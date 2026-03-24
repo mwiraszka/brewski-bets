@@ -109,6 +109,10 @@ export class ClerkService {
     }
   }
 
+  async getToken(): Promise<string | null> {
+    return this.clerk.session?.getToken() ?? null;
+  }
+
   async updateProfile(firstName: string, lastName: string): Promise<void> {
     await this.clerk.user!.update({ firstName, lastName });
   }
