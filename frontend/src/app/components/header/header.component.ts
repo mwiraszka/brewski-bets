@@ -1,4 +1,4 @@
-import { AvatarComponent, ButtonComponent, TooltipDirective } from '@eagami/ui';
+import { AvatarComponent, ButtonComponent } from '@eagami/ui';
 
 import { Component, computed, inject, signal } from '@angular/core';
 import { NavigationEnd, Router, RouterLink } from '@angular/router';
@@ -13,7 +13,7 @@ import { environment } from '@env';
   selector: 'bb-header',
   templateUrl: './header.component.html',
   styleUrl: './header.component.scss',
-  imports: [RouterLink, AvatarComponent, ButtonComponent, TooltipDirective],
+  imports: [RouterLink, AvatarComponent, ButtonComponent],
 })
 export class HeaderComponent {
   private readonly clerk = inject(ClerkService);
@@ -26,9 +26,7 @@ export class HeaderComponent {
     { initialValue: this.router.url },
   );
 
-  readonly previewTooltip = environment.preview
-    ? `Preview\nBranch: ${environment.preview.branch}\nCommit: ${environment.preview.commit}\nDate: ${environment.preview.date}`
-    : null;
+  readonly previewInfo = environment.preview;
 
   readonly isLoggedIn = computed(() => this.clerk.isLoggedIn());
   readonly showLoginButton = computed(() => !this.isLoggedIn() && this.currentUrl() !== '/login');

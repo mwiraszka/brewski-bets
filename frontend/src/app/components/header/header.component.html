@@ -1,13 +1,20 @@
 <header class="header">
-  <a
-    routerLink="/"
-    class="branding"
-    [eaTooltip]="previewTooltip ?? ''">
+  <a routerLink="/" class="branding">
     <img
       src="assets/bb.svg"
       alt="Brewski Bets"
       class="logo" />
     <h1 class="brand-name">brewski bets</h1>
+    @if (previewInfo) {
+      <div class="preview-badge">
+        preview
+        <div class="preview-tooltip">
+          <span>Branch: {{ previewInfo.branch }}</span>
+          <span>Commit: {{ previewInfo.commit }}</span>
+          <span>Date: {{ previewInfo.date }}</span>
+        </div>
+      </div>
+    }
   </a>
 
   @if (isLoggedIn()) {
