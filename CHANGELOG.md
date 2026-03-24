@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Store full-size avatar in Cloudflare R2 for re-editing previously cropped photos
+- Automatically create user record on sign-up via Clerk webhook
 - Add API service for authenticated backend communication
 - Restore Vercel deployment source links to GitHub
 
