@@ -9,6 +9,9 @@ on:
     branches-ignore:
       - main
 
+permissions:
+  pull-requests: read
+
 jobs:
   Deploy-Preview:
     runs-on: ubuntu-latest
