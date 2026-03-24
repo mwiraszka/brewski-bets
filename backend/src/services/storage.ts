@@ -22,7 +22,8 @@ export async function uploadAvatar(
   const s3 = createClient(env);
   const key = `avatars/${userId}/original`;
 
-  await s3.send(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Vercel's TS build cannot resolve S3Client.send()
+  await (s3 as any).send(
     new PutObjectCommand({
       Bucket: env.R2_BUCKET_NAME,
       Key: key,
@@ -40,7 +41,8 @@ export async function deleteAvatar(
 ): Promise<void> {
   const s3 = createClient(env);
 
-  await s3.send(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Vercel's TS build cannot resolve S3Client.send()
+  await (s3 as any).send(
     new DeleteObjectCommand({
       Bucket: env.R2_BUCKET_NAME,
       Key: `avatars/${userId}/original`,
