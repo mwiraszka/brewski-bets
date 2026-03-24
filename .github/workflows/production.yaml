@@ -32,7 +32,14 @@ jobs:
         run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
 
       - name: Deploy Project Artifacts
-        run: vercel deploy --prebuilt --prod --yes --scope=eagami --token=${{ secrets.VERCEL_TOKEN }}
+        run: >
+          vercel deploy --prebuilt --prod --yes --scope=eagami
+          --token=${{ secrets.VERCEL_TOKEN }}
+          --meta githubCommitRef=${{ github.ref_name }}
+          --meta githubCommitSha=${{ github.sha }}
+          --meta githubCommitOrg=${{ github.repository_owner }}
+          --meta githubCommitRepo=${{ github.event.repository.name }}
+          --meta githubDeployment=1
 
   Create-Release:
     runs-on: ubuntu-latest

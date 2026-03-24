@@ -42,4 +42,11 @@ jobs:
         run: vercel build --token=${{ secrets.VERCEL_TOKEN }}
 
       - name: Deploy Project Artifacts
-        run: vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }}
+        run: >
+          vercel deploy --prebuilt
+          --token=${{ secrets.VERCEL_TOKEN }}
+          --meta githubCommitRef=${{ github.ref_name }}
+          --meta githubCommitSha=${{ github.sha }}
+          --meta githubCommitOrg=${{ github.repository_owner }}
+          --meta githubCommitRepo=${{ github.event.repository.name }}
+          --meta githubDeployment=1
