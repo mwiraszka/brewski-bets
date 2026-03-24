@@ -36,14 +36,15 @@ jobs:
 
       - name: Deploy Project Artifacts
         id: deploy
-        run: >
-          echo "url=$(vercel deploy --prebuilt
-          --token=${{ secrets.VERCEL_TOKEN }}
-          --meta githubCommitRef=${{ github.ref_name }}
-          --meta githubCommitSha=${{ github.sha }}
-          --meta githubCommitOrg=${{ github.repository_owner }}
-          --meta githubCommitRepo=${{ github.event.repository.name }}
-          --meta githubDeployment=1)" >> "$GITHUB_OUTPUT"
+        run: |
+          DEPLOY_URL=$(vercel deploy --prebuilt \
+            --token=${{ secrets.VERCEL_TOKEN }} \
+            --meta githubCommitRef=${{ github.ref_name }} \
+            --meta githubCommitSha=${{ github.sha }} \
+            --meta githubCommitOrg=${{ github.repository_owner }} \
+            --meta githubCommitRepo=${{ github.event.repository.name }} \
+            --meta githubDeployment=1)
+          echo "url=$DEPLOY_URL" >> "$GITHUB_OUTPUT"
 
       - name: Alias to Preview Domain
         run: vercel alias set ${{ steps.deploy.outputs.url }} api-preview.brewskibets.com --token=${{ secrets.VERCEL_TOKEN }} --scope=eagami
