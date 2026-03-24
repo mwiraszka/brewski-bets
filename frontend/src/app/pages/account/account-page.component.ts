@@ -7,9 +7,24 @@ import {
   ToastService,
 } from '@eagami/ui';
 
-import { Component, computed, effect, inject, OnInit, signal, viewChild } from '@angular/core';
+import {
+  Component,
+  computed,
+  DestroyRef,
+  effect,
+  ElementRef,
+  inject,
+  OnInit,
+  signal,
+  viewChild,
+} from '@angular/core';
 
+import { ApiService } from '@app/services/api.service';
 import { ClerkService } from '@app/services/clerk.service';
+
+interface UserResponse {
+  avatarOriginalUrl: string | null;
+}
 
 @Component({
   selector: 'bb-account-page',
@@ -23,10 +38,13 @@ import { ClerkService } from '@app/services/clerk.service';
   ],
 })
 export class AccountPageComponent implements OnInit {
+  private readonly api = inject(ApiService);
   private readonly clerk = inject(ClerkService);
+  private readonly destroyRef = inject(DestroyRef);
   private readonly toast = inject(ToastService);
 
   private readonly avatarEditor = viewChild(AvatarEditorComponent);
+  private readonly avatarEditorEl = viewChild(AvatarEditorComponent, { read: ElementRef });
 
   readonly firstName = signal('');
   readonly lastName = signal('');
@@ -35,13 +53,19 @@ export class AccountPageComponent implements OnInit {
   readonly saving = signal(false);
   readonly avatarDirty = signal(false);
 
+  private readonly avatarOriginalUrl = signal<string | null>(null);
+
   readonly avatarSrc = computed(() => {
+    const originalUrl = this.avatarOriginalUrl();
+    if (originalUrl) return originalUrl;
+
     const user = this.clerk.user();
     return user?.hasImage ? user.imageUrl : undefined;
   });
 
   private readonly removeAvatar = signal(false);
   private cropResolver: ((blob: Blob) => void) | null = null;
+  private originalFile: File | null = null;
   private initialLoadDone = false;
 
   readonly hasChanges = computed(() => {
@@ -68,12 +92,19 @@ export class AccountPageComponent implements OnInit {
       if (!hasImage) return;
       this.removeAvatar.set(false);
     });
+
+    effect(() => {
+      const editorEl = this.avatarEditorEl();
+      if (!editorEl) return;
+      this.listenForOriginalFile(editorEl.nativeElement);
+    });
   }
 
   ngOnInit(): void {
     const user = this.clerk.user();
     this.firstName.set(user?.firstName ?? '');
     this.lastName.set(user?.lastName ?? '');
+    this.fetchAvatarOriginalUrl();
   }
 
   onCropped(event: AvatarEditorCropEvent): void {
@@ -86,6 +117,7 @@ export class AccountPageComponent implements OnInit {
   onRemoveAvatar(): void {
     this.avatarDirty.set(true);
     this.removeAvatar.set(true);
+    this.originalFile = null;
   }
 
   async onSave(): Promise<void> {
@@ -116,8 +148,22 @@ export class AccountPageComponent implements OnInit {
       if (photoChanged) {
         const blob = await this.exportCrop();
         await this.clerk.setProfileImage(blob);
+
+        if (this.originalFile) {
+          try {
+            await this.uploadOriginalAvatar(this.originalFile);
+          } catch {
+            this.toast.error('Full-size image could not be saved for future editing');
+          }
+        }
       } else if (photoRemoved) {
         await this.clerk.setProfileImage(null);
+
+        try {
+          await this.deleteOriginalAvatar();
+        } catch {
+          this.toast.error('Full-size image could not be removed');
+        }
       }
 
       if (firstChanged) changes.push('first name');
@@ -134,11 +180,54 @@ export class AccountPageComponent implements OnInit {
 
       this.avatarDirty.set(false);
       this.removeAvatar.set(false);
+      this.originalFile = null;
     } catch (e: unknown) {
       this.toast.error(this.clerk.extractError(e));
     } finally {
       this.saving.set(false);
     }
+  }
+
+  private async fetchAvatarOriginalUrl(): Promise<void> {
+    try {
+      const user = await this.api.get<UserResponse>('/users/me');
+      this.avatarOriginalUrl.set(user.avatarOriginalUrl);
+    } catch {
+      this.toast.error('Full-size image could not be loaded');
+    }
+  }
+
+  private async uploadOriginalAvatar(file: File): Promise<void> {
+    const formData = new FormData();
+    formData.append('file', file);
+    const user = await this.api.post<UserResponse>('/users/me/avatar', formData);
+    this.avatarOriginalUrl.set(user.avatarOriginalUrl);
+  }
+
+  private async deleteOriginalAvatar(): Promise<void> {
+    await this.api.delete('/users/me/avatar');
+    this.avatarOriginalUrl.set(null);
+  }
+
+  private listenForOriginalFile(hostEl: HTMLElement): void {
+    const onFileCapture = (event: Event): void => {
+      const input = event.target as HTMLInputElement;
+      const file = input.files?.[0];
+      if (file) this.originalFile = file;
+    };
+
+    const onDropCapture = (event: DragEvent): void => {
+      const file = event.dataTransfer?.files[0];
+      if (file) this.originalFile = file;
+    };
+
+    hostEl.addEventListener('change', onFileCapture, { capture: true });
+    hostEl.addEventListener('drop', onDropCapture, { capture: true });
+
+    this.destroyRef.onDestroy(() => {
+      hostEl.removeEventListener('change', onFileCapture, { capture: true });
+      hostEl.removeEventListener('drop', onDropCapture, { capture: true });
+    });
   }
 
   private exportCrop(): Promise<Blob> {
