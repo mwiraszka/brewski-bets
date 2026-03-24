@@ -6,14 +6,19 @@
       class="logo" />
     <h1 class="brand-name">brewski bets</h1>
     @if (previewInfo) {
-      <div class="preview-badge">
+      <a
+        class="preview-badge"
+        [href]="previewInfo.prUrl"
+        target="_blank"
+        rel="noopener noreferrer"
+        (click)="$event.stopPropagation()">
         preview
         <div class="preview-tooltip">
-          <span>Branch: {{ previewInfo.branch }}</span>
-          <span>Commit: {{ previewInfo.commit }}</span>
-          <span>Date: {{ previewInfo.date }}</span>
+          <span><span class="preview-label">Branch:</span> {{ previewInfo.branch }}</span>
+          <span><span class="preview-label">Commit:</span> {{ previewInfo.commit }}</span>
+          <span><span class="preview-label">Date:</span> {{ previewInfo.date }}</span>
         </div>
-      </div>
+      </a>
     }
   </a>
 

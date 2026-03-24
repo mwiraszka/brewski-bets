@@ -29,10 +29,13 @@ jobs:
         run: vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
 
       - name: Inject Preview Build Info
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           SHORT_SHA=$(echo "${{ github.sha }}" | cut -c1-7)
           COMMIT_DATE=$(git log -1 --format=%ci)
-          sed -i "s|preview: null.*|preview: { branch: '${GITHUB_REF_NAME}', commit: '${SHORT_SHA}', date: '${COMMIT_DATE}' },|" src/environments/environment.preview.ts
+          PR_URL=$(gh pr view "$GITHUB_REF_NAME" --json url --jq .url 2>/dev/null || echo "")
+          sed -i "s|preview: null.*|preview: { branch: '${GITHUB_REF_NAME}', commit: '${SHORT_SHA}', date: '${COMMIT_DATE}', prUrl: '${PR_URL}' },|" src/environments/environment.preview.ts
 
       - name: Override Build Command for Preview
         run: |

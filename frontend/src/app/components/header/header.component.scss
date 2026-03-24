@@ -36,6 +36,8 @@
   border-radius: 4px;
   background: #fff3e0;
   color: #e65100;
+  text-decoration: none;
+  cursor: pointer;
 
   &:hover .preview-tooltip {
     opacity: 1;
@@ -62,6 +64,10 @@
   background: #1a1a1a;
   color: #ffffff;
   transition: opacity 0.15s;
+}
+
+.preview-label {
+  color: #999999;
 }
 
 .user-menu {
