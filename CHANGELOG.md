@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Automatically create user record on sign-up via Clerk webhook
 - Add API service for authenticated backend communication
 - Restore Vercel deployment source links to GitHub
+- Show preview build info tooltip on logo in preview environment
 
 ## [0.9.2] - 2026-03-23
 
