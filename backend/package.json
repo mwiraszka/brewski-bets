@@ -32,6 +32,10 @@
       "ignoreMissing": [
         "react"
       ]
-    }
+    },
+    "onlyBuiltDependencies": [
+      "@clerk/shared",
+      "esbuild"
+    ]
   }
 }
