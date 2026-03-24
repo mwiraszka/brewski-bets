@@ -193,7 +193,9 @@ export class AccountPageComponent implements OnInit {
       const user = await this.api.get<UserResponse>('/users/me');
       this.avatarOriginalUrl.set(user.avatarOriginalUrl);
     } catch {
-      this.toast.error('Full-size image could not be loaded');
+      if (this.clerk.user()?.hasImage) {
+        this.toast.error('Full-size image could not be loaded');
+      }
     }
   }
 
