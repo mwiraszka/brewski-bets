@@ -1,16 +1,23 @@
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
+import { env } from 'hono/adapter';
 
 import { createDb, type Db } from './db/index.js';
 import { authMiddleware } from './middleware/auth.js';
 import { betRoutes } from './routes/bets.js';
 import { userRoutes } from './routes/users.js';
 import { webhookRoutes } from './routes/webhooks.js';
-import type { AppContext } from './types/index.js';
+import type { AppBindings, AppContext } from './types/index.js';
 
 let cachedDb: Db | null = null;
 
 const app = new Hono<AppContext>().basePath('/api');
+
+app.use('*', async (c, next) => {
+  const e = env<AppBindings>(c);
+  Object.assign(c.env, e);
+  return next();
+});
 
 app.use('*', cors({
   origin: '*',

@@ -1,6 +1,6 @@
 import type { Db } from '../db/index.js';
 
-export interface AppBindings {
+export interface AppBindings extends Record<string, string> {
   DATABASE_URL: string;
   CLERK_SECRET_KEY: string;
   CLERK_WEBHOOK_SECRET: string;
