@@ -19,10 +19,13 @@ import {
   viewChild,
 } from '@angular/core';
 
+import { environment } from '@env';
+
 import { ApiError, ApiService } from '@app/services/api.service';
 import { ClerkService } from '@app/services/clerk.service';
 
 interface UserResponse {
+  id: string;
   avatarOriginalUrl: string | null;
 }
 
@@ -198,7 +201,9 @@ export class AccountPageComponent implements OnInit {
   private async fetchAvatarOriginalUrl(): Promise<void> {
     try {
       const user = await this.api.get<UserResponse>('/users/me');
-      this.avatarOriginalUrl.set(user.avatarOriginalUrl);
+      if (user.avatarOriginalUrl) {
+        this.avatarOriginalUrl.set(`${environment.apiUrl}/users/${user.id}/avatar`);
+      }
     } catch (e: unknown) {
       if (e instanceof ApiError && e.status === 404) {
         return;
