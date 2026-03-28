@@ -4,6 +4,15 @@ import { environment } from '@env';
 
 import { ClerkService } from './clerk.service';
 
+export class ApiError extends Error {
+  constructor(
+    message: string,
+    readonly status: number,
+  ) {
+    super(message);
+  }
+}
+
 @Injectable({
   providedIn: 'root',
 })
@@ -39,7 +48,7 @@ export class ApiService {
 
     if (!response.ok) {
       const error = await response.json().catch(() => null);
-      throw new Error(error?.error ?? `Request failed (${response.status})`);
+      throw new ApiError(error?.error ?? `Request failed (${response.status})`, response.status);
     }
 
     return response.json();
