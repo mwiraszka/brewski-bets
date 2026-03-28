@@ -19,7 +19,7 @@ import {
   viewChild,
 } from '@angular/core';
 
-import { ApiService } from '@app/services/api.service';
+import { ApiError, ApiService } from '@app/services/api.service';
 import { ClerkService } from '@app/services/clerk.service';
 
 interface UserResponse {
@@ -192,10 +192,11 @@ export class AccountPageComponent implements OnInit {
     try {
       const user = await this.api.get<UserResponse>('/users/me');
       this.avatarOriginalUrl.set(user.avatarOriginalUrl);
-    } catch {
-      if (this.clerk.user()?.hasImage) {
-        this.toast.error('Full-size image could not be loaded');
+    } catch (e: unknown) {
+      if (e instanceof ApiError && e.status === 404) {
+        return;
       }
+      this.toast.error('Full-size image could not be loaded');
     }
   }
 
