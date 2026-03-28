@@ -19,6 +19,16 @@ app.use('*', async (c, next) => {
   return next();
 });
 
+app.get('/debug/env', (c) => {
+  return c.json({
+    hasDbUrl: !!c.env.DATABASE_URL,
+    hasClerkSecret: !!c.env.CLERK_SECRET_KEY,
+    hasWebhookSecret: !!c.env.CLERK_WEBHOOK_SECRET,
+    hasR2Account: !!c.env.R2_ACCOUNT_ID,
+    envKeys: Object.keys(c.env).length,
+  });
+});
+
 app.use('*', cors({
   origin: '*',
   allowHeaders: ['Authorization', 'Content-Type'],
