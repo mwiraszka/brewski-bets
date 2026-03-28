@@ -30,6 +30,14 @@ export class ApiService {
     });
   }
 
+  async patch<T>(path: string, body: unknown): Promise<T> {
+    return this.request<T>(path, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+  }
+
   async delete<T>(path: string): Promise<T> {
     return this.request<T>(path, { method: 'DELETE' });
   }
