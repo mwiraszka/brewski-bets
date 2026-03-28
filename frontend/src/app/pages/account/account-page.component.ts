@@ -145,6 +145,13 @@ export class AccountPageComponent implements OnInit {
 
       await this.clerk.updateProfile(this.firstName(), this.lastName());
 
+      if (firstChanged || lastChanged) {
+        const body: { firstName?: string; lastName?: string } = {};
+        if (firstChanged) body.firstName = this.firstName();
+        if (lastChanged) body.lastName = this.lastName();
+        await this.api.patch('/users/me', body);
+      }
+
       if (photoChanged) {
         const blob = await this.exportCrop();
         await this.clerk.setProfileImage(blob);
