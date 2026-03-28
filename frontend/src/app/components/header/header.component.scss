@@ -26,6 +26,50 @@
   letter-spacing: 1px;
 }
 
+.preview-badge {
+  position: relative;
+  padding: 2px 8px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-radius: 4px;
+  background: #fff3e0;
+  color: #e65100;
+  text-decoration: none;
+  cursor: pointer;
+
+  &:hover .preview-tooltip {
+    opacity: 1;
+    visibility: visible;
+  }
+}
+
+.preview-tooltip {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  opacity: 0;
+  visibility: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 8px 12px;
+  font-size: 12px;
+  font-weight: 400;
+  white-space: nowrap;
+  text-transform: none;
+  letter-spacing: 0;
+  border-radius: 4px;
+  background: #1a1a1a;
+  color: #ffffff;
+  transition: opacity 0.15s;
+}
+
+.preview-label {
+  color: #999999;
+}
+
 .user-menu {
   position: relative;
 }

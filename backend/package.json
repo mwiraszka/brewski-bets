@@ -13,14 +13,16 @@
   "dependencies": {
     "@aws-sdk/client-s3": "3.797.0",
     "@clerk/backend": "1.27.0",
+    "@hono/node-server": "1.19.11",
     "@hono/zod-validator": "0.5.0",
     "@neondatabase/serverless": "1.0.1",
     "drizzle-orm": "0.44.2",
     "hono": "4.7.10",
+    "svix": "1.89.0",
     "zod": "3.25.20"
   },
   "devDependencies": {
-    "@types/node": "^25.5.0",
+    "@types/node": "25.5.0",
     "drizzle-kit": "0.31.1",
     "tsx": "4.19.4",
     "typescript": "5.9.3"
@@ -28,7 +30,13 @@
   "packageManager": "pnpm@10.32.1",
   "pnpm": {
     "peerDependencyRules": {
-      "ignoreMissing": ["react"]
-    }
+      "ignoreMissing": [
+        "react"
+      ]
+    },
+    "onlyBuiltDependencies": [
+      "@clerk/shared",
+      "esbuild"
+    ]
   }
 }

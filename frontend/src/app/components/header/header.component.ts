@@ -7,6 +7,8 @@ import { filter, map } from 'rxjs';
 
 import { ClerkService } from '@app/services/clerk.service';
 
+import { environment } from '@env';
+
 @Component({
   selector: 'bb-header',
   templateUrl: './header.component.html',
@@ -23,6 +25,8 @@ export class HeaderComponent {
     ),
     { initialValue: this.router.url },
   );
+
+  readonly previewInfo = environment.preview;
 
   readonly isLoggedIn = computed(() => this.clerk.isLoggedIn());
   readonly showLoginButton = computed(() => !this.isLoggedIn() && this.currentUrl() !== '/login');
