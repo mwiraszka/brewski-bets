@@ -1,6 +1,5 @@
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
-import { handle } from 'hono/vercel';
 
 import { createDb, type Db } from './db/index.js';
 import { authMiddleware } from './middleware/auth.js';
@@ -35,4 +34,4 @@ app.use('/bets/*', authMiddleware);
 app.route('/users', userRoutes);
 app.route('/bets', betRoutes);
 
-export default handle(app);
+export default app;

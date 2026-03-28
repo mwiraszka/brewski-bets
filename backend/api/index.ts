@@ -1,5 +1,5 @@
-export const config = {
-  runtime: 'edge',
-};
+import { handle } from '@hono/node-server/vercel';
 
-export { default } from '../src/index.js';
+import app from '../src/index.js';
+
+export default handle(app);

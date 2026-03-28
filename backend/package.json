@@ -13,6 +13,7 @@
   "dependencies": {
     "@aws-sdk/client-s3": "3.797.0",
     "@clerk/backend": "1.27.0",
+    "@hono/node-server": "1.19.11",
     "@hono/zod-validator": "0.5.0",
     "@neondatabase/serverless": "1.0.1",
     "drizzle-orm": "0.44.2",
