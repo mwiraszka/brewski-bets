@@ -29,6 +29,11 @@ app.get('/debug/env', (c) => {
   });
 });
 
+app.post('/debug/body', async (c) => {
+  const body = await c.req.text();
+  return c.json({ bodyLength: body.length, bodyPreview: body.slice(0, 100) });
+});
+
 app.use('*', cors({
   origin: '*',
   allowHeaders: ['Authorization', 'Content-Type'],
