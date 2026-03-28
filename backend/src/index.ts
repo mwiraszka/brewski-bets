@@ -2,7 +2,10 @@ import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 import { env } from 'hono/adapter';
 
+import { eq } from 'drizzle-orm';
+
 import { createDb, type Db } from './db/index.js';
+import { users } from './db/schema.js';
 import { authMiddleware } from './middleware/auth.js';
 import { betRoutes } from './routes/bets.js';
 import { userRoutes } from './routes/users.js';
@@ -49,6 +52,28 @@ app.use('*', async (c, next) => {
 });
 
 app.route('/webhooks', webhookRoutes);
+
+app.get('/users/:id/avatar', async (c) => {
+  const db = c.get('db');
+  const id = c.req.param('id');
+
+  const [user] = await db.select({ avatarOriginalUrl: users.avatarOriginalUrl }).from(users).where(eq(users.id, id)).limit(1);
+  if (!user?.avatarOriginalUrl) {
+    return c.json({ error: 'No avatar found' }, 404);
+  }
+
+  const r2Response = await fetch(user.avatarOriginalUrl);
+  if (!r2Response.ok) {
+    return c.json({ error: 'Failed to fetch avatar' }, 502);
+  }
+
+  return new Response(r2Response.body, {
+    headers: {
+      'Content-Type': r2Response.headers.get('Content-Type') || 'image/jpeg',
+      'Cache-Control': 'public, max-age=3600',
+    },
+  });
+});
 
 app.use('/users/*', authMiddleware);
 app.use('/bets/*', authMiddleware);
