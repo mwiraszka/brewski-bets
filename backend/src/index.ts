@@ -37,7 +37,7 @@ app.post('/debug/body', async (c) => {
 app.use('*', cors({
   origin: '*',
   allowHeaders: ['Authorization', 'Content-Type'],
-  allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowMethods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
 }));
 
 app.use('*', async (c, next) => {
