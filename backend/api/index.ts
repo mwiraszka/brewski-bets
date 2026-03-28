@@ -27,7 +27,7 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
     init.body = await readBody(req);
   }
 
-  const response = await app.fetch(new Request(url.href, init));
+  const response = await app.fetch(new Request(url.href, init), process.env);
 
   res.writeHead(response.status, Object.fromEntries(response.headers.entries()));
   res.end(await response.text());
