@@ -13,8 +13,6 @@ let cachedDb: Db | null = null;
 
 const app = new Hono<AppContext>().basePath('/api');
 
-app.get('/health', (c) => c.json({ status: 'ok', timestamp: Date.now() }));
-
 app.use('*', cors({
   origin: '*',
   allowHeaders: ['Authorization', 'Content-Type'],
