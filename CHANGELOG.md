@@ -5,6 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.11.0] - 2026-03-29
+
+### Added
+
+- Use a code input component for the email verification step when creating an account
+
+### Fixed
+
+- Fix spurious "Full-size image could not be loaded" toast appearing on first account page visit
+- Fix first name not being saved to the database when updating account details
+
+### Changed
+
+- Update all frontend and backend dependencies to latest versions, resolving security vulnerabilities
+- Remove unused `@ngneat/until-destroy` and `angular-feather` dependencies
+
 ## [0.10.0] - 2026-03-24
 
 ### Added

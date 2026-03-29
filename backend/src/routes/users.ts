@@ -27,7 +27,11 @@ export const userRoutes = new Hono<AppContext>()
     const clerkId = c.get('clerkId');
     const body = c.req.valid('json');
 
-    const existing = await db.select().from(users).where(eq(users.clerkId, clerkId)).limit(1);
+    const existing = await db
+      .select()
+      .from(users)
+      .where(eq(users.clerkId, clerkId))
+      .limit(1);
     if (existing.length) {
       return c.json({ error: 'User already exists' }, 409);
     }
@@ -56,6 +60,33 @@ export const userRoutes = new Hono<AppContext>()
     if (!user) {
       return c.json({ error: 'User not found' }, 404);
     }
+
+    return c.json(user);
+  })
+
+  .put('/me', zValidator('json', createUserSchema), async c => {
+    const db = c.get('db');
+    const clerkId = c.get('clerkId');
+    const body = c.req.valid('json');
+
+    const [user] = await db
+      .insert(users)
+      .values({
+        clerkId,
+        email: body.email,
+        firstName: body.firstName,
+        lastName: body.lastName,
+      })
+      .onConflictDoUpdate({
+        target: users.clerkId,
+        set: {
+          email: body.email,
+          firstName: body.firstName,
+          lastName: body.lastName,
+          lastModifiedDate: new Date(),
+        },
+      })
+      .returning();
 
     return c.json(user);
   })

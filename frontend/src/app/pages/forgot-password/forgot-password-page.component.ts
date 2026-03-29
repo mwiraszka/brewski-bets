@@ -1,6 +1,6 @@
 import { ButtonComponent, CardComponent, InputComponent } from '@eagami/ui';
 
-import { Component, inject, OnDestroy, signal } from '@angular/core';
+import { Component, OnDestroy, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 

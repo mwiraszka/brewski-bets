@@ -49,10 +49,9 @@ export class ClerkService {
   }
 
   async verifyEmail(code: string): Promise<void> {
-    const result =
-      await this.clerk.client!.signUp.attemptEmailAddressVerification({
-        code,
-      });
+    const result = await this.clerk.client!.signUp.attemptEmailAddressVerification({
+      code,
+    });
 
     if (result.status === 'complete') {
       await this.clerk.setActive({ session: result.createdSessionId });
@@ -121,10 +120,7 @@ export class ClerkService {
     await this.clerk.user!.setProfileImage({ file });
   }
 
-  async changePassword(
-    currentPassword: string,
-    newPassword: string,
-  ): Promise<void> {
+  async changePassword(currentPassword: string, newPassword: string): Promise<void> {
     await this.clerk.user!.updatePassword({ currentPassword, newPassword });
   }
 
@@ -144,10 +140,8 @@ export class ClerkService {
       form_password_incorrect: 'Incorrect password',
       form_password_pwned:
         'This password has been found in a data breach, please choose a different one',
-      form_password_length_too_short:
-        'Password must be at least 8 characters',
-      form_identifier_exists:
-        'An account with that email already exists',
+      form_password_length_too_short: 'Password must be at least 8 characters',
+      form_identifier_exists: 'An account with that email already exists',
       form_code_incorrect: 'Incorrect verification code',
       form_param_format_invalid: 'Please enter a valid email address',
       form_password_not_strong_enough:

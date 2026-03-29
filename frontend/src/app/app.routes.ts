@@ -6,17 +6,13 @@ export const routes: Routes = [
   {
     path: '',
     loadComponent: () =>
-      import('./pages/home/home-page.component').then(
-        c => c.HomePageComponent,
-      ),
+      import('./pages/home/home-page.component').then(c => c.HomePageComponent),
     canActivate: [authGuard],
   },
   {
     path: 'account',
     loadComponent: () =>
-      import('./pages/account/account-page.component').then(
-        c => c.AccountPageComponent,
-      ),
+      import('./pages/account/account-page.component').then(c => c.AccountPageComponent),
     canActivate: [authGuard],
   },
   {
@@ -37,9 +33,7 @@ export const routes: Routes = [
       {
         path: 'login',
         loadComponent: () =>
-          import('./pages/login/login-page.component').then(
-            c => c.LoginPageComponent,
-          ),
+          import('./pages/login/login-page.component').then(c => c.LoginPageComponent),
         canActivate: [guestGuard],
       },
       {

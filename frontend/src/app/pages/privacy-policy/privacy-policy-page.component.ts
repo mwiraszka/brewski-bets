@@ -1,6 +1,6 @@
-import { Component } from '@angular/core';
-
 import { CardComponent } from '@eagami/ui';
+
+import { Component } from '@angular/core';
 
 @Component({
   selector: 'bb-privacy-policy-page',

@@ -1,10 +1,9 @@
+import { serve } from '@hono/node-server';
+import { eq } from 'drizzle-orm';
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
-import { env } from 'hono/adapter';
 
-import { eq } from 'drizzle-orm';
-
-import { createDb, type Db } from './db/index.js';
+import { type Db, createDb } from './db/index.js';
 import { users } from './db/schema.js';
 import { authMiddleware } from './middleware/auth.js';
 import { betRoutes } from './routes/bets.js';
@@ -12,17 +11,18 @@ import { userRoutes } from './routes/users.js';
 import { webhookRoutes } from './routes/webhooks.js';
 import type { AppBindings, AppContext } from './types/index.js';
 
+const bindings = process.env as unknown as AppBindings;
+
 let cachedDb: Db | null = null;
 
 const app = new Hono<AppContext>().basePath('/api');
 
 app.use('*', async (c, next) => {
-  const e = env<AppBindings>(c);
-  Object.assign(c.env, e);
+  Object.assign(c.env, bindings);
   return next();
 });
 
-app.get('/debug/env', (c) => {
+app.get('/debug/env', c => {
   return c.json({
     hasDbUrl: !!c.env.DATABASE_URL,
     hasClerkSecret: !!c.env.CLERK_SECRET_KEY,
@@ -32,16 +32,19 @@ app.get('/debug/env', (c) => {
   });
 });
 
-app.post('/debug/body', async (c) => {
+app.post('/debug/body', async c => {
   const body = await c.req.text();
   return c.json({ bodyLength: body.length, bodyPreview: body.slice(0, 100) });
 });
 
-app.use('*', cors({
-  origin: '*',
-  allowHeaders: ['Authorization', 'Content-Type'],
-  allowMethods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-}));
+app.use(
+  '*',
+  cors({
+    origin: '*',
+    allowHeaders: ['Authorization', 'Content-Type'],
+    allowMethods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  }),
+);
 
 app.use('*', async (c, next) => {
   if (!cachedDb) {
@@ -53,11 +56,15 @@ app.use('*', async (c, next) => {
 
 app.route('/webhooks', webhookRoutes);
 
-app.get('/users/:id/avatar', async (c) => {
+app.get('/users/:id/avatar', async c => {
   const db = c.get('db');
   const id = c.req.param('id');
 
-  const [user] = await db.select({ avatarOriginalUrl: users.avatarOriginalUrl }).from(users).where(eq(users.id, id)).limit(1);
+  const [user] = await db
+    .select({ avatarOriginalUrl: users.avatarOriginalUrl })
+    .from(users)
+    .where(eq(users.id, id))
+    .limit(1);
   if (!user?.avatarOriginalUrl) {
     return c.json({ error: 'No avatar found' }, 404);
   }
@@ -81,4 +88,6 @@ app.use('/bets/*', authMiddleware);
 app.route('/users', userRoutes);
 app.route('/bets', betRoutes);
 
-export default app;
+const port = Number(process.env['PORT'] ?? 3000);
+serve({ fetch: app.fetch, port });
+console.log(`Server running on http://localhost:${port}`);

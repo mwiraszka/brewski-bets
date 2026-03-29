@@ -35,10 +35,7 @@ export async function uploadAvatar(
   return `${env.R2_PUBLIC_URL}/${key}`;
 }
 
-export async function deleteAvatar(
-  env: AppBindings,
-  userId: string,
-): Promise<void> {
+export async function deleteAvatar(env: AppBindings, userId: string): Promise<void> {
   const s3 = createClient(env);
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Vercel's TS build cannot resolve S3Client.send()
