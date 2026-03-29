@@ -1,9 +1,6 @@
 # Generated code
 node_modules
 
-# Prettier config
-.prettierrc
-
 # Environment variables
 .env
 .env.local

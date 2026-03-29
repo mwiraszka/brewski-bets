@@ -17,6 +17,7 @@
     "build:prod": "ng build --configuration production",
     "build:stats": "ng build --stats-json && webpack-bundle-analyzer dist/stats.json",
     "watch": "ng build --watch --configuration development",
+    "format": "prettier --write 'src/**/*.{ts,html,scss}'",
     "lint": "eslint 'src/**'",
     "test": "jest"
   },
