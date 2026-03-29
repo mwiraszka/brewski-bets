@@ -9,20 +9,20 @@ import {
 
 import {
   Component,
-  computed,
   DestroyRef,
-  effect,
   ElementRef,
-  inject,
   OnInit,
+  computed,
+  effect,
+  inject,
   signal,
   viewChild,
 } from '@angular/core';
 
-import { environment } from '@env';
-
 import { ApiError, ApiService } from '@app/services/api.service';
 import { ClerkService } from '@app/services/clerk.service';
+
+import { environment } from '@env';
 
 interface UserResponse {
   id: string;
@@ -33,12 +33,7 @@ interface UserResponse {
   selector: 'bb-account-page',
   templateUrl: './account-page.component.html',
   styleUrl: './account-page.component.scss',
-  imports: [
-    AvatarEditorComponent,
-    ButtonComponent,
-    CardComponent,
-    InputComponent,
-  ],
+  imports: [AvatarEditorComponent, ButtonComponent, CardComponent, InputComponent],
 })
 export class AccountPageComponent implements OnInit {
   private readonly api = inject(ApiService);
@@ -56,20 +51,17 @@ export class AccountPageComponent implements OnInit {
   readonly saving = signal(false);
   readonly avatarDirty = signal(false);
 
-  private readonly avatarOriginalUrl = signal<string | null>(null);
+  readonly avatarOriginalUrl = signal<string | null>(null);
+  readonly removeAvatar = signal(false);
+  private cropResolver: ((blob: Blob) => void) | null = null;
+  originalFile: File | null = null;
 
   readonly avatarSrc = computed(() => {
     const originalUrl = this.avatarOriginalUrl();
     if (originalUrl) return originalUrl;
-
     const user = this.clerk.user();
     return user?.hasImage ? user.imageUrl : undefined;
   });
-
-  private readonly removeAvatar = signal(false);
-  private cropResolver: ((blob: Blob) => void) | null = null;
-  private originalFile: File | null = null;
-  private initialLoadDone = false;
 
   readonly hasChanges = computed(() => {
     const user = this.clerk.user();
@@ -82,24 +74,9 @@ export class AccountPageComponent implements OnInit {
 
   constructor() {
     effect(() => {
-      const editor = this.avatarEditor();
-      if (!editor) return;
-      const hasImage = editor.hasImage();
-
-      if (!this.initialLoadDone) {
-        this.initialLoadDone = true;
-        return;
-      }
-
-      this.avatarDirty.set(true);
-      if (!hasImage) return;
-      this.removeAvatar.set(false);
-    });
-
-    effect(() => {
       const editorEl = this.avatarEditorEl();
       if (!editorEl) return;
-      this.listenForOriginalFile(editorEl.nativeElement);
+      this.registerFileListeners(editorEl.nativeElement);
     });
   }
 
@@ -111,10 +88,8 @@ export class AccountPageComponent implements OnInit {
   }
 
   onCropped(event: AvatarEditorCropEvent): void {
-    if (this.cropResolver) {
-      this.cropResolver(event.blob);
-      this.cropResolver = null;
-    }
+    this.cropResolver?.(event.blob);
+    this.cropResolver = null;
   }
 
   onRemoveAvatar(): void {
@@ -124,68 +99,15 @@ export class AccountPageComponent implements OnInit {
   }
 
   async onSave(): Promise<void> {
-    this.firstNameError.set('');
-    this.lastNameError.set('');
-
-    const firstEmpty = !this.firstName().trim();
-    const lastEmpty = !this.lastName().trim();
-
-    if (firstEmpty) this.firstNameError.set('First name is required');
-    if (lastEmpty) this.lastNameError.set('Last name is required');
-    if (firstEmpty || lastEmpty) return;
+    if (!this.validate()) return;
 
     this.saving.set(true);
 
     try {
-      const user = this.clerk.user();
-      const changes: string[] = [];
-
-      const firstChanged = this.firstName() !== (user?.firstName ?? '');
-      const lastChanged = this.lastName() !== (user?.lastName ?? '');
-      const photoRemoved = this.removeAvatar() && !!this.avatarSrc();
-      const editor = this.avatarEditor();
-      const photoChanged = this.avatarDirty() && !this.removeAvatar() && !!editor?.hasImage();
-
-      await this.clerk.updateProfile(this.firstName(), this.lastName());
-
-      if (firstChanged || lastChanged) {
-        const body: { firstName?: string; lastName?: string } = {};
-        if (firstChanged) body.firstName = this.firstName();
-        if (lastChanged) body.lastName = this.lastName();
-        await this.api.patch('/users/me', body);
-      }
-
-      if (photoChanged) {
-        const blob = await this.exportCrop();
-        await this.clerk.setProfileImage(blob);
-
-        if (this.originalFile) {
-          try {
-            await this.uploadOriginalAvatar(this.originalFile);
-          } catch {
-            this.toast.error('Full-size image could not be saved for future editing');
-          }
-        }
-      } else if (photoRemoved) {
-        await this.clerk.setProfileImage(null);
-
-        try {
-          await this.deleteOriginalAvatar();
-        } catch {
-          this.toast.error('Full-size image could not be removed');
-        }
-      }
-
-      if (firstChanged) changes.push('first name');
-      if (lastChanged) changes.push('last name');
-      if (photoChanged || photoRemoved) changes.push('photo');
+      const changes = await this.applyChanges();
 
       if (changes.length) {
-        const label =
-          changes.length <= 2
-            ? changes.join(' and ')
-            : `${changes.slice(0, -1).join(', ')} and ${changes.at(-1)}`;
-        this.toast.success(`${label.charAt(0).toUpperCase()}${label.slice(1)} updated`);
+        this.toast.success(this.buildSuccessMessage(changes));
       }
 
       this.avatarDirty.set(false);
@@ -198,14 +120,96 @@ export class AccountPageComponent implements OnInit {
     }
   }
 
-  private async fetchAvatarOriginalUrl(): Promise<void> {
+  private validate(): boolean {
+    this.firstNameError.set('');
+    this.lastNameError.set('');
+
+    const firstEmpty = !this.firstName().trim();
+    const lastEmpty = !this.lastName().trim();
+
+    if (firstEmpty) this.firstNameError.set('First name is required');
+    if (lastEmpty) this.lastNameError.set('Last name is required');
+
+    return !firstEmpty && !lastEmpty;
+  }
+
+  private async applyChanges(): Promise<string[]> {
+    const user = this.clerk.user();
+    const changes: string[] = [];
+
+    const firstChanged = this.firstName() !== (user?.firstName ?? '');
+    const lastChanged = this.lastName() !== (user?.lastName ?? '');
+    const photoChanged = this.avatarDirty() && !this.removeAvatar() && this.hasEditorImage();
+    const photoRemoved = this.removeAvatar() && !!this.avatarSrc();
+
+    if (firstChanged || lastChanged) {
+      await this.clerk.updateProfile(this.firstName(), this.lastName());
+      await this.saveNameToBackend(firstChanged, lastChanged);
+      if (firstChanged) changes.push('first name');
+      if (lastChanged) changes.push('last name');
+    }
+
+    if (photoChanged) {
+      await this.savePhoto();
+      changes.push('photo');
+    } else if (photoRemoved) {
+      await this.removePhoto();
+      changes.push('photo');
+    }
+
+    return changes;
+  }
+
+  private async saveNameToBackend(firstChanged: boolean, lastChanged: boolean): Promise<void> {
+    const body: { firstName?: string; lastName?: string } = {};
+    if (firstChanged) body.firstName = this.firstName();
+    if (lastChanged) body.lastName = this.lastName();
+    await this.api.patch('/users/me', body);
+  }
+
+  private async savePhoto(): Promise<void> {
+    const blob = await this.exportCrop();
+    await this.clerk.setProfileImage(blob);
+
+    if (this.originalFile) {
+      try {
+        await this.uploadOriginalAvatar(this.originalFile);
+      } catch {
+        this.toast.error('Full-size image could not be saved for future editing');
+      }
+    }
+  }
+
+  private async removePhoto(): Promise<void> {
+    await this.clerk.setProfileImage(null);
+
+    try {
+      await this.deleteOriginalAvatar();
+    } catch {
+      this.toast.error('Full-size image could not be removed');
+    }
+  }
+
+  private buildSuccessMessage(changes: string[]): string {
+    const label =
+      changes.length <= 2
+        ? changes.join(' and ')
+        : `${changes.slice(0, -1).join(', ')} and ${changes.at(-1)}`;
+    return `${label.charAt(0).toUpperCase()}${label.slice(1)} updated`;
+  }
+
+  hasEditorImage(): boolean {
+    return !!this.avatarEditor()?.hasImage();
+  }
+
+  async fetchAvatarOriginalUrl(): Promise<void> {
     try {
       const user = await this.api.get<UserResponse>('/users/me');
       if (user.avatarOriginalUrl) {
         this.avatarOriginalUrl.set(`${environment.apiUrl}/users/${user.id}/avatar`);
       }
     } catch (e: unknown) {
-      if (e instanceof ApiError && e.status === 404) {
+      if (!(e instanceof ApiError) || e.status === 401 || e.status === 404) {
         return;
       }
       this.toast.error('Full-size image could not be loaded');
@@ -224,16 +228,21 @@ export class AccountPageComponent implements OnInit {
     this.avatarOriginalUrl.set(null);
   }
 
-  private listenForOriginalFile(hostEl: HTMLElement): void {
+  registerFileListeners(hostEl: HTMLElement): void {
     const onFileCapture = (event: Event): void => {
-      const input = event.target as HTMLInputElement;
-      const file = input.files?.[0];
-      if (file) this.originalFile = file;
+      const file = (event.target as HTMLInputElement).files?.[0];
+      if (!file) return;
+      this.originalFile = file;
+      this.avatarDirty.set(true);
+      this.removeAvatar.set(false);
     };
 
     const onDropCapture = (event: DragEvent): void => {
       const file = event.dataTransfer?.files[0];
-      if (file) this.originalFile = file;
+      if (!file) return;
+      this.originalFile = file;
+      this.avatarDirty.set(true);
+      this.removeAvatar.set(false);
     };
 
     hostEl.addEventListener('change', onFileCapture, { capture: true });
@@ -245,10 +254,10 @@ export class AccountPageComponent implements OnInit {
     });
   }
 
-  private exportCrop(): Promise<Blob> {
+  exportCrop(): Promise<Blob> {
     return new Promise(resolve => {
       this.cropResolver = resolve;
-      this.avatarEditor()!.exportCrop();
+      this.avatarEditor()?.exportCrop();
     });
   }
 }
