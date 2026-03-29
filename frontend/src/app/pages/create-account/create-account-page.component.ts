@@ -1,6 +1,12 @@
-import { ButtonComponent, CardComponent, DividerComponent, InputComponent } from '@eagami/ui';
+import {
+  ButtonComponent,
+  CardComponent,
+  CodeInputComponent,
+  DividerComponent,
+  InputComponent,
+} from '@eagami/ui';
 
-import { Component, inject, OnDestroy, signal } from '@angular/core';
+import { Component, OnDestroy, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 
@@ -13,7 +19,16 @@ const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
   selector: 'bb-create-account-page',
   templateUrl: './create-account-page.component.html',
   styleUrl: './create-account-page.component.scss',
-  imports: [FormsModule, RouterLink, ButtonComponent, CardComponent, DividerComponent, InputComponent, GoogleIconComponent],
+  imports: [
+    FormsModule,
+    RouterLink,
+    ButtonComponent,
+    CardComponent,
+    CodeInputComponent,
+    DividerComponent,
+    InputComponent,
+    GoogleIconComponent,
+  ],
 })
 export class CreateAccountPageComponent implements OnDestroy {
   private readonly clerk = inject(ClerkService);
@@ -65,10 +80,6 @@ export class CreateAccountPageComponent implements OnDestroy {
     );
   }
 
-  onVerificationCodeBlur(): void {
-    // No format validation needed for code
-  }
-
   async onContinueWithGoogle(): Promise<void> {
     this.googleLoading.set(true);
     try {
@@ -107,8 +118,13 @@ export class CreateAccountPageComponent implements OnDestroy {
       this.confirmPasswordError.set('');
     }
 
-    return !this.firstNameError() && !this.lastNameError() &&
-      !this.emailError() && !this.passwordError() && !this.confirmPasswordError();
+    return (
+      !this.firstNameError() &&
+      !this.lastNameError() &&
+      !this.emailError() &&
+      !this.passwordError() &&
+      !this.confirmPasswordError()
+    );
   }
 
   async onSubmit(): Promise<void> {
@@ -138,11 +154,6 @@ export class CreateAccountPageComponent implements OnDestroy {
   }
 
   async onVerify(): Promise<void> {
-    if (!this.verificationCode()) {
-      this.verificationCodeError.set('Verification code is required');
-      return;
-    }
-
     this.verificationCodeError.set('');
     this.error.set('');
     this.loading.set(true);
@@ -156,5 +167,4 @@ export class CreateAccountPageComponent implements OnDestroy {
       this.loading.set(false);
     }
   }
-
 }

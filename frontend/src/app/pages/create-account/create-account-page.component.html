@@ -100,32 +100,20 @@
     headerAlign="center">
     <h2 eaCardHeader>Verify email</h2>
 
-    <form
-      class="auth-form"
-      (ngSubmit)="onVerify()">
+    <div class="auth-form">
       <p class="hint">We sent a verification code to {{ email() }}.</p>
 
-      <ea-input
-        label="Verification Code"
-        autocomplete="one-time-code"
-        placeholder="Enter code"
-        [autofocus]="true"
-        [required]="true"
-        [error]="verificationCodeError()"
-        (inputBlurred)="onVerificationCodeBlur()"
-        [(value)]="verificationCode" />
+      <div class="code-input">
+        <ea-code-input
+          label="Verification code"
+          [error]="verificationCodeError()"
+          (completed)="onVerify()"
+          [(value)]="verificationCode" />
+      </div>
 
       @if (error()) {
         <p class="error">{{ error() }}</p>
       }
-
-      <ea-button
-        type="submit"
-        variant="primary"
-        [fullWidth]="true"
-        [loading]="loading()">
-        Verify
-      </ea-button>
-    </form>
+    </div>
   </ea-card>
 }
