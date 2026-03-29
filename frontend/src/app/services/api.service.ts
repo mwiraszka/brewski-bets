@@ -1,4 +1,4 @@
-import { inject, Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 
 import { environment } from '@env';
 
@@ -30,6 +30,14 @@ export class ApiService {
     });
   }
 
+  async put<T>(path: string, body: unknown): Promise<T> {
+    return this.request<T>(path, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+  }
+
   async patch<T>(path: string, body: unknown): Promise<T> {
     return this.request<T>(path, {
       method: 'PATCH',
@@ -56,7 +64,10 @@ export class ApiService {
 
     if (!response.ok) {
       const error = await response.json().catch(() => null);
-      throw new ApiError(error?.error ?? `Request failed (${response.status})`, response.status);
+      throw new ApiError(
+        error?.error ?? `Request failed (${response.status})`,
+        response.status,
+      );
     }
 
     return response.json();

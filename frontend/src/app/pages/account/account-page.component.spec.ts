@@ -19,7 +19,12 @@ jest.mock('@env', () => ({
 
 const MOCK_API_URL = 'http://localhost:3000/api';
 
-type MockUser = { firstName: string; lastName: string; hasImage: boolean; imageUrl: string };
+type MockUser = {
+  firstName: string;
+  lastName: string;
+  hasImage: boolean;
+  imageUrl: string;
+};
 
 type MockClerkService = {
   user: WritableSignal<MockUser | null>;
@@ -30,6 +35,7 @@ type MockClerkService = {
 
 type MockApiService = {
   get: jest.Mock<Promise<unknown>>;
+  put: jest.Mock<Promise<unknown>>;
   patch: jest.Mock<Promise<unknown>>;
   post: jest.Mock<Promise<unknown>>;
   delete: jest.Mock<Promise<unknown>>;
@@ -89,6 +95,7 @@ describe('AccountPageComponent', () => {
 
     mockApi = {
       get: jest.fn().mockResolvedValue({ id: 'user-1', avatarOriginalUrl: null }),
+      put: jest.fn().mockResolvedValue({ id: 'user-1', avatarOriginalUrl: null }),
       patch: jest.fn().mockResolvedValue({}),
       post: jest.fn().mockResolvedValue({ id: 'user-1', avatarOriginalUrl: null }),
       delete: jest.fn().mockResolvedValue({}),
@@ -128,7 +135,10 @@ describe('AccountPageComponent', () => {
     });
 
     it('sets avatarOriginalUrl when the API returns a stored URL', async () => {
-      mockApi.get.mockResolvedValue({ id: 'user-1', avatarOriginalUrl: 'http://s3/orig.jpg' });
+      mockApi.get.mockResolvedValue({
+        id: 'user-1',
+        avatarOriginalUrl: 'http://s3/orig.jpg',
+      });
 
       await component.fetchAvatarOriginalUrl();
 
@@ -151,11 +161,19 @@ describe('AccountPageComponent', () => {
       expect(mockToast.error).not.toHaveBeenCalled();
     });
 
-    it('silently ignores 404 errors on avatar load', async () => {
+    it('creates the user record and continues when GET returns 404', async () => {
       mockApi.get.mockRejectedValue(new ApiError('Not found', 404));
+      mockApi.put.mockResolvedValue({ id: 'user-1', avatarOriginalUrl: null });
 
       await component.fetchAvatarOriginalUrl();
 
+      expect(mockApi.put).toHaveBeenCalledWith(
+        '/users/me',
+        expect.objectContaining({
+          firstName: 'John',
+          lastName: 'Doe',
+        }),
+      );
       expect(mockToast.error).not.toHaveBeenCalled();
     });
 
@@ -180,7 +198,11 @@ describe('AccountPageComponent', () => {
     });
 
     it('falls back to the Clerk image when no original URL is stored', async () => {
-      mockClerk.user = signal({ ...MOCK_USER, hasImage: true, imageUrl: 'http://clerk/photo' });
+      mockClerk.user = signal({
+        ...MOCK_USER,
+        hasImage: true,
+        imageUrl: 'http://clerk/photo',
+      });
 
       component = await createComponent(mockClerk, mockApi, mockToast);
 
@@ -274,7 +296,10 @@ describe('AccountPageComponent', () => {
     });
 
     it('does nothing when no crop is pending', () => {
-      const event: AvatarEditorCropEvent = { blob: new Blob(), dataUrl: 'data:image/jpeg;base64,abc' };
+      const event: AvatarEditorCropEvent = {
+        blob: new Blob(),
+        dataUrl: 'data:image/jpeg;base64,abc',
+      };
 
       expect(() => component.onCropped(event)).not.toThrow();
     });
@@ -452,7 +477,9 @@ describe('AccountPageComponent', () => {
 
       await component.onSave();
 
-      expect(mockToast.success).toHaveBeenCalledWith('First name, last name and photo updated');
+      expect(mockToast.success).toHaveBeenCalledWith(
+        'First name, last name and photo updated',
+      );
     });
 
     it('shows no toast when nothing changed', async () => {
@@ -484,7 +511,10 @@ describe('AccountPageComponent', () => {
 
     it('uploads the original file when one was captured', async () => {
       component.originalFile = new File(['raw'], 'photo.jpg');
-      mockApi.post.mockResolvedValue({ id: 'u1', avatarOriginalUrl: 'http://s3/orig.jpg' });
+      mockApi.post.mockResolvedValue({
+        id: 'u1',
+        avatarOriginalUrl: 'http://s3/orig.jpg',
+      });
 
       await component.onSave();
 
@@ -518,7 +548,11 @@ describe('AccountPageComponent', () => {
 
   describe('onSave — photo remove', () => {
     beforeEach(async () => {
-      mockClerk.user = signal({ ...MOCK_USER, hasImage: true, imageUrl: 'http://clerk/img' });
+      mockClerk.user = signal({
+        ...MOCK_USER,
+        hasImage: true,
+        imageUrl: 'http://clerk/img',
+      });
       component = await createComponent(mockClerk, mockApi, mockToast);
       component.onRemoveAvatar();
     });
@@ -540,7 +574,9 @@ describe('AccountPageComponent', () => {
 
       await component.onSave();
 
-      expect(mockToast.error).toHaveBeenCalledWith('Full-size image could not be removed');
+      expect(mockToast.error).toHaveBeenCalledWith(
+        'Full-size image could not be removed',
+      );
       expect(mockToast.success).toHaveBeenCalledWith('Photo updated');
     });
 
@@ -588,7 +624,11 @@ describe('AccountPageComponent', () => {
     });
 
     it('resets removeAvatar after a successful save', async () => {
-      mockClerk.user = signal({ ...MOCK_USER, hasImage: true, imageUrl: 'http://clerk/img' });
+      mockClerk.user = signal({
+        ...MOCK_USER,
+        hasImage: true,
+        imageUrl: 'http://clerk/img',
+      });
       component = await createComponent(mockClerk, mockApi, mockToast);
       component.onRemoveAvatar();
 
@@ -679,7 +719,10 @@ describe('AccountPageComponent', () => {
     it('sets originalFile on a drop event', () => {
       const file = new File(['data'], 'dropped.jpg');
       const dropEvent = new Event('drop') as Event & { dataTransfer: { files: File[] } };
-      Object.defineProperty(dropEvent, 'dataTransfer', { value: { files: [file] }, configurable: true });
+      Object.defineProperty(dropEvent, 'dataTransfer', {
+        value: { files: [file] },
+        configurable: true,
+      });
 
       hostEl.dispatchEvent(dropEvent);
 
@@ -689,7 +732,10 @@ describe('AccountPageComponent', () => {
     it('sets avatarDirty to true on a drop event', () => {
       const file = new File(['data'], 'dropped.jpg');
       const dropEvent = new Event('drop') as Event & { dataTransfer: { files: File[] } };
-      Object.defineProperty(dropEvent, 'dataTransfer', { value: { files: [file] }, configurable: true });
+      Object.defineProperty(dropEvent, 'dataTransfer', {
+        value: { files: [file] },
+        configurable: true,
+      });
 
       hostEl.dispatchEvent(dropEvent);
 
@@ -700,7 +746,10 @@ describe('AccountPageComponent', () => {
       component.removeAvatar.set(true);
       const file = new File(['data'], 'dropped.jpg');
       const dropEvent = new Event('drop') as Event & { dataTransfer: { files: File[] } };
-      Object.defineProperty(dropEvent, 'dataTransfer', { value: { files: [file] }, configurable: true });
+      Object.defineProperty(dropEvent, 'dataTransfer', {
+        value: { files: [file] },
+        configurable: true,
+      });
 
       hostEl.dispatchEvent(dropEvent);
 
@@ -709,7 +758,10 @@ describe('AccountPageComponent', () => {
 
     it('ignores drop events with no files', () => {
       const dropEvent = new Event('drop') as Event & { dataTransfer: { files: File[] } };
-      Object.defineProperty(dropEvent, 'dataTransfer', { value: { files: [] }, configurable: true });
+      Object.defineProperty(dropEvent, 'dataTransfer', {
+        value: { files: [] },
+        configurable: true,
+      });
 
       hostEl.dispatchEvent(dropEvent);
 

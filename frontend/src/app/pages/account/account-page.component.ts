@@ -42,7 +42,9 @@ export class AccountPageComponent implements OnInit {
   private readonly toast = inject(ToastService);
 
   private readonly avatarEditor = viewChild(AvatarEditorComponent);
-  private readonly avatarEditorEl = viewChild(AvatarEditorComponent, { read: ElementRef });
+  private readonly avatarEditorEl = viewChild(AvatarEditorComponent, {
+    read: ElementRef,
+  });
 
   readonly firstName = signal('');
   readonly lastName = signal('');
@@ -139,7 +141,8 @@ export class AccountPageComponent implements OnInit {
 
     const firstChanged = this.firstName() !== (user?.firstName ?? '');
     const lastChanged = this.lastName() !== (user?.lastName ?? '');
-    const photoChanged = this.avatarDirty() && !this.removeAvatar() && this.hasEditorImage();
+    const photoChanged =
+      this.avatarDirty() && !this.removeAvatar() && this.hasEditorImage();
     const photoRemoved = this.removeAvatar() && !!this.avatarSrc();
 
     if (firstChanged || lastChanged) {
@@ -160,7 +163,10 @@ export class AccountPageComponent implements OnInit {
     return changes;
   }
 
-  private async saveNameToBackend(firstChanged: boolean, lastChanged: boolean): Promise<void> {
+  private async saveNameToBackend(
+    firstChanged: boolean,
+    lastChanged: boolean,
+  ): Promise<void> {
     const body: { firstName?: string; lastName?: string } = {};
     if (firstChanged) body.firstName = this.firstName();
     if (lastChanged) body.lastName = this.lastName();
@@ -204,23 +210,40 @@ export class AccountPageComponent implements OnInit {
 
   async fetchAvatarOriginalUrl(): Promise<void> {
     try {
-      const user = await this.api.get<UserResponse>('/users/me');
+      const user = await this.api
+        .get<UserResponse>('/users/me')
+        .catch(async (e: unknown) => {
+          if (e instanceof ApiError && e.status === 404) {
+            return this.ensureUserRecord();
+          }
+          throw e;
+        });
+
       if (user.avatarOriginalUrl) {
         this.avatarOriginalUrl.set(`${environment.apiUrl}/users/${user.id}/avatar`);
       }
     } catch (e: unknown) {
-      if (!(e instanceof ApiError) || e.status === 401 || e.status === 404) {
+      if (!(e instanceof ApiError) || e.status === 401) {
         return;
       }
       this.toast.error('Full-size image could not be loaded');
     }
   }
 
+  private async ensureUserRecord(): Promise<UserResponse> {
+    const user = this.clerk.user();
+    return this.api.put<UserResponse>('/users/me', {
+      email: user?.primaryEmailAddress?.emailAddress ?? '',
+      firstName: user?.firstName ?? '',
+      lastName: user?.lastName ?? '',
+    });
+  }
+
   private async uploadOriginalAvatar(file: File): Promise<void> {
     const formData = new FormData();
     formData.append('file', file);
     const user = await this.api.post<UserResponse>('/users/me/avatar', formData);
-    this.avatarOriginalUrl.set(user.avatarOriginalUrl);
+    this.avatarOriginalUrl.set(`${environment.apiUrl}/users/${user.id}/avatar`);
   }
 
   private async deleteOriginalAvatar(): Promise<void> {
