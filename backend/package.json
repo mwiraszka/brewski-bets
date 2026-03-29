@@ -5,7 +5,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "tsx watch src/index.ts",
+    "dev": "tsx watch --env-file=.env src/index.ts",
+    "format": "prettier --write 'src/**/*.ts'",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
     "db:studio": "drizzle-kit studio"
@@ -22,8 +23,10 @@
     "zod": "3.25.76"
   },
   "devDependencies": {
+    "@trivago/prettier-plugin-sort-imports": "6.0.2",
     "@types/node": "25.5.0",
     "drizzle-kit": "0.31.10",
+    "prettier": "3.8.1",
     "tsx": "4.21.0",
     "typescript": "6.0.2"
   },
