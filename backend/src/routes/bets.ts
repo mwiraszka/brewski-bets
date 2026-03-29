@@ -83,12 +83,7 @@ export const betRoutes = new Hono<AppContext>()
     const [bet] = await db
       .select()
       .from(bets)
-      .where(
-        and(
-          eq(bets.id, id),
-          or(eq(bets.user1Id, userId), eq(bets.user2Id, userId)),
-        ),
-      )
+      .where(and(eq(bets.id, id), or(eq(bets.user1Id, userId), eq(bets.user2Id, userId))))
       .limit(1);
 
     if (!bet) {
@@ -111,12 +106,7 @@ export const betRoutes = new Hono<AppContext>()
     const [existing] = await db
       .select()
       .from(bets)
-      .where(
-        and(
-          eq(bets.id, id),
-          or(eq(bets.user1Id, userId), eq(bets.user2Id, userId)),
-        ),
-      )
+      .where(and(eq(bets.id, id), or(eq(bets.user1Id, userId), eq(bets.user2Id, userId))))
       .limit(1);
 
     if (!existing) {
@@ -161,12 +151,7 @@ export const betRoutes = new Hono<AppContext>()
     const [existing] = await db
       .select()
       .from(bets)
-      .where(
-        and(
-          eq(bets.id, id),
-          or(eq(bets.user1Id, userId), eq(bets.user2Id, userId)),
-        ),
-      )
+      .where(and(eq(bets.id, id), or(eq(bets.user1Id, userId), eq(bets.user2Id, userId))))
       .limit(1);
 
     if (!existing) {

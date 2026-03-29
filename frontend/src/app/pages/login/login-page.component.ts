@@ -1,4 +1,9 @@
-import { ButtonComponent, CardComponent, DividerComponent, InputComponent } from '@eagami/ui';
+import {
+  ButtonComponent,
+  CardComponent,
+  DividerComponent,
+  InputComponent,
+} from '@eagami/ui';
 
 import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';

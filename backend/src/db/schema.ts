@@ -17,7 +17,9 @@ export const users = pgTable('users', {
   lastName: text('last_name').notNull(),
   avatarOriginalUrl: text('avatar_original_url'),
   createdDate: timestamp('created_date', { withTimezone: true }).notNull().defaultNow(),
-  lastModifiedDate: timestamp('last_modified_date', { withTimezone: true }).notNull().defaultNow(),
+  lastModifiedDate: timestamp('last_modified_date', { withTimezone: true })
+    .notNull()
+    .defaultNow(),
 });
 
 export const bets = pgTable('bets', {
@@ -37,7 +39,9 @@ export const bets = pgTable('bets', {
   status: betStatusEnum('status').notNull().default('pending'),
   outcome: betOutcomeEnum('outcome').notNull().default('open'),
   createdDate: timestamp('created_date', { withTimezone: true }).notNull().defaultNow(),
-  lastModifiedDate: timestamp('last_modified_date', { withTimezone: true }).notNull().defaultNow(),
+  lastModifiedDate: timestamp('last_modified_date', { withTimezone: true })
+    .notNull()
+    .defaultNow(),
   createdBy: uuid('created_by')
     .notNull()
     .references(() => users.id),

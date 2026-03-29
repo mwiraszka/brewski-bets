@@ -1,9 +1,9 @@
 import { AvatarComponent, ButtonComponent } from '@eagami/ui';
+import { filter, map } from 'rxjs';
 
 import { Component, computed, inject, signal } from '@angular/core';
-import { NavigationEnd, Router, RouterLink } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { filter, map } from 'rxjs';
+import { NavigationEnd, Router, RouterLink } from '@angular/router';
 
 import { ClerkService } from '@app/services/clerk.service';
 
@@ -29,7 +29,9 @@ export class HeaderComponent {
   readonly previewInfo = environment.preview;
 
   readonly isLoggedIn = computed(() => this.clerk.isLoggedIn());
-  readonly showLoginButton = computed(() => !this.isLoggedIn() && this.currentUrl() !== '/login');
+  readonly showLoginButton = computed(
+    () => !this.isLoggedIn() && this.currentUrl() !== '/login',
+  );
   readonly menuOpen = signal(false);
 
   readonly avatarSrc = computed(() => {

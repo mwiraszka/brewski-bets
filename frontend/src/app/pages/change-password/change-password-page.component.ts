@@ -1,6 +1,6 @@
 import { ButtonComponent, CardComponent, InputComponent } from '@eagami/ui';
 
-import { Component, inject, OnDestroy, signal } from '@angular/core';
+import { Component, OnDestroy, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 
@@ -75,7 +75,11 @@ export class ChangePasswordPageComponent implements OnDestroy {
       this.confirmPasswordError.set('');
     }
 
-    return !this.currentPasswordError() && !this.newPasswordError() && !this.confirmPasswordError();
+    return (
+      !this.currentPasswordError() &&
+      !this.newPasswordError() &&
+      !this.confirmPasswordError()
+    );
   }
 
   async onSubmit(): Promise<void> {
@@ -85,10 +89,7 @@ export class ChangePasswordPageComponent implements OnDestroy {
     this.loading.set(true);
 
     try {
-      await this.clerk.changePassword(
-        this.currentPassword(),
-        this.newPassword(),
-      );
+      await this.clerk.changePassword(this.currentPassword(), this.newPassword());
       await this.router.navigate(['/']);
     } catch (e: unknown) {
       this.error.set(this.clerk.extractError(e));

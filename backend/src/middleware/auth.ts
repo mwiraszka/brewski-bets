@@ -21,7 +21,11 @@ export async function authMiddleware(c: Context<AppContext>, next: Next) {
     c.set('clerkId', payload.sub);
 
     const db = c.get('db');
-    const [user] = await db.select().from(users).where(eq(users.clerkId, payload.sub)).limit(1);
+    const [user] = await db
+      .select()
+      .from(users)
+      .where(eq(users.clerkId, payload.sub))
+      .limit(1);
 
     if (user) {
       c.set('userId', user.id);
