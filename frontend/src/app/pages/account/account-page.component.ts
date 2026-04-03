@@ -9,17 +9,9 @@ import {
 
 import { Component, OnInit, computed, inject, signal, viewChild } from '@angular/core';
 
-import { ApiError, ApiService } from '@app/services/api.service';
+import { ApiService } from '@app/services/api.service';
 import { ClerkService } from '@app/services/clerk.service';
-
-import { environment } from '@env';
-
-interface UserResponse {
-  id: string;
-  avatarOriginalUrl: string | null;
-  avatarCropState: AvatarEditorCropState | null;
-  lastModifiedDate: string;
-}
+import { UserRecord, UserService } from '@app/services/user.service';
 
 @Component({
   selector: 'bb-account-page',
@@ -30,6 +22,7 @@ interface UserResponse {
 export class AccountPageComponent implements OnInit {
   private readonly api = inject(ApiService);
   private readonly clerk = inject(ClerkService);
+  private readonly userService = inject(UserService);
   private readonly toast = inject(ToastService);
 
   private readonly avatarEditor = viewChild(AvatarEditorComponent);
@@ -41,7 +34,6 @@ export class AccountPageComponent implements OnInit {
   readonly saving = signal(false);
   readonly avatarDirty = signal(false);
 
-  readonly avatarOriginalUrl = signal<string | null>(null);
   readonly editorSrc = signal<string | undefined>(undefined);
   readonly removeAvatar = signal(false);
   readonly savedCropState = signal<AvatarEditorCropState | null>(null);
@@ -62,10 +54,9 @@ export class AccountPageComponent implements OnInit {
     const user = this.clerk.user();
     this.firstName.set(user?.firstName ?? '');
     this.lastName.set(user?.lastName ?? '');
-    if (user?.hasImage) {
-      this.editorSrc.set(user.imageUrl);
-    }
-    this.fetchAvatarOriginalUrl();
+    this.editorSrc.set(this.userService.avatarUrl());
+    this.savedCropState.set(this.userService.avatarCropState());
+    this.liveCropState.set(this.userService.avatarCropState());
   }
 
   onFileSelected(file: File): void {
@@ -129,9 +120,7 @@ export class AccountPageComponent implements OnInit {
     const photoChanged =
       this.avatarDirty() && !this.removeAvatar() && !!this.originalFile;
     const photoRemoved =
-      this.avatarDirty() &&
-      this.removeAvatar() &&
-      (!!this.avatarOriginalUrl() || !!this.clerk.user()?.hasImage);
+      this.avatarDirty() && this.removeAvatar() && this.userService.hasAvatar();
     const cropChanged = this.isCropChanged();
 
     if (firstChanged || lastChanged) {
@@ -216,28 +205,6 @@ export class AccountPageComponent implements OnInit {
     );
   }
 
-  async fetchAvatarOriginalUrl(): Promise<void> {
-    try {
-      const user = await this.api.get<UserResponse>('/users/me');
-
-      if (user.avatarOriginalUrl) {
-        const cacheBuster = new Date(user.lastModifiedDate).getTime();
-        const url = `${environment.apiUrl}/users/${user.id}/avatar?t=${cacheBuster}`;
-        this.avatarOriginalUrl.set(url);
-        if (user.avatarCropState) {
-          this.savedCropState.set(user.avatarCropState);
-          this.liveCropState.set(user.avatarCropState);
-        }
-        this.editorSrc.set(url);
-      }
-    } catch (e: unknown) {
-      if (!(e instanceof ApiError) || e.status === 401) {
-        return;
-      }
-      this.toast.error('Full-size image could not be loaded');
-    }
-  }
-
   private async uploadOriginalAvatar(
     file: File,
     cropState: AvatarEditorCropState,
@@ -245,14 +212,15 @@ export class AccountPageComponent implements OnInit {
     const formData = new FormData();
     formData.append('file', file);
     formData.append('cropState', JSON.stringify(cropState));
-    await this.api.post<UserResponse>('/users/me/avatar', formData);
+    const user = await this.api.post<UserRecord>('/users/me/avatar', formData);
+    this.userService.setUser(user);
     this.savedCropState.set(cropState);
     this.liveCropState.set(cropState);
   }
 
   private async deleteOriginalAvatar(): Promise<void> {
     await this.api.delete('/users/me/avatar');
-    this.avatarOriginalUrl.set(null);
+    this.userService.clearAvatar();
     this.editorSrc.set(undefined);
     this.savedCropState.set(null);
     this.liveCropState.set(null);
