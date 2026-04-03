@@ -19,6 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fix avatar editor showing placeholder while full-size image loads on account page
 - Fix avatar editor controls resetting after saving or refreshing the page
 - Persist and restore zoom and pan crop state so the edited avatar is always displayed correctly
+- Fix account page showing stale name after profile changes in the Clerk dashboard
 - Fix stale avatar showing in header after photo change
 - Fix old avatar briefly appearing on account page load before new one renders
 - Avatar editor image area shows a shimmer skeleton while the full-size photo loads
