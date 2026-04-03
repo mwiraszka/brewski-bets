@@ -15,23 +15,23 @@ ea-card {
   width: 100%;
   max-width: 800px;
   min-height: 0;
+  --color-bg-base: #ffffff;
+  --color-text-primary: #1a1a1a;
+  --color-text-secondary: #555555;
+  --color-border-default: #e0e0e0;
+  --ea-card-body-padding: 32px;
 
   ::ng-deep .ea-card {
     display: flex;
     flex-direction: column;
     flex: 1;
     min-height: 0;
-    --color-bg-base: #ffffff;
-    --color-text-primary: #1a1a1a;
-    --color-text-secondary: #555555;
-    --color-border-default: #e0e0e0;
   }
 
   ::ng-deep .ea-card__body {
     overflow-y: auto;
     flex: 1;
     min-height: 0;
-    padding: 32px !important;
   }
 }
 
