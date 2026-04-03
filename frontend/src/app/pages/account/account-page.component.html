@@ -6,8 +6,10 @@
       <ea-avatar-editor
         shape="circle"
         [canvasSize]="200"
-        [currentSrc]="avatarSrc()"
-        (cropped)="onCropped($event)"
+        [currentSrc]="editorSrc()"
+        [cropState]="savedCropState()"
+        (fileSelected)="onFileSelected($event)"
+        (cropStateChange)="onCropStateChange($event)"
         (removed)="onRemoveAvatar()" />
     </div>
 

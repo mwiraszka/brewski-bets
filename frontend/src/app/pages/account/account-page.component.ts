@@ -1,23 +1,13 @@
 import {
   AvatarEditorComponent,
-  AvatarEditorCropEvent,
+  AvatarEditorCropState,
   ButtonComponent,
   CardComponent,
   InputComponent,
   ToastService,
 } from '@eagami/ui';
 
-import {
-  Component,
-  DestroyRef,
-  ElementRef,
-  OnInit,
-  computed,
-  effect,
-  inject,
-  signal,
-  viewChild,
-} from '@angular/core';
+import { Component, OnInit, computed, inject, signal, viewChild } from '@angular/core';
 
 import { ApiError, ApiService } from '@app/services/api.service';
 import { ClerkService } from '@app/services/clerk.service';
@@ -27,6 +17,8 @@ import { environment } from '@env';
 interface UserResponse {
   id: string;
   avatarOriginalUrl: string | null;
+  avatarCropState: AvatarEditorCropState | null;
+  lastModifiedDate: string;
 }
 
 @Component({
@@ -38,13 +30,9 @@ interface UserResponse {
 export class AccountPageComponent implements OnInit {
   private readonly api = inject(ApiService);
   private readonly clerk = inject(ClerkService);
-  private readonly destroyRef = inject(DestroyRef);
   private readonly toast = inject(ToastService);
 
   private readonly avatarEditor = viewChild(AvatarEditorComponent);
-  private readonly avatarEditorEl = viewChild(AvatarEditorComponent, {
-    read: ElementRef,
-  });
 
   readonly firstName = signal('');
   readonly lastName = signal('');
@@ -54,44 +42,41 @@ export class AccountPageComponent implements OnInit {
   readonly avatarDirty = signal(false);
 
   readonly avatarOriginalUrl = signal<string | null>(null);
+  readonly editorSrc = signal<string | undefined>(undefined);
   readonly removeAvatar = signal(false);
-  private cropResolver: ((blob: Blob) => void) | null = null;
+  readonly savedCropState = signal<AvatarEditorCropState | null>(null);
+  readonly liveCropState = signal<AvatarEditorCropState | null>(null);
   originalFile: File | null = null;
-
-  readonly avatarSrc = computed(() => {
-    const originalUrl = this.avatarOriginalUrl();
-    if (originalUrl) return originalUrl;
-    const user = this.clerk.user();
-    return user?.hasImage ? user.imageUrl : undefined;
-  });
 
   readonly hasChanges = computed(() => {
     const user = this.clerk.user();
     return (
       this.firstName() !== (user?.firstName ?? '') ||
       this.lastName() !== (user?.lastName ?? '') ||
-      this.avatarDirty()
+      this.avatarDirty() ||
+      this.isCropChanged()
     );
   });
-
-  constructor() {
-    effect(() => {
-      const editorEl = this.avatarEditorEl();
-      if (!editorEl) return;
-      this.registerFileListeners(editorEl.nativeElement);
-    });
-  }
 
   ngOnInit(): void {
     const user = this.clerk.user();
     this.firstName.set(user?.firstName ?? '');
     this.lastName.set(user?.lastName ?? '');
+    if (user?.hasImage) {
+      this.editorSrc.set(user.imageUrl);
+    }
     this.fetchAvatarOriginalUrl();
   }
 
-  onCropped(event: AvatarEditorCropEvent): void {
-    this.cropResolver?.(event.blob);
-    this.cropResolver = null;
+  onFileSelected(file: File): void {
+    this.originalFile = file;
+    this.avatarDirty.set(true);
+    this.removeAvatar.set(false);
+    this.liveCropState.set(null);
+  }
+
+  onCropStateChange(state: AvatarEditorCropState): void {
+    this.liveCropState.set(state);
   }
 
   onRemoveAvatar(): void {
@@ -142,8 +127,12 @@ export class AccountPageComponent implements OnInit {
     const firstChanged = this.firstName() !== (user?.firstName ?? '');
     const lastChanged = this.lastName() !== (user?.lastName ?? '');
     const photoChanged =
-      this.avatarDirty() && !this.removeAvatar() && this.hasEditorImage();
-    const photoRemoved = this.removeAvatar() && !!this.avatarSrc();
+      this.avatarDirty() && !this.removeAvatar() && !!this.originalFile;
+    const photoRemoved =
+      this.avatarDirty() &&
+      this.removeAvatar() &&
+      (!!this.avatarOriginalUrl() || !!this.clerk.user()?.hasImage);
+    const cropChanged = this.isCropChanged();
 
     if (firstChanged || lastChanged) {
       await this.clerk.updateProfile(this.firstName(), this.lastName());
@@ -157,6 +146,9 @@ export class AccountPageComponent implements OnInit {
       changes.push('photo');
     } else if (photoRemoved) {
       await this.removePhoto();
+      changes.push('photo');
+    } else if (cropChanged) {
+      await this.saveCropState();
       changes.push('photo');
     }
 
@@ -175,12 +167,12 @@ export class AccountPageComponent implements OnInit {
 
   private async savePhoto(): Promise<void> {
     const blob = await this.exportCrop();
-    this.avatarOriginalUrl.set(null);
+    const cropState = this.liveCropState() ?? { zoom: 1, offsetX: 0, offsetY: 0 };
     await this.clerk.setProfileImage(blob);
 
     if (this.originalFile) {
       try {
-        await this.uploadOriginalAvatar(this.originalFile);
+        await this.uploadOriginalAvatar(this.originalFile, cropState);
       } catch {
         this.toast.error('Full-size image could not be saved for future editing');
       }
@@ -197,6 +189,13 @@ export class AccountPageComponent implements OnInit {
     }
   }
 
+  private async saveCropState(): Promise<void> {
+    const cropState = this.liveCropState();
+    if (!cropState) return;
+    await this.api.patch('/users/me', { avatarCropState: cropState });
+    this.savedCropState.set(cropState);
+  }
+
   private buildSuccessMessage(changes: string[]): string {
     const label =
       changes.length <= 2
@@ -205,8 +204,16 @@ export class AccountPageComponent implements OnInit {
     return `${label.charAt(0).toUpperCase()}${label.slice(1)} updated`;
   }
 
-  hasEditorImage(): boolean {
-    return !!this.avatarEditor()?.hasImage();
+  private isCropChanged(): boolean {
+    if (this.avatarDirty()) return false;
+    const saved = this.savedCropState();
+    const live = this.liveCropState();
+    if (!live || !saved) return false;
+    return (
+      live.zoom !== saved.zoom ||
+      live.offsetX !== saved.offsetX ||
+      live.offsetY !== saved.offsetY
+    );
   }
 
   async fetchAvatarOriginalUrl(): Promise<void> {
@@ -214,7 +221,14 @@ export class AccountPageComponent implements OnInit {
       const user = await this.api.get<UserResponse>('/users/me');
 
       if (user.avatarOriginalUrl) {
-        this.avatarOriginalUrl.set(`${environment.apiUrl}/users/${user.id}/avatar`);
+        const cacheBuster = new Date(user.lastModifiedDate).getTime();
+        const url = `${environment.apiUrl}/users/${user.id}/avatar?t=${cacheBuster}`;
+        this.avatarOriginalUrl.set(url);
+        if (user.avatarCropState) {
+          this.savedCropState.set(user.avatarCropState);
+          this.liveCropState.set(user.avatarCropState);
+        }
+        this.editorSrc.set(url);
       }
     } catch (e: unknown) {
       if (!(e instanceof ApiError) || e.status === 401) {
@@ -224,50 +238,27 @@ export class AccountPageComponent implements OnInit {
     }
   }
 
-  private async uploadOriginalAvatar(file: File): Promise<void> {
+  private async uploadOriginalAvatar(
+    file: File,
+    cropState: AvatarEditorCropState,
+  ): Promise<void> {
     const formData = new FormData();
     formData.append('file', file);
-    const user = await this.api.post<UserResponse>('/users/me/avatar', formData);
-    this.avatarOriginalUrl.set(
-      `${environment.apiUrl}/users/${user.id}/avatar?t=${Date.now()}`,
-    );
+    formData.append('cropState', JSON.stringify(cropState));
+    await this.api.post<UserResponse>('/users/me/avatar', formData);
+    this.savedCropState.set(cropState);
+    this.liveCropState.set(cropState);
   }
 
   private async deleteOriginalAvatar(): Promise<void> {
     await this.api.delete('/users/me/avatar');
     this.avatarOriginalUrl.set(null);
-  }
-
-  registerFileListeners(hostEl: HTMLElement): void {
-    const onFileCapture = (event: Event): void => {
-      const file = (event.target as HTMLInputElement).files?.[0];
-      if (!file) return;
-      this.originalFile = file;
-      this.avatarDirty.set(true);
-      this.removeAvatar.set(false);
-    };
-
-    const onDropCapture = (event: DragEvent): void => {
-      const file = event.dataTransfer?.files[0];
-      if (!file) return;
-      this.originalFile = file;
-      this.avatarDirty.set(true);
-      this.removeAvatar.set(false);
-    };
-
-    hostEl.addEventListener('change', onFileCapture, { capture: true });
-    hostEl.addEventListener('drop', onDropCapture, { capture: true });
-
-    this.destroyRef.onDestroy(() => {
-      hostEl.removeEventListener('change', onFileCapture, { capture: true });
-      hostEl.removeEventListener('drop', onDropCapture, { capture: true });
-    });
+    this.editorSrc.set(undefined);
+    this.savedCropState.set(null);
+    this.liveCropState.set(null);
   }
 
   exportCrop(): Promise<Blob> {
-    return new Promise(resolve => {
-      this.cropResolver = resolve;
-      this.avatarEditor()?.exportCrop();
-    });
+    return this.avatarEditor()!.exportCrop();
   }
 }
