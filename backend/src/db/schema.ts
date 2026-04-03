@@ -23,6 +23,7 @@ export const users = pgTable('users', {
   email: text('email').notNull(),
   firstName: text('first_name').notNull(),
   lastName: text('last_name').notNull(),
+  clerkImageUrl: text('clerk_image_url'),
   avatarOriginalUrl: text('avatar_original_url'),
   avatarCropState: jsonb('avatar_crop_state').$type<{
     zoom: number;

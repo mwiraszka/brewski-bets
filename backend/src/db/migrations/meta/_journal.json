@@ -15,6 +15,13 @@
       "when": 1775235006178,
       "tag": "0001_nervous_vermin",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1775257309542,
+      "tag": "0002_friendly_phil_sheldon",
+      "breakpoints": true
     }
   ]
 }
