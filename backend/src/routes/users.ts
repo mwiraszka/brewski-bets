@@ -1,10 +1,10 @@
 import { createClerkClient } from '@clerk/backend';
 import { zValidator } from '@hono/zod-validator';
-import { eq } from 'drizzle-orm';
+import { eq, or } from 'drizzle-orm';
 import { Hono } from 'hono';
 import { z } from 'zod';
 
-import { users } from '../db/schema.js';
+import { bets, users } from '../db/schema.js';
 import { deleteAvatar, uploadAvatar } from '../services/storage.js';
 import type { AppContext } from '../types/index.js';
 
@@ -138,6 +138,30 @@ export const userRoutes = new Hono<AppContext>()
     }
 
     return c.json(user);
+  })
+
+  .delete('/me', async c => {
+    const db = c.get('db');
+    const clerkId = c.get('clerkId');
+    const userId = c.get('userId');
+    if (!userId) {
+      return c.json({ error: 'User not found' }, 404);
+    }
+
+    await db.delete(bets).where(or(eq(bets.user1Id, userId), eq(bets.user2Id, userId)));
+
+    try {
+      await deleteAvatar(c.env, userId);
+    } catch {
+      // ignore — avatar may not exist in R2
+    }
+
+    await db.delete(users).where(eq(users.id, userId));
+
+    const clerk = createClerkClient({ secretKey: c.env.CLERK_SECRET_KEY });
+    await clerk.users.deleteUser(clerkId);
+
+    return c.json({ deleted: true });
   })
 
   .delete('/me/avatar', async c => {

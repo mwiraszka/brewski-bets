@@ -1,8 +1,8 @@
-import { eq } from 'drizzle-orm';
+import { eq, or } from 'drizzle-orm';
 import { Hono } from 'hono';
 import { Webhook } from 'svix';
 
-import { users } from '../db/schema.js';
+import { bets, users } from '../db/schema.js';
 import { deleteAvatar, uploadAvatar } from '../services/storage.js';
 import type { AppContext } from '../types/index.js';
 
@@ -134,6 +134,28 @@ export const webhookRoutes = new Hono<AppContext>().post('/clerk', async c => {
           })
           .where(eq(users.id, user.id));
       }
+    }
+  }
+
+  if (event.type === 'user.deleted') {
+    const [user] = await db
+      .select()
+      .from(users)
+      .where(eq(users.clerkId, clerkId))
+      .limit(1);
+
+    if (user) {
+      await db
+        .delete(bets)
+        .where(or(eq(bets.user1Id, user.id), eq(bets.user2Id, user.id)));
+
+      try {
+        await deleteAvatar(c.env, user.id);
+      } catch {
+        // ignore — avatar may not exist in R2
+      }
+
+      await db.delete(users).where(eq(users.id, user.id));
     }
   }
 
