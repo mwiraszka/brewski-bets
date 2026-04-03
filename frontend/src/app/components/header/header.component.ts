@@ -6,7 +6,6 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router, RouterLink } from '@angular/router';
 
 import { ClerkService } from '@app/services/clerk.service';
-import { UserService } from '@app/services/user.service';
 
 import { environment } from '@env';
 
@@ -18,7 +17,6 @@ import { environment } from '@env';
 })
 export class HeaderComponent {
   private readonly clerk = inject(ClerkService);
-  private readonly userService = inject(UserService);
   private readonly router = inject(Router);
   private readonly currentUrl = toSignal(
     this.router.events.pipe(
@@ -36,7 +34,10 @@ export class HeaderComponent {
   );
   readonly menuOpen = signal(false);
 
-  readonly avatarSrc = computed(() => this.userService.avatarUrl());
+  readonly avatarSrc = computed(() => {
+    const user = this.clerk.user();
+    return user?.hasImage ? user.imageUrl : undefined;
+  });
   readonly initials = computed(() => {
     const user = this.clerk.user();
     const first = user?.firstName?.[0] ?? '';
