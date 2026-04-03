@@ -4,6 +4,7 @@ import {
   ButtonComponent,
   CardComponent,
   InputComponent,
+  SkeletonComponent,
   ToastService,
 } from '@eagami/ui';
 
@@ -17,7 +18,13 @@ import { UserRecord, UserService } from '@app/services/user.service';
   selector: 'bb-account-page',
   templateUrl: './account-page.component.html',
   styleUrl: './account-page.component.scss',
-  imports: [AvatarEditorComponent, ButtonComponent, CardComponent, InputComponent],
+  imports: [
+    AvatarEditorComponent,
+    ButtonComponent,
+    CardComponent,
+    InputComponent,
+    SkeletonComponent,
+  ],
 })
 export class AccountPageComponent implements OnInit {
   private readonly api = inject(ApiService);
@@ -50,6 +57,10 @@ export class AccountPageComponent implements OnInit {
     );
   });
 
+  readonly showSkeleton = computed(
+    () => !!this.editorSrc() && !this.avatarEditor()?.hasImage(),
+  );
+
   ngOnInit(): void {
     const user = this.clerk.user();
     this.firstName.set(user?.firstName ?? '');
@@ -59,14 +70,7 @@ export class AccountPageComponent implements OnInit {
     this.savedCropState.set(cropState);
     this.liveCropState.set(cropState);
 
-    const clerkUrl = user?.hasImage ? user.imageUrl : undefined;
-    const fullSizeUrl = this.userService.avatarUrl();
-
-    this.editorSrc.set(clerkUrl ?? fullSizeUrl);
-
-    if (fullSizeUrl && fullSizeUrl !== clerkUrl) {
-      Promise.resolve().then(() => this.editorSrc.set(fullSizeUrl));
-    }
+    this.editorSrc.set(this.userService.avatarUrl());
   }
 
   onFileSelected(file: File): void {

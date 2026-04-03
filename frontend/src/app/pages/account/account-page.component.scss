@@ -26,6 +26,20 @@ ea-card {
   margin-bottom: 24px;
 }
 
+.avatar-editor-wrapper {
+  position: relative;
+
+  .avatar-skeleton {
+    position: absolute;
+    top: 0;
+    left: 0;
+  }
+
+  .avatar-editor--loading {
+    visibility: hidden;
+  }
+}
+
 .name-fields {
   display: flex;
   flex-direction: column;
