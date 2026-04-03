@@ -243,7 +243,9 @@ export class AccountPageComponent implements OnInit {
     const formData = new FormData();
     formData.append('file', file);
     const user = await this.api.post<UserResponse>('/users/me/avatar', formData);
-    this.avatarOriginalUrl.set(`${environment.apiUrl}/users/${user.id}/avatar`);
+    this.avatarOriginalUrl.set(
+      `${environment.apiUrl}/users/${user.id}/avatar?t=${Date.now()}`,
+    );
   }
 
   private async deleteOriginalAvatar(): Promise<void> {
