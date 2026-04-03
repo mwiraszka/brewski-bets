@@ -54,9 +54,19 @@ export class AccountPageComponent implements OnInit {
     const user = this.clerk.user();
     this.firstName.set(user?.firstName ?? '');
     this.lastName.set(user?.lastName ?? '');
-    this.editorSrc.set(this.userService.avatarUrl());
-    this.savedCropState.set(this.userService.avatarCropState());
-    this.liveCropState.set(this.userService.avatarCropState());
+
+    const cropState = this.userService.avatarCropState();
+    this.savedCropState.set(cropState);
+    this.liveCropState.set(cropState);
+
+    const clerkUrl = user?.hasImage ? user.imageUrl : undefined;
+    const fullSizeUrl = this.userService.avatarUrl();
+
+    this.editorSrc.set(clerkUrl ?? fullSizeUrl);
+
+    if (fullSizeUrl && fullSizeUrl !== clerkUrl) {
+      Promise.resolve().then(() => this.editorSrc.set(fullSizeUrl));
+    }
   }
 
   onFileSelected(file: File): void {
