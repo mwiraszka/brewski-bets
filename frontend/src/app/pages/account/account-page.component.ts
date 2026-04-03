@@ -3,11 +3,14 @@ import {
   AvatarEditorCropState,
   ButtonComponent,
   CardComponent,
+  DialogComponent,
+  DividerComponent,
   InputComponent,
   ToastService,
 } from '@eagami/ui';
 
 import { Component, OnInit, computed, inject, signal, viewChild } from '@angular/core';
+import { Router } from '@angular/router';
 
 import { ApiService } from '@app/services/api.service';
 import { ClerkService } from '@app/services/clerk.service';
@@ -17,11 +20,19 @@ import { UserRecord, UserService } from '@app/services/user.service';
   selector: 'bb-account-page',
   templateUrl: './account-page.component.html',
   styleUrl: './account-page.component.scss',
-  imports: [AvatarEditorComponent, ButtonComponent, CardComponent, InputComponent],
+  imports: [
+    AvatarEditorComponent,
+    ButtonComponent,
+    CardComponent,
+    DialogComponent,
+    DividerComponent,
+    InputComponent,
+  ],
 })
 export class AccountPageComponent implements OnInit {
   private readonly api = inject(ApiService);
   private readonly clerk = inject(ClerkService);
+  private readonly router = inject(Router);
   private readonly userService = inject(UserService);
   private readonly toast = inject(ToastService);
 
@@ -32,6 +43,8 @@ export class AccountPageComponent implements OnInit {
   readonly firstNameError = signal('');
   readonly lastNameError = signal('');
   readonly saving = signal(false);
+  readonly deleting = signal(false);
+  readonly deleteDialogOpen = signal(false);
   readonly avatarDirty = signal(false);
 
   readonly editorSrc = signal<string | undefined>(undefined);
@@ -236,6 +249,27 @@ export class AccountPageComponent implements OnInit {
     this.editorSrc.set(undefined);
     this.savedCropState.set(null);
     this.liveCropState.set(null);
+  }
+
+  async onConfirmDelete(): Promise<void> {
+    this.deleting.set(true);
+
+    try {
+      await this.api.delete('/users/me');
+      this.deleteDialogOpen.set(false);
+
+      try {
+        await this.clerk.logOut();
+      } catch {
+        // session may already be invalidated
+      }
+
+      await this.router.navigate(['/']);
+    } catch (e: unknown) {
+      this.toast.error(this.clerk.extractError(e));
+    } finally {
+      this.deleting.set(false);
+    }
   }
 
   exportCrop(): Promise<Blob> {

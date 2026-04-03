@@ -2,6 +2,7 @@ import { AvatarEditorCropState, ToastService } from '@eagami/ui';
 
 import { NO_ERRORS_SCHEMA, WritableSignal, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
+import { Router } from '@angular/router';
 
 import { ApiService } from '@app/services/api.service';
 import { ClerkService } from '@app/services/clerk.service';
@@ -29,7 +30,12 @@ type MockClerkService = {
   user: WritableSignal<MockUser | null>;
   updateProfile: jest.Mock<Promise<void>, [string, string]>;
   setProfileImage: jest.Mock<Promise<string | undefined>, [Blob | null]>;
+  logOut: jest.Mock<Promise<void>>;
   extractError: jest.Mock<string, [unknown]>;
+};
+
+type MockRouter = {
+  navigate: jest.Mock<Promise<boolean>, [string[]]>;
 };
 
 type MockApiService = {
@@ -64,6 +70,7 @@ async function createComponent(
   mockApi: MockApiService,
   mockUserService: MockUserService,
   mockToast: MockToastService,
+  mockRouter: MockRouter,
 ): Promise<AccountPageComponent> {
   TestBed.resetTestingModule();
   await TestBed.configureTestingModule({
@@ -73,6 +80,7 @@ async function createComponent(
       { provide: ApiService, useValue: mockApi },
       { provide: UserService, useValue: mockUserService },
       { provide: ToastService, useValue: mockToast },
+      { provide: Router, useValue: mockRouter },
     ],
   })
     .overrideComponent(AccountPageComponent, {
@@ -91,13 +99,19 @@ describe('AccountPageComponent', () => {
   let mockApi: MockApiService;
   let mockUserService: MockUserService;
   let mockToast: MockToastService;
+  let mockRouter: MockRouter;
 
   beforeEach(async () => {
     mockClerk = {
       user: signal<MockUser | null>({ ...MOCK_USER }),
       updateProfile: jest.fn().mockResolvedValue(undefined),
       setProfileImage: jest.fn().mockResolvedValue('https://img.clerk.com/updated'),
+      logOut: jest.fn().mockResolvedValue(undefined),
       extractError: jest.fn().mockReturnValue('Something went wrong'),
+    };
+
+    mockRouter = {
+      navigate: jest.fn().mockResolvedValue(true),
     };
 
     mockApi = {
@@ -125,7 +139,13 @@ describe('AccountPageComponent', () => {
       error: jest.fn().mockReturnValue(2),
     };
 
-    component = await createComponent(mockClerk, mockApi, mockUserService, mockToast);
+    component = await createComponent(
+      mockClerk,
+      mockApi,
+      mockUserService,
+      mockToast,
+      mockRouter,
+    );
   });
 
   // ---------------------------------------------------------------------------
@@ -141,7 +161,13 @@ describe('AccountPageComponent', () => {
     it('sets empty strings when clerk user has no name', async () => {
       mockClerk.user = signal(null);
 
-      component = await createComponent(mockClerk, mockApi, mockUserService, mockToast);
+      component = await createComponent(
+        mockClerk,
+        mockApi,
+        mockUserService,
+        mockToast,
+        mockRouter,
+      );
 
       expect(component.firstName()).toBe('');
       expect(component.lastName()).toBe('');
@@ -150,7 +176,13 @@ describe('AccountPageComponent', () => {
     it('sets editorSrc from userService.avatarUrl', async () => {
       mockUserService.avatarUrl = signal('http://api/users/u1/avatar?t=123');
 
-      component = await createComponent(mockClerk, mockApi, mockUserService, mockToast);
+      component = await createComponent(
+        mockClerk,
+        mockApi,
+        mockUserService,
+        mockToast,
+        mockRouter,
+      );
 
       expect(component.editorSrc()).toBe('http://api/users/u1/avatar?t=123');
     });
@@ -159,7 +191,13 @@ describe('AccountPageComponent', () => {
       const cropState: AvatarEditorCropState = { zoom: 2, offsetX: 10, offsetY: 5 };
       mockUserService.avatarCropState = signal(cropState);
 
-      component = await createComponent(mockClerk, mockApi, mockUserService, mockToast);
+      component = await createComponent(
+        mockClerk,
+        mockApi,
+        mockUserService,
+        mockToast,
+        mockRouter,
+      );
 
       expect(component.savedCropState()).toEqual(cropState);
       expect(component.liveCropState()).toEqual(cropState);
@@ -178,7 +216,13 @@ describe('AccountPageComponent', () => {
     it('reflects the userService avatarUrl on init', async () => {
       mockUserService.avatarUrl = signal('http://api/users/u1/avatar?t=123');
 
-      component = await createComponent(mockClerk, mockApi, mockUserService, mockToast);
+      component = await createComponent(
+        mockClerk,
+        mockApi,
+        mockUserService,
+        mockToast,
+        mockRouter,
+      );
 
       expect(component.editorSrc()).toBe('http://api/users/u1/avatar?t=123');
     });
@@ -657,7 +701,13 @@ describe('AccountPageComponent', () => {
       });
       mockUserService.hasAvatar = signal(true);
 
-      component = await createComponent(mockClerk, mockApi, mockUserService, mockToast);
+      component = await createComponent(
+        mockClerk,
+        mockApi,
+        mockUserService,
+        mockToast,
+        mockRouter,
+      );
       component.onRemoveAvatar();
     });
 
@@ -696,7 +746,13 @@ describe('AccountPageComponent', () => {
       mockClerk.user = signal({ ...MOCK_USER, hasImage: false });
       mockUserService.hasAvatar = signal(false);
 
-      component = await createComponent(mockClerk, mockApi, mockUserService, mockToast);
+      component = await createComponent(
+        mockClerk,
+        mockApi,
+        mockUserService,
+        mockToast,
+        mockRouter,
+      );
       component.onRemoveAvatar();
 
       await component.onSave();
@@ -745,7 +801,13 @@ describe('AccountPageComponent', () => {
       });
       mockUserService.hasAvatar = signal(true);
 
-      component = await createComponent(mockClerk, mockApi, mockUserService, mockToast);
+      component = await createComponent(
+        mockClerk,
+        mockApi,
+        mockUserService,
+        mockToast,
+        mockRouter,
+      );
       component.onRemoveAvatar();
 
       await component.onSave();
@@ -771,6 +833,71 @@ describe('AccountPageComponent', () => {
 
       expect(mockToast.error).toHaveBeenCalledWith('Something went wrong');
       expect(component.firstName()).toBe('Jane');
+    });
+  });
+
+  // ---------------------------------------------------------------------------
+  // onConfirmDelete
+  // ---------------------------------------------------------------------------
+
+  describe('onConfirmDelete', () => {
+    it('calls the delete user endpoint', async () => {
+      await component.onConfirmDelete();
+
+      expect(mockApi.delete).toHaveBeenCalledWith('/users/me');
+    });
+
+    it('logs out and navigates to home after successful deletion', async () => {
+      await component.onConfirmDelete();
+
+      expect(mockClerk.logOut).toHaveBeenCalled();
+      expect(mockRouter.navigate).toHaveBeenCalledWith(['/']);
+    });
+
+    it('closes the dialog after successful deletion', async () => {
+      component.deleteDialogOpen.set(true);
+
+      await component.onConfirmDelete();
+
+      expect(component.deleteDialogOpen()).toBe(false);
+    });
+
+    it('sets deleting to false after successful deletion', async () => {
+      await component.onConfirmDelete();
+
+      expect(component.deleting()).toBe(false);
+    });
+
+    it('still navigates when logOut throws', async () => {
+      mockClerk.logOut.mockRejectedValue(new Error('session invalid'));
+
+      await component.onConfirmDelete();
+
+      expect(mockRouter.navigate).toHaveBeenCalledWith(['/']);
+    });
+
+    it('shows an error toast when the delete fails', async () => {
+      mockApi.delete.mockRejectedValue(new Error('Server error'));
+
+      await component.onConfirmDelete();
+
+      expect(mockToast.error).toHaveBeenCalledWith('Something went wrong');
+    });
+
+    it('does not navigate when the delete fails', async () => {
+      mockApi.delete.mockRejectedValue(new Error('Server error'));
+
+      await component.onConfirmDelete();
+
+      expect(mockRouter.navigate).not.toHaveBeenCalled();
+    });
+
+    it('sets deleting to false when the delete fails', async () => {
+      mockApi.delete.mockRejectedValue(new Error('Server error'));
+
+      await component.onConfirmDelete();
+
+      expect(component.deleting()).toBe(false);
     });
   });
 });
