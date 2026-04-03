@@ -11,9 +11,18 @@ import type { AppContext } from '../types/index.js';
 const MAX_AVATAR_SIZE = 5 * 1024 * 1024; // 5 MB
 const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
 
+const avatarCropStateSchema = z
+  .object({
+    zoom: z.number(),
+    offsetX: z.number(),
+    offsetY: z.number(),
+  })
+  .nullable();
+
 const updateUserSchema = z.object({
   firstName: z.string().min(1).optional(),
   lastName: z.string().min(1).optional(),
+  avatarCropState: avatarCropStateSchema.optional(),
 });
 
 export const userRoutes = new Hono<AppContext>()
@@ -92,10 +101,28 @@ export const userRoutes = new Hono<AppContext>()
       return c.json({ error: 'File must be under 5 MB' }, 400);
     }
 
+    const cropStateRaw = body['cropState'];
+    let cropState: { zoom: number; offsetX: number; offsetY: number } | null = null;
+    if (typeof cropStateRaw === 'string') {
+      try {
+        cropState = JSON.parse(cropStateRaw) as {
+          zoom: number;
+          offsetX: number;
+          offsetY: number;
+        };
+      } catch {
+        // ignore invalid crop state
+      }
+    }
+
     const url = await uploadAvatar(c.env, userId, await file.arrayBuffer(), file.type);
     const [user] = await db
       .update(users)
-      .set({ avatarOriginalUrl: url, lastModifiedDate: new Date() })
+      .set({
+        avatarOriginalUrl: url,
+        avatarCropState: cropState,
+        lastModifiedDate: new Date(),
+      })
       .where(eq(users.id, userId))
       .returning();
 
@@ -116,7 +143,11 @@ export const userRoutes = new Hono<AppContext>()
     await deleteAvatar(c.env, userId);
     const [user] = await db
       .update(users)
-      .set({ avatarOriginalUrl: null, lastModifiedDate: new Date() })
+      .set({
+        avatarOriginalUrl: null,
+        avatarCropState: null,
+        lastModifiedDate: new Date(),
+      })
       .where(eq(users.id, userId))
       .returning();
 
