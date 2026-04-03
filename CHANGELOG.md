@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Fix avatar reverting to cached version after photo change
+- Fix 404 error on first account page visit by auto-creating user record from Clerk data
 
 ## [0.11.0] - 2026-03-29
 
