@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Sync user profile changes made in the Clerk dashboard (name, email, avatar) to the database and R2
+- Add delete account option on the account page with confirmation dialog
 
 ### Fixed
 
