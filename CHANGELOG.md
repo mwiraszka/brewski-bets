@@ -11,18 +11,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Sync user profile changes made in the Clerk dashboard (name, email, avatar) to the database and R2
 - Add delete account option on the account page with confirmation dialog
+- Display shimmer skeleton in the avatar editor while the full-size photo loads
 
 ### Fixed
 
-- Fix avatar reverting to cached version after photo change
-- Fix 404 error on first account page visit by auto-creating user record from Clerk data
-- Fix avatar editor showing placeholder while full-size image loads on account page
-- Fix avatar editor controls resetting after saving or refreshing the page
+- Prevent avatar from reverting to cached version after photo change
+- Auto-create user record from Clerk data to avoid 404 on first account page visit
+- Ensure avatar editor displays the full-size image instead of a placeholder on the account page
+- Prevent avatar editor controls from resetting after saving or refreshing the page
 - Persist and restore zoom and pan crop state so the edited avatar is always displayed correctly
-- Fix account page showing stale name after profile changes in the Clerk dashboard
-- Fix stale avatar showing in header after photo change
-- Fix old avatar briefly appearing on account page load before new one renders
-- Avatar editor image area shows a shimmer skeleton while the full-size photo loads
+- Keep account page name in sync with changes made in the Clerk dashboard
+- Ensure header avatar updates immediately after photo change
+- Prevent old avatar from briefly appearing on account page load before new one renders
 
 ## [0.11.0] - 2026-03-29
 
