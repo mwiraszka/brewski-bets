@@ -31,29 +31,34 @@ export const userRoutes = new Hono<AppContext>()
   .get('/me', async c => {
     const db = c.get('db');
     const clerkId = c.get('clerkId');
-    let userId = c.get('userId');
 
-    if (!userId) {
-      const clerk = createClerkClient({ secretKey: c.env.CLERK_SECRET_KEY });
-      const clerkUser = await clerk.users.getUser(clerkId);
-      const [created] = await db
-        .insert(users)
-        .values({
-          clerkId,
+    const clerk = createClerkClient({ secretKey: c.env.CLERK_SECRET_KEY });
+    const clerkUser = await clerk.users.getUser(clerkId);
+
+    await db
+      .insert(users)
+      .values({
+        clerkId,
+        email: clerkUser.emailAddresses[0]?.emailAddress ?? '',
+        firstName: clerkUser.firstName ?? '',
+        lastName: clerkUser.lastName ?? '',
+        clerkImageUrl: clerkUser.imageUrl,
+      })
+      .onConflictDoUpdate({
+        target: users.clerkId,
+        set: {
           email: clerkUser.emailAddresses[0]?.emailAddress ?? '',
           firstName: clerkUser.firstName ?? '',
           lastName: clerkUser.lastName ?? '',
           clerkImageUrl: clerkUser.imageUrl,
-        })
-        .onConflictDoUpdate({
-          target: users.clerkId,
-          set: { lastModifiedDate: new Date() },
-        })
-        .returning();
-      userId = created.id;
-    }
+        },
+      });
 
-    const [user] = await db.select().from(users).where(eq(users.id, userId)).limit(1);
+    const [user] = await db
+      .select()
+      .from(users)
+      .where(eq(users.clerkId, clerkId))
+      .limit(1);
     if (!user) {
       return c.json({ error: 'User not found' }, 404);
     }
