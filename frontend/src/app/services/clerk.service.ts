@@ -116,8 +116,9 @@ export class ClerkService {
     await this.clerk.user!.update({ firstName, lastName });
   }
 
-  async setProfileImage(file: Blob | null): Promise<void> {
+  async setProfileImage(file: Blob | null): Promise<string | undefined> {
     await this.clerk.user!.setProfileImage({ file });
+    return this.clerk.user?.imageUrl ?? undefined;
   }
 
   async changePassword(currentPassword: string, newPassword: string): Promise<void> {

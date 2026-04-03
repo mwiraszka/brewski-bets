@@ -28,7 +28,7 @@ type MockUser = {
 type MockClerkService = {
   user: WritableSignal<MockUser | null>;
   updateProfile: jest.Mock<Promise<void>, [string, string]>;
-  setProfileImage: jest.Mock<Promise<void>, [Blob | null]>;
+  setProfileImage: jest.Mock<Promise<string | undefined>, [Blob | null]>;
   extractError: jest.Mock<string, [unknown]>;
 };
 
@@ -96,7 +96,7 @@ describe('AccountPageComponent', () => {
     mockClerk = {
       user: signal<MockUser | null>({ ...MOCK_USER }),
       updateProfile: jest.fn().mockResolvedValue(undefined),
-      setProfileImage: jest.fn().mockResolvedValue(undefined),
+      setProfileImage: jest.fn().mockResolvedValue('https://img.clerk.com/updated'),
       extractError: jest.fn().mockReturnValue('Something went wrong'),
     };
 
@@ -534,6 +534,7 @@ describe('AccountPageComponent', () => {
       const urlDuringUpload: (string | undefined)[] = [];
       mockClerk.setProfileImage.mockImplementation(async () => {
         urlDuringUpload.push(component.editorSrc());
+        return 'https://img.clerk.com/updated';
       });
 
       await component.onSave();
@@ -613,6 +614,7 @@ describe('AccountPageComponent', () => {
 
       expect(mockApi.patch).toHaveBeenCalledWith('/users/me', {
         avatarCropState: { zoom: 2, offsetX: 10, offsetY: 5 },
+        clerkImageUrl: 'https://img.clerk.com/updated',
       });
     });
 
@@ -665,10 +667,12 @@ describe('AccountPageComponent', () => {
       expect(mockClerk.setProfileImage).toHaveBeenCalledWith(null);
     });
 
-    it('calls the delete avatar endpoint', async () => {
+    it('calls the delete avatar endpoint with the clerk image URL', async () => {
       await component.onSave();
 
-      expect(mockApi.delete).toHaveBeenCalledWith('/users/me/avatar');
+      expect(mockApi.delete).toHaveBeenCalledWith(
+        expect.stringContaining('/users/me/avatar?clerkImageUrl='),
+      );
     });
 
     it('clears the avatar via userService after deletion', async () => {

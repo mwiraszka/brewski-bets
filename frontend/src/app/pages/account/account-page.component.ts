@@ -160,11 +160,11 @@ export class AccountPageComponent implements OnInit {
   private async savePhoto(): Promise<void> {
     const blob = await this.exportCrop();
     const cropState = this.liveCropState() ?? { zoom: 1, offsetX: 0, offsetY: 0 };
-    await this.clerk.setProfileImage(blob);
+    const clerkImageUrl = await this.clerk.setProfileImage(blob);
 
     if (this.originalFile) {
       try {
-        await this.uploadOriginalAvatar(this.originalFile, cropState);
+        await this.uploadOriginalAvatar(this.originalFile, cropState, clerkImageUrl);
       } catch {
         this.toast.error('Full-size image could not be saved for future editing');
       }
@@ -172,10 +172,10 @@ export class AccountPageComponent implements OnInit {
   }
 
   private async removePhoto(): Promise<void> {
-    await this.clerk.setProfileImage(null);
+    const clerkImageUrl = await this.clerk.setProfileImage(null);
 
     try {
-      await this.deleteOriginalAvatar();
+      await this.deleteOriginalAvatar(clerkImageUrl);
     } catch {
       this.toast.error('Full-size image could not be removed');
     }
@@ -185,8 +185,8 @@ export class AccountPageComponent implements OnInit {
     const cropState = this.liveCropState();
     if (!cropState) return;
     const blob = await this.exportCrop();
-    await this.clerk.setProfileImage(blob);
-    await this.api.patch('/users/me', { avatarCropState: cropState });
+    const clerkImageUrl = await this.clerk.setProfileImage(blob);
+    await this.api.patch('/users/me', { avatarCropState: cropState, clerkImageUrl });
     this.savedCropState.set(cropState);
   }
 
@@ -213,18 +213,25 @@ export class AccountPageComponent implements OnInit {
   private async uploadOriginalAvatar(
     file: File,
     cropState: AvatarEditorCropState,
+    clerkImageUrl?: string,
   ): Promise<void> {
     const formData = new FormData();
     formData.append('file', file);
     formData.append('cropState', JSON.stringify(cropState));
+    if (clerkImageUrl) {
+      formData.append('clerkImageUrl', clerkImageUrl);
+    }
     const user = await this.api.post<UserRecord>('/users/me/avatar', formData);
     this.userService.setUser(user);
     this.savedCropState.set(cropState);
     this.liveCropState.set(cropState);
   }
 
-  private async deleteOriginalAvatar(): Promise<void> {
-    await this.api.delete('/users/me/avatar');
+  private async deleteOriginalAvatar(clerkImageUrl?: string): Promise<void> {
+    const query = clerkImageUrl
+      ? `?clerkImageUrl=${encodeURIComponent(clerkImageUrl)}`
+      : '';
+    await this.api.delete(`/users/me/avatar${query}`);
     this.userService.clearAvatar();
     this.editorSrc.set(undefined);
     this.savedCropState.set(null);
