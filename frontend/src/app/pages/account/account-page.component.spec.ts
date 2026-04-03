@@ -599,6 +599,13 @@ describe('AccountPageComponent', () => {
     beforeEach(() => {
       component.savedCropState.set({ zoom: 1, offsetX: 0, offsetY: 0 });
       component.liveCropState.set({ zoom: 2, offsetX: 10, offsetY: 5 });
+      jest.spyOn(component, 'exportCrop').mockResolvedValue(new Blob(['img']));
+    });
+
+    it('calls clerk.setProfileImage with the cropped blob when only crop changes', async () => {
+      await component.onSave();
+
+      expect(mockClerk.setProfileImage).toHaveBeenCalledWith(expect.any(Blob));
     });
 
     it('patches the backend with the new crop state when only crop changes', async () => {

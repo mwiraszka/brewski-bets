@@ -181,6 +181,8 @@ export class AccountPageComponent implements OnInit {
   private async saveCropState(): Promise<void> {
     const cropState = this.liveCropState();
     if (!cropState) return;
+    const blob = await this.exportCrop();
+    await this.clerk.setProfileImage(blob);
     await this.api.patch('/users/me', { avatarCropState: cropState });
     this.savedCropState.set(cropState);
   }
