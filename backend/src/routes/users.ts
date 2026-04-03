@@ -1,3 +1,4 @@
+import { createClerkClient } from '@clerk/backend';
 import { zValidator } from '@hono/zod-validator';
 import { eq } from 'drizzle-orm';
 import { Hono } from 'hono';
@@ -10,83 +11,41 @@ import type { AppContext } from '../types/index.js';
 const MAX_AVATAR_SIZE = 5 * 1024 * 1024; // 5 MB
 const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
 
-const createUserSchema = z.object({
-  email: z.string().email(),
-  firstName: z.string().min(1),
-  lastName: z.string().min(1),
-});
-
 const updateUserSchema = z.object({
   firstName: z.string().min(1).optional(),
   lastName: z.string().min(1).optional(),
 });
 
 export const userRoutes = new Hono<AppContext>()
-  .post('/', zValidator('json', createUserSchema), async c => {
-    const db = c.get('db');
-    const clerkId = c.get('clerkId');
-    const body = c.req.valid('json');
-
-    const existing = await db
-      .select()
-      .from(users)
-      .where(eq(users.clerkId, clerkId))
-      .limit(1);
-    if (existing.length) {
-      return c.json({ error: 'User already exists' }, 409);
-    }
-
-    const [user] = await db
-      .insert(users)
-      .values({
-        clerkId,
-        email: body.email,
-        firstName: body.firstName,
-        lastName: body.lastName,
-      })
-      .returning();
-
-    return c.json(user, 201);
-  })
 
   .get('/me', async c => {
     const db = c.get('db');
-    const userId = c.get('userId');
+    const clerkId = c.get('clerkId');
+    let userId = c.get('userId');
+
     if (!userId) {
-      return c.json({ error: 'User not found' }, 404);
+      const clerk = createClerkClient({ secretKey: c.env.CLERK_SECRET_KEY });
+      const clerkUser = await clerk.users.getUser(clerkId);
+      const [created] = await db
+        .insert(users)
+        .values({
+          clerkId,
+          email: clerkUser.emailAddresses[0]?.emailAddress ?? '',
+          firstName: clerkUser.firstName ?? '',
+          lastName: clerkUser.lastName ?? '',
+        })
+        .onConflictDoUpdate({
+          target: users.clerkId,
+          set: { lastModifiedDate: new Date() },
+        })
+        .returning();
+      userId = created.id;
     }
 
     const [user] = await db.select().from(users).where(eq(users.id, userId)).limit(1);
     if (!user) {
       return c.json({ error: 'User not found' }, 404);
     }
-
-    return c.json(user);
-  })
-
-  .put('/me', zValidator('json', createUserSchema), async c => {
-    const db = c.get('db');
-    const clerkId = c.get('clerkId');
-    const body = c.req.valid('json');
-
-    const [user] = await db
-      .insert(users)
-      .values({
-        clerkId,
-        email: body.email,
-        firstName: body.firstName,
-        lastName: body.lastName,
-      })
-      .onConflictDoUpdate({
-        target: users.clerkId,
-        set: {
-          email: body.email,
-          firstName: body.firstName,
-          lastName: body.lastName,
-          lastModifiedDate: new Date(),
-        },
-      })
-      .returning();
 
     return c.json(user);
   })
