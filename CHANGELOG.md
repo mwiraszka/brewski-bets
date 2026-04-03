@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Persist and restore zoom and pan crop state so the edited avatar is always displayed correctly
 - Fix stale avatar showing in header after photo change
 - Fix old avatar briefly appearing on account page load before new one renders
+- Avatar editor image area shows a shimmer skeleton while the full-size photo loads
 
 ## [0.11.0] - 2026-03-29
 
