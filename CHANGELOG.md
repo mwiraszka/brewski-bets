@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.12.0] - 2026-04-02
 
+### Added
+
+- Sync user profile changes made in the Clerk dashboard (name, email, avatar) to the database and R2
+
 ### Fixed
 
 - Fix avatar reverting to cached version after photo change
