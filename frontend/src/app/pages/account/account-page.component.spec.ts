@@ -28,6 +28,7 @@ type MockUser = {
 
 type MockClerkService = {
   user: WritableSignal<MockUser | null>;
+  reloadUser: jest.Mock<Promise<void>>;
   updateProfile: jest.Mock<Promise<void>, [string, string]>;
   setProfileImage: jest.Mock<Promise<string | undefined>, [Blob | null]>;
   logOut: jest.Mock<Promise<void>>;
@@ -104,6 +105,7 @@ describe('AccountPageComponent', () => {
   beforeEach(async () => {
     mockClerk = {
       user: signal<MockUser | null>({ ...MOCK_USER }),
+      reloadUser: jest.fn().mockResolvedValue(undefined),
       updateProfile: jest.fn().mockResolvedValue(undefined),
       setProfileImage: jest.fn().mockResolvedValue('https://img.clerk.com/updated'),
       logOut: jest.fn().mockResolvedValue(undefined),
@@ -185,6 +187,25 @@ describe('AccountPageComponent', () => {
       );
 
       expect(component.editorSrc()).toBe('http://api/users/u1/avatar?t=123');
+    });
+
+    it('updates names after reloading clerk user', async () => {
+      mockClerk.reloadUser.mockImplementation(async () => {
+        mockClerk.user.set({ ...MOCK_USER, firstName: 'Jane', lastName: 'Smith' });
+      });
+
+      component = await createComponent(
+        mockClerk,
+        mockApi,
+        mockUserService,
+        mockToast,
+        mockRouter,
+      );
+
+      await mockClerk.reloadUser();
+
+      expect(component.firstName()).toBe('Jane');
+      expect(component.lastName()).toBe('Smith');
     });
 
     it('sets savedCropState and liveCropState from userService.avatarCropState', async () => {

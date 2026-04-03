@@ -108,6 +108,10 @@ export class ClerkService {
     }
   }
 
+  async reloadUser(): Promise<void> {
+    await this.clerk.user?.reload();
+  }
+
   async getToken(): Promise<string | null> {
     return this.clerk.session?.getToken() ?? null;
   }

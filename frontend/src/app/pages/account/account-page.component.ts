@@ -73,6 +73,12 @@ export class AccountPageComponent implements OnInit {
     this.liveCropState.set(cropState);
 
     this.editorSrc.set(this.userService.avatarUrl());
+
+    this.clerk.reloadUser().then(() => {
+      const updated = this.clerk.user();
+      this.firstName.set(updated?.firstName ?? '');
+      this.lastName.set(updated?.lastName ?? '');
+    });
   }
 
   onFileSelected(file: File): void {
