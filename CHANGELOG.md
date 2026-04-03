@@ -11,6 +11,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Fix avatar reverting to cached version after photo change
 - Fix 404 error on first account page visit by auto-creating user record from Clerk data
+- Fix avatar editor showing placeholder while full-size image loads on account page
+- Fix avatar editor controls resetting after saving or refreshing the page
+- Persist and restore zoom and pan crop state so the edited avatar is always displayed correctly
 
 ## [0.11.0] - 2026-03-29
 
