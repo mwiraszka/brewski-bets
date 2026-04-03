@@ -14,6 +14,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fix avatar editor showing placeholder while full-size image loads on account page
 - Fix avatar editor controls resetting after saving or refreshing the page
 - Persist and restore zoom and pan crop state so the edited avatar is always displayed correctly
+- Fix stale avatar showing in header after photo change
+- Fix old avatar briefly appearing on account page load before new one renders
 
 ## [0.11.0] - 2026-03-29
 
