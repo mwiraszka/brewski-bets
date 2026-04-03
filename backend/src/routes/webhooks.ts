@@ -3,6 +3,7 @@ import { Hono } from 'hono';
 import { Webhook } from 'svix';
 
 import { users } from '../db/schema.js';
+import { deleteAvatar, uploadAvatar } from '../services/storage.js';
 import type { AppContext } from '../types/index.js';
 
 interface ClerkUserEvent {
@@ -11,6 +12,8 @@ interface ClerkUserEvent {
     email_addresses: Array<{ email_address: string }>;
     first_name: string | null;
     last_name: string | null;
+    image_url: string;
+    has_image: boolean;
   };
   type: string;
 }
@@ -38,10 +41,10 @@ export const webhookRoutes = new Hono<AppContext>().post('/clerk', async c => {
     return c.json({ error: 'Invalid webhook signature' }, 400);
   }
 
-  if (event.type === 'user.created') {
-    const db = c.get('db');
-    const clerkId = event.data.id;
+  const db = c.get('db');
+  const clerkId = event.data.id;
 
+  if (event.type === 'user.created') {
     const existing = await db
       .select()
       .from(users)
@@ -54,7 +57,83 @@ export const webhookRoutes = new Hono<AppContext>().post('/clerk', async c => {
         email: event.data.email_addresses[0].email_address,
         firstName: event.data.first_name ?? '',
         lastName: event.data.last_name ?? '',
+        clerkImageUrl: event.data.image_url,
       });
+    }
+  }
+
+  if (event.type === 'user.updated') {
+    const [user] = await db
+      .select()
+      .from(users)
+      .where(eq(users.clerkId, clerkId))
+      .limit(1);
+
+    if (user) {
+      const imageChanged = event.data.image_url !== user.clerkImageUrl;
+
+      if (imageChanged && event.data.has_image) {
+        try {
+          const response = await fetch(event.data.image_url);
+          const buffer = await response.arrayBuffer();
+          const contentType = response.headers.get('content-type') || 'image/jpeg';
+          const url = await uploadAvatar(c.env, user.id, buffer, contentType);
+
+          await db
+            .update(users)
+            .set({
+              email: event.data.email_addresses[0].email_address,
+              firstName: event.data.first_name ?? '',
+              lastName: event.data.last_name ?? '',
+              clerkImageUrl: event.data.image_url,
+              avatarOriginalUrl: url,
+              avatarCropState: { zoom: 1, offsetX: 0, offsetY: 0 },
+              lastModifiedDate: new Date(),
+            })
+            .where(eq(users.id, user.id));
+        } catch {
+          await db
+            .update(users)
+            .set({
+              email: event.data.email_addresses[0].email_address,
+              firstName: event.data.first_name ?? '',
+              lastName: event.data.last_name ?? '',
+              clerkImageUrl: event.data.image_url,
+              lastModifiedDate: new Date(),
+            })
+            .where(eq(users.id, user.id));
+        }
+      } else if (imageChanged && !event.data.has_image) {
+        try {
+          await deleteAvatar(c.env, user.id);
+        } catch {
+          // ignore — avatar may not exist in R2
+        }
+
+        await db
+          .update(users)
+          .set({
+            email: event.data.email_addresses[0].email_address,
+            firstName: event.data.first_name ?? '',
+            lastName: event.data.last_name ?? '',
+            clerkImageUrl: event.data.image_url,
+            avatarOriginalUrl: null,
+            avatarCropState: null,
+            lastModifiedDate: new Date(),
+          })
+          .where(eq(users.id, user.id));
+      } else {
+        await db
+          .update(users)
+          .set({
+            email: event.data.email_addresses[0].email_address,
+            firstName: event.data.first_name ?? '',
+            lastName: event.data.last_name ?? '',
+            clerkImageUrl: event.data.image_url,
+            lastModifiedDate: new Date(),
+          })
+          .where(eq(users.id, user.id));
+      }
     }
   }
 

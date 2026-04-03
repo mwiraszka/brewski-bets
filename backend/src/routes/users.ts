@@ -23,6 +23,7 @@ const updateUserSchema = z.object({
   firstName: z.string().min(1).optional(),
   lastName: z.string().min(1).optional(),
   avatarCropState: avatarCropStateSchema.optional(),
+  clerkImageUrl: z.string().optional(),
 });
 
 export const userRoutes = new Hono<AppContext>()
@@ -42,6 +43,7 @@ export const userRoutes = new Hono<AppContext>()
           email: clerkUser.emailAddresses[0]?.emailAddress ?? '',
           firstName: clerkUser.firstName ?? '',
           lastName: clerkUser.lastName ?? '',
+          clerkImageUrl: clerkUser.imageUrl,
         })
         .onConflictDoUpdate({
           target: users.clerkId,
@@ -115,12 +117,17 @@ export const userRoutes = new Hono<AppContext>()
       }
     }
 
+    const clerkImageUrlRaw = body['clerkImageUrl'];
+    const clerkImageUrl =
+      typeof clerkImageUrlRaw === 'string' ? clerkImageUrlRaw : undefined;
+
     const url = await uploadAvatar(c.env, userId, await file.arrayBuffer(), file.type);
     const [user] = await db
       .update(users)
       .set({
         avatarOriginalUrl: url,
         avatarCropState: cropState,
+        ...(clerkImageUrl && { clerkImageUrl }),
         lastModifiedDate: new Date(),
       })
       .where(eq(users.id, userId))
@@ -140,12 +147,15 @@ export const userRoutes = new Hono<AppContext>()
       return c.json({ error: 'User not found' }, 404);
     }
 
+    const clerkImageUrl = c.req.query('clerkImageUrl');
+
     await deleteAvatar(c.env, userId);
     const [user] = await db
       .update(users)
       .set({
         avatarOriginalUrl: null,
         avatarCropState: null,
+        ...(clerkImageUrl && { clerkImageUrl }),
         lastModifiedDate: new Date(),
       })
       .where(eq(users.id, userId))
