@@ -175,6 +175,7 @@ export class AccountPageComponent implements OnInit {
 
   private async savePhoto(): Promise<void> {
     const blob = await this.exportCrop();
+    this.avatarOriginalUrl.set(null);
     await this.clerk.setProfileImage(blob);
 
     if (this.originalFile) {
@@ -210,14 +211,7 @@ export class AccountPageComponent implements OnInit {
 
   async fetchAvatarOriginalUrl(): Promise<void> {
     try {
-      const user = await this.api
-        .get<UserResponse>('/users/me')
-        .catch(async (e: unknown) => {
-          if (e instanceof ApiError && e.status === 404) {
-            return this.ensureUserRecord();
-          }
-          throw e;
-        });
+      const user = await this.api.get<UserResponse>('/users/me');
 
       if (user.avatarOriginalUrl) {
         this.avatarOriginalUrl.set(`${environment.apiUrl}/users/${user.id}/avatar`);
@@ -228,15 +222,6 @@ export class AccountPageComponent implements OnInit {
       }
       this.toast.error('Full-size image could not be loaded');
     }
-  }
-
-  private async ensureUserRecord(): Promise<UserResponse> {
-    const user = this.clerk.user();
-    return this.api.put<UserResponse>('/users/me', {
-      email: user?.primaryEmailAddress?.emailAddress ?? '',
-      firstName: user?.firstName ?? '',
-      lastName: user?.lastName ?? '',
-    });
   }
 
   private async uploadOriginalAvatar(file: File): Promise<void> {

@@ -35,7 +35,6 @@ type MockClerkService = {
 
 type MockApiService = {
   get: jest.Mock<Promise<unknown>>;
-  put: jest.Mock<Promise<unknown>>;
   patch: jest.Mock<Promise<unknown>>;
   post: jest.Mock<Promise<unknown>>;
   delete: jest.Mock<Promise<unknown>>;
@@ -95,7 +94,6 @@ describe('AccountPageComponent', () => {
 
     mockApi = {
       get: jest.fn().mockResolvedValue({ id: 'user-1', avatarOriginalUrl: null }),
-      put: jest.fn().mockResolvedValue({ id: 'user-1', avatarOriginalUrl: null }),
       patch: jest.fn().mockResolvedValue({}),
       post: jest.fn().mockResolvedValue({ id: 'user-1', avatarOriginalUrl: null }),
       delete: jest.fn().mockResolvedValue({}),
@@ -161,20 +159,12 @@ describe('AccountPageComponent', () => {
       expect(mockToast.error).not.toHaveBeenCalled();
     });
 
-    it('creates the user record and continues when GET returns 404', async () => {
+    it('shows error toast when GET /users/me returns 404', async () => {
       mockApi.get.mockRejectedValue(new ApiError('Not found', 404));
-      mockApi.put.mockResolvedValue({ id: 'user-1', avatarOriginalUrl: null });
 
       await component.fetchAvatarOriginalUrl();
 
-      expect(mockApi.put).toHaveBeenCalledWith(
-        '/users/me',
-        expect.objectContaining({
-          firstName: 'John',
-          lastName: 'Doe',
-        }),
-      );
-      expect(mockToast.error).not.toHaveBeenCalled();
+      expect(mockToast.error).toHaveBeenCalledWith('Full-size image could not be loaded');
     });
 
     it('silently ignores network errors on avatar load', async () => {
@@ -507,6 +497,18 @@ describe('AccountPageComponent', () => {
       await component.onSave();
 
       expect(mockClerk.setProfileImage).toHaveBeenCalledWith(mockBlob);
+    });
+
+    it('clears avatarOriginalUrl before calling setProfileImage to prevent stale cache flash', async () => {
+      component.avatarOriginalUrl.set('http://api/users/u1/avatar');
+      const urlDuringUpload: (string | null)[] = [];
+      mockClerk.setProfileImage.mockImplementation(async () => {
+        urlDuringUpload.push(component.avatarOriginalUrl());
+      });
+
+      await component.onSave();
+
+      expect(urlDuringUpload).toEqual([null]);
     });
 
     it('uploads the original file when one was captured', async () => {
