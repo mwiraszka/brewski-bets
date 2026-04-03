@@ -4,7 +4,6 @@ import {
   ButtonComponent,
   CardComponent,
   InputComponent,
-  SkeletonComponent,
   ToastService,
 } from '@eagami/ui';
 
@@ -18,13 +17,7 @@ import { UserRecord, UserService } from '@app/services/user.service';
   selector: 'bb-account-page',
   templateUrl: './account-page.component.html',
   styleUrl: './account-page.component.scss',
-  imports: [
-    AvatarEditorComponent,
-    ButtonComponent,
-    CardComponent,
-    InputComponent,
-    SkeletonComponent,
-  ],
+  imports: [AvatarEditorComponent, ButtonComponent, CardComponent, InputComponent],
 })
 export class AccountPageComponent implements OnInit {
   private readonly api = inject(ApiService);
@@ -56,10 +49,6 @@ export class AccountPageComponent implements OnInit {
       this.isCropChanged()
     );
   });
-
-  readonly showSkeleton = computed(
-    () => !!this.editorSrc() && !this.avatarEditor()?.hasImage(),
-  );
 
   ngOnInit(): void {
     const user = this.clerk.user();

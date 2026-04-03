@@ -3,24 +3,14 @@
     <h2 eaCardHeader>Account</h2>
 
     <div class="avatar-section">
-      <div class="avatar-editor-wrapper">
-        @if (showSkeleton()) {
-          <ea-skeleton
-            class="avatar-skeleton"
-            variant="circle"
-            width="200px"
-            height="200px" />
-        }
-        <ea-avatar-editor
-          [class.avatar-editor--loading]="showSkeleton()"
-          shape="circle"
-          [canvasSize]="200"
-          [currentSrc]="editorSrc()"
-          [cropState]="savedCropState()"
-          (fileSelected)="onFileSelected($event)"
-          (cropStateChange)="onCropStateChange($event)"
-          (removed)="onRemoveAvatar()" />
-      </div>
+      <ea-avatar-editor
+        shape="circle"
+        [canvasSize]="200"
+        [currentSrc]="editorSrc()"
+        [cropState]="savedCropState()"
+        (fileSelected)="onFileSelected($event)"
+        (cropStateChange)="onCropStateChange($event)"
+        (removed)="onRemoveAvatar()" />
     </div>
 
     <div class="name-fields">
