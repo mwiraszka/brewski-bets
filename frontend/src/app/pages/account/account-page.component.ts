@@ -135,7 +135,7 @@ export class AccountPageComponent implements OnInit {
     if (newRevertSrc !== previousRevertSrc) {
       changes.push('photo');
       this.revertSrc.set(newRevertSrc);
-      this.editorSrc.set(newRevertSrc);
+      this.editorSrc.set(this.userService.avatarUrl() ?? newRevertSrc);
     }
 
     if (notify && changes.length) {
