@@ -47,9 +47,11 @@ type MockApiService = {
 };
 
 type MockUserService = {
+  user: WritableSignal<{ firstName: string; lastName: string } | null>;
   avatarUrl: WritableSignal<string | undefined>;
   avatarCropState: WritableSignal<AvatarEditorCropState | null>;
   hasAvatar: WritableSignal<boolean>;
+  load: jest.Mock<Promise<void>>;
   setUser: jest.Mock<void>;
   clearAvatar: jest.Mock<void>;
 };
@@ -129,9 +131,11 @@ describe('AccountPageComponent', () => {
     };
 
     mockUserService = {
+      user: signal(null),
       avatarUrl: signal(undefined),
       avatarCropState: signal(null),
       hasAvatar: signal(false),
+      load: jest.fn().mockResolvedValue(undefined),
       setUser: jest.fn(),
       clearAvatar: jest.fn(),
     };
@@ -189,9 +193,9 @@ describe('AccountPageComponent', () => {
       expect(component.editorSrc()).toBe('http://api/users/u1/avatar?t=123');
     });
 
-    it('updates names after reloading clerk user', async () => {
-      mockClerk.reloadUser.mockImplementation(async () => {
-        mockClerk.user.set({ ...MOCK_USER, firstName: 'Jane', lastName: 'Smith' });
+    it('refreshes user data from backend on init', async () => {
+      mockUserService.load.mockImplementation(async () => {
+        mockUserService.user.set({ firstName: 'Jane', lastName: 'Smith' });
       });
 
       component = await createComponent(
@@ -202,8 +206,9 @@ describe('AccountPageComponent', () => {
         mockRouter,
       );
 
-      await mockClerk.reloadUser();
+      await mockUserService.load();
 
+      expect(mockUserService.load).toHaveBeenCalled();
       expect(component.firstName()).toBe('Jane');
       expect(component.lastName()).toBe('Smith');
     });
