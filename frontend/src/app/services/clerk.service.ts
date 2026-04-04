@@ -79,6 +79,22 @@ export class ClerkService {
   }
 
   async handleSSOCallback(): Promise<void> {
+    const signUp = this.clerk.client!.signUp;
+    const signIn = this.clerk.client!.signIn;
+
+    if (signIn.firstFactorVerification?.status === 'transferable') {
+      const result = await signUp.create({
+        transfer: true,
+        firstName: signUp.firstName ?? undefined,
+        lastName: signUp.lastName ?? '-',
+      });
+
+      if (result.status === 'complete') {
+        await this.clerk.setActive({ session: result.createdSessionId });
+        return;
+      }
+    }
+
     await this.clerk.handleRedirectCallback({
       signInForceRedirectUrl: '/',
       signUpForceRedirectUrl: '/',
