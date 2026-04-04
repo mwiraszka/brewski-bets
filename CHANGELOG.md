@@ -18,6 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Handle Clerk's new device verification by prompting for an email code during login
 - Prevent the log in button from briefly flashing in the header during page load
+- Preserve current avatar in the editor when an external profile change is detected
 - Fix `stringifyContentPathRegex` in Jest config using incompatible regex literal instead of string
 
 ## [0.12.0] - 2026-04-04
