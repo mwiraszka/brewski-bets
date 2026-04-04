@@ -11,11 +11,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Show toast notification on the account page when profile changes are made externally via the Clerk dashboard
 - Automatically redirect to home with a toast when the user's account is deleted externally
+- Autofocus the verification code input on login and create account pages
 - Add unit tests for all frontend components, services, guards, and pages achieving 100% line and function coverage
 
 ### Fixed
 
 - Handle Clerk's new device verification by prompting for an email code during login
+- Prevent the log in button from briefly flashing in the header during page load
 - Fix `stringifyContentPathRegex` in Jest config using incompatible regex literal instead of string
 
 ## [0.12.0] - 2026-04-04
