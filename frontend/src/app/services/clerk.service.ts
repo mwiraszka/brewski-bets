@@ -13,6 +13,9 @@ export class ClerkService {
   readonly isLoaded = signal(false);
   readonly isLoggedIn = signal(false);
   readonly user = signal<Clerk['user']>(null, { equal: () => false });
+  readonly externallyDeleted = signal(false);
+
+  private _sessionEndExpected = false;
 
   async load(): Promise<void> {
     this.clerk = new Clerk(environment.clerkPublishableKey);
@@ -58,11 +61,32 @@ export class ClerkService {
     }
   }
 
-  async logIn(identifier: string, password: string): Promise<void> {
+  async logIn(
+    identifier: string,
+    password: string,
+  ): Promise<{ needsSecondFactor: boolean }> {
     const result = await this.clerk.client!.signIn.create({
       strategy: 'password',
       identifier,
       password,
+    });
+
+    if (result.status === 'needs_second_factor') {
+      await result.prepareSecondFactor({ strategy: 'email_code' });
+      return { needsSecondFactor: true };
+    }
+
+    if (result.status === 'complete') {
+      await this.clerk.setActive({ session: result.createdSessionId });
+    }
+
+    return { needsSecondFactor: false };
+  }
+
+  async verifyLoginCode(code: string): Promise<void> {
+    const result = await this.clerk.client!.signIn.attemptSecondFactor({
+      strategy: 'email_code',
+      code,
     });
 
     if (result.status === 'complete') {
@@ -101,7 +125,12 @@ export class ClerkService {
     });
   }
 
+  expectSessionEnd(): void {
+    this._sessionEndExpected = true;
+  }
+
   async logOut(): Promise<void> {
+    this._sessionEndExpected = true;
     await this.clerk.signOut();
   }
 
@@ -181,8 +210,14 @@ export class ClerkService {
   }
 
   private syncState(): void {
+    const wasLoggedIn = this.isLoggedIn();
+
     this.isLoaded.set(true);
     this.isLoggedIn.set(!!this.clerk.user);
     this.user.set(this.clerk.user ?? null);
+
+    if (wasLoggedIn && !this.clerk.user && !this._sessionEndExpected) {
+      this.externallyDeleted.set(true);
+    }
   }
 }

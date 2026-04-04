@@ -1,71 +1,97 @@
-<ea-card
-  variant="outlined"
-  headerAlign="center">
-  <h2 eaCardHeader>Log in</h2>
+@if (!pendingSecondFactor()) {
+  <ea-card
+    variant="outlined"
+    headerAlign="center">
+    <h2 eaCardHeader>Log in</h2>
 
-  <div class="auth-form">
-    <ea-button
-      variant="secondary"
-      [fullWidth]="true"
-      [loading]="googleLoading()"
-      (clicked)="onContinueWithGoogle()">
-      <bb-google-icon slot="prefix" />
-      Continue with Google
-    </ea-button>
+    <div class="auth-form">
+      <ea-button
+        variant="secondary"
+        [fullWidth]="true"
+        [loading]="googleLoading()"
+        (clicked)="onContinueWithGoogle()">
+        <bb-google-icon slot="prefix" />
+        Continue with Google
+      </ea-button>
 
-    <ea-divider label="or" />
+      <ea-divider label="or" />
 
-    <form
-      class="auth-form"
-      (ngSubmit)="onSubmit()">
-      <ea-input
-        label="Email"
-        type="email"
-        autocomplete="email"
-        placeholder="you@example.com"
-        [autofocus]="true"
-        [required]="true"
-        [error]="emailError()"
-        (inputBlurred)="onEmailBlur()"
-        [(value)]="email" />
+      <form
+        class="auth-form"
+        (ngSubmit)="onSubmit()">
+        <ea-input
+          label="Email"
+          type="email"
+          autocomplete="email"
+          placeholder="you@example.com"
+          [autofocus]="true"
+          [required]="true"
+          [error]="emailError()"
+          (inputBlurred)="onEmailBlur()"
+          [(value)]="email" />
 
-      <ea-input
-        label="Password"
-        type="password"
-        autocomplete="current-password"
-        [required]="true"
-        [error]="passwordError()"
-        (inputBlurred)="onPasswordBlur()"
-        [(value)]="password" />
+        <ea-input
+          label="Password"
+          type="password"
+          autocomplete="current-password"
+          [required]="true"
+          [error]="passwordError()"
+          (inputBlurred)="onPasswordBlur()"
+          [(value)]="password" />
+
+        @if (error()) {
+          <p class="error">{{ error() }}</p>
+        }
+
+        <ea-button
+          type="submit"
+          variant="primary"
+          [fullWidth]="true"
+          [loading]="loading()">
+          Log in
+        </ea-button>
+      </form>
+    </div>
+
+    <div
+      eaCardFooter
+      class="auth-footer">
+      <p class="auth-link">
+        <a routerLink="/forgot-password">Forgot password?</a>
+      </p>
+      <p class="auth-link">
+        Don't have an account?
+        <a routerLink="/create-account">Create account</a>
+      </p>
+      <p class="legal-links">
+        <a routerLink="/privacy-policy">Privacy Policy</a>
+        <span>&middot;</span>
+        <a routerLink="/terms-of-service">Terms of Service</a>
+      </p>
+    </div>
+  </ea-card>
+} @else {
+  <ea-card
+    variant="outlined"
+    headerAlign="center">
+    <h2 eaCardHeader>Verify your identity</h2>
+
+    <div class="auth-form">
+      <p class="hint">We sent a verification code to {{ email() }}.</p>
+
+      <div
+        class="code-input"
+        #codeInput>
+        <ea-code-input
+          label="Verification code"
+          [error]="verificationCodeError()"
+          (completed)="onVerify()"
+          [(value)]="verificationCode" />
+      </div>
 
       @if (error()) {
         <p class="error">{{ error() }}</p>
       }
-
-      <ea-button
-        type="submit"
-        variant="primary"
-        [fullWidth]="true"
-        [loading]="loading()">
-        Log in
-      </ea-button>
-    </form>
-  </div>
-
-  <div
-    eaCardFooter
-    class="auth-footer">
-    <p class="auth-link">
-      <a routerLink="/forgot-password">Forgot password?</a>
-    </p>
-    <p class="auth-link">
-      Don't have an account?
-      <a routerLink="/create-account">Create account</a>
-    </p>
-    <p class="legal-links">
-      <a routerLink="/privacy-policy">Privacy Policy</a>
-      <span>&middot;</span>
-      <a routerLink="/terms-of-service">Terms of Service</a>
-    </p>
-  </div>
-</ea-card>
+    </div>
+  </ea-card>
+}

@@ -29,8 +29,17 @@ export class HeaderComponent {
   readonly previewInfo = environment.preview;
 
   readonly isLoggedIn = computed(() => this.clerk.isLoggedIn());
+  private readonly authRoutes = new Set([
+    '/',
+    '/login',
+    '/create-account',
+    '/forgot-password',
+  ]);
   readonly showLoginButton = computed(
-    () => !this.isLoggedIn() && this.currentUrl() !== '/login',
+    () =>
+      this.clerk.isLoaded() &&
+      !this.isLoggedIn() &&
+      !this.authRoutes.has(this.currentUrl()),
   );
   readonly menuOpen = signal(false);
 

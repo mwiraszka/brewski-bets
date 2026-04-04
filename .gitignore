@@ -12,6 +12,9 @@ Thumbs.db
 # Compiled output
 dist
 
+# Test coverage
+coverage
+
 # Angular and Babel Webpack
 .angular
 

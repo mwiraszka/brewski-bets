@@ -6,7 +6,14 @@ import {
   InputComponent,
 } from '@eagami/ui';
 
-import { Component, OnDestroy, inject, signal } from '@angular/core';
+import {
+  Component,
+  ElementRef,
+  OnDestroy,
+  inject,
+  signal,
+  viewChild,
+} from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 
@@ -33,6 +40,8 @@ const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 export class CreateAccountPageComponent implements OnDestroy {
   private readonly clerk = inject(ClerkService);
   private readonly router = inject(Router);
+
+  private readonly codeInput = viewChild<ElementRef>('codeInput');
 
   firstName = signal('');
   lastName = signal('');
@@ -143,6 +152,7 @@ export class CreateAccountPageComponent implements OnDestroy {
 
       if (needsVerification) {
         this.pendingVerification.set(true);
+        setTimeout(() => this.codeInput()?.nativeElement.querySelector('input')?.focus());
       } else {
         await this.router.navigate(['/']);
       }

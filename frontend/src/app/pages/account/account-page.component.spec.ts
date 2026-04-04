@@ -31,6 +31,7 @@ type MockClerkService = {
   reloadUser: jest.Mock<Promise<void>>;
   updateProfile: jest.Mock<Promise<void>, [string, string]>;
   setProfileImage: jest.Mock<Promise<string | undefined>, [Blob | null]>;
+  expectSessionEnd: jest.Mock<void>;
   logOut: jest.Mock<Promise<void>>;
   extractError: jest.Mock<string, [unknown]>;
 };
@@ -110,6 +111,7 @@ describe('AccountPageComponent', () => {
       reloadUser: jest.fn().mockResolvedValue(undefined),
       updateProfile: jest.fn().mockResolvedValue(undefined),
       setProfileImage: jest.fn().mockResolvedValue('https://img.clerk.com/updated'),
+      expectSessionEnd: jest.fn(),
       logOut: jest.fn().mockResolvedValue(undefined),
       extractError: jest.fn().mockReturnValue('Something went wrong'),
     };
@@ -206,7 +208,7 @@ describe('AccountPageComponent', () => {
         mockRouter,
       );
 
-      await mockUserService.load();
+      await new Promise(resolve => setTimeout(resolve));
 
       expect(mockUserService.load).toHaveBeenCalled();
       expect(component.firstName()).toBe('Jane');
@@ -924,6 +926,64 @@ describe('AccountPageComponent', () => {
       await component.onConfirmDelete();
 
       expect(component.deleting()).toBe(false);
+    });
+  });
+
+  // ---------------------------------------------------------------------------
+  // Visibility change handler
+  // ---------------------------------------------------------------------------
+
+  describe('visibility change', () => {
+    it('refreshes user data when the tab becomes visible', async () => {
+      mockUserService.load.mockImplementation(async () => {
+        mockUserService.user.set({ firstName: 'Refreshed', lastName: 'User' });
+      });
+
+      Object.defineProperty(document, 'visibilityState', {
+        value: 'visible',
+        writable: true,
+      });
+      document.dispatchEvent(new Event('visibilitychange'));
+
+      await new Promise(resolve => setTimeout(resolve));
+
+      expect(component.firstName()).toBe('Refreshed');
+    });
+  });
+
+  // ---------------------------------------------------------------------------
+  // isCropChanged — null saved state
+  // ---------------------------------------------------------------------------
+
+  describe('hasChanges — crop with null saved state', () => {
+    it('is true when savedCropState is null and liveCropState has non-default values', () => {
+      component.savedCropState.set(null);
+      component.liveCropState.set({ zoom: 2, offsetX: 0, offsetY: 0 });
+
+      expect(component.hasChanges()).toBe(true);
+    });
+
+    it('is false when savedCropState is null and liveCropState has default values', () => {
+      component.savedCropState.set(null);
+      component.liveCropState.set({ zoom: 1, offsetX: 0, offsetY: 0 });
+
+      expect(component.hasChanges()).toBe(false);
+    });
+  });
+
+  // ---------------------------------------------------------------------------
+  // exportCrop
+  // ---------------------------------------------------------------------------
+
+  describe('exportCrop', () => {
+    it('delegates to the avatar editor viewChild', async () => {
+      const mockBlob = new Blob(['test']);
+      const mockEditor = { exportCrop: jest.fn().mockResolvedValue(mockBlob) };
+      jest.spyOn(component as never, 'avatarEditor').mockReturnValue(mockEditor as never);
+
+      const result = await component.exportCrop();
+
+      expect(result).toBe(mockBlob);
     });
   });
 });

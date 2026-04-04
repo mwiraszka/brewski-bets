@@ -32,28 +32,6 @@ export const userRoutes = new Hono<AppContext>()
     const db = c.get('db');
     const clerkId = c.get('clerkId');
 
-    const clerk = createClerkClient({ secretKey: c.env.CLERK_SECRET_KEY });
-    const clerkUser = await clerk.users.getUser(clerkId);
-
-    await db
-      .insert(users)
-      .values({
-        clerkId,
-        email: clerkUser.emailAddresses[0]?.emailAddress ?? '',
-        firstName: clerkUser.firstName ?? '',
-        lastName: clerkUser.lastName ?? '',
-        clerkImageUrl: clerkUser.imageUrl,
-      })
-      .onConflictDoUpdate({
-        target: users.clerkId,
-        set: {
-          email: clerkUser.emailAddresses[0]?.emailAddress ?? '',
-          firstName: clerkUser.firstName ?? '',
-          lastName: clerkUser.lastName ?? '',
-          clerkImageUrl: clerkUser.imageUrl,
-        },
-      });
-
     const [user] = await db
       .select()
       .from(users)
