@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.13.0] - 2026-04-04
+
+### Added
+
+- Add unit tests for all frontend components, services, guards, and pages achieving 100% line and function coverage
+
+### Fixed
+
+- Fix `stringifyContentPathRegex` in Jest config using incompatible regex literal instead of string
+
 ## [0.12.0] - 2026-04-04
 
 ### Added
@@ -247,6 +257,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - PWA manifest and service worker configuration
 - GitHub issue templates
 
+[0.13.0]: https://github.com/mwiraszka/brewski-bets/compare/v0.12.0...v0.13.0
 [0.12.0]: https://github.com/mwiraszka/brewski-bets/compare/v0.11.0...v0.12.0
 [0.11.0]: https://github.com/mwiraszka/brewski-bets/compare/v0.10.0...v0.11.0
 [0.10.0]: https://github.com/mwiraszka/brewski-bets/compare/v0.9.2...v0.10.0
