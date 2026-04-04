@@ -12,6 +12,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Sync user profile changes made in the Clerk dashboard (name, email, avatar) to the database and R2
 - Add delete account option on the account page with confirmation dialog
 - Display shimmer skeleton in the avatar editor while the full-size photo loads
+- Upload avatar to R2 automatically when a new user is created via webhook
+- Allow reverting avatar to the original Clerk profile photo
 
 ### Fixed
 
@@ -23,6 +25,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Keep account page name in sync with changes made in the Clerk dashboard
 - Ensure header avatar updates immediately after photo change
 - Prevent old avatar from briefly appearing on account page load before new one renders
+- Handle Google SSO sign-in for new users by automatically converting to account creation
+- Detect unsaved crop changes correctly when no prior crop state exists
 
 ## [0.11.0] - 2026-03-29
 
