@@ -52,13 +52,32 @@ export const webhookRoutes = new Hono<AppContext>().post('/clerk', async c => {
       .limit(1);
 
     if (!existing.length) {
-      await db.insert(users).values({
-        clerkId,
-        email: event.data.email_addresses[0].email_address,
-        firstName: event.data.first_name ?? '',
-        lastName: event.data.last_name ?? '',
-        clerkImageUrl: event.data.image_url,
-      });
+      const [newUser] = await db
+        .insert(users)
+        .values({
+          clerkId,
+          email: event.data.email_addresses[0].email_address,
+          firstName: event.data.first_name ?? '',
+          lastName: event.data.last_name ?? '',
+          clerkImageUrl: event.data.image_url,
+        })
+        .returning();
+
+      if (newUser && event.data.has_image) {
+        try {
+          const response = await fetch(event.data.image_url);
+          const buffer = await response.arrayBuffer();
+          const contentType = response.headers.get('content-type') || 'image/jpeg';
+          const url = await uploadAvatar(c.env, newUser.id, buffer, contentType);
+
+          await db
+            .update(users)
+            .set({ avatarOriginalUrl: url })
+            .where(eq(users.id, newUser.id));
+        } catch {
+          // ignore — account still works without R2 avatar
+        }
+      }
     }
   }
 
