@@ -8,6 +8,20 @@
       "when": 1774356417588,
       "tag": "0000_free_misty_knight",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1775235006178,
+      "tag": "0001_nervous_vermin",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1775257309542,
+      "tag": "0002_friendly_phil_sheldon",
+      "breakpoints": true
     }
   ]
 }

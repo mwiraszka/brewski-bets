@@ -79,6 +79,22 @@ export class ClerkService {
   }
 
   async handleSSOCallback(): Promise<void> {
+    const signUp = this.clerk.client!.signUp;
+    const signIn = this.clerk.client!.signIn;
+
+    if (signIn.firstFactorVerification?.status === 'transferable') {
+      const result = await signUp.create({
+        transfer: true,
+        firstName: signUp.firstName ?? undefined,
+        lastName: signUp.lastName ?? '-',
+      });
+
+      if (result.status === 'complete') {
+        await this.clerk.setActive({ session: result.createdSessionId });
+        return;
+      }
+    }
+
     await this.clerk.handleRedirectCallback({
       signInForceRedirectUrl: '/',
       signUpForceRedirectUrl: '/',
@@ -108,6 +124,11 @@ export class ClerkService {
     }
   }
 
+  async reloadUser(): Promise<void> {
+    await this.clerk.user?.reload();
+    this.syncState();
+  }
+
   async getToken(): Promise<string | null> {
     return this.clerk.session?.getToken() ?? null;
   }
@@ -116,8 +137,9 @@ export class ClerkService {
     await this.clerk.user!.update({ firstName, lastName });
   }
 
-  async setProfileImage(file: Blob | null): Promise<void> {
+  async setProfileImage(file: Blob | null): Promise<string | undefined> {
     await this.clerk.user!.setProfileImage({ file });
+    return this.clerk.user?.imageUrl ?? undefined;
   }
 
   async changePassword(currentPassword: string, newPassword: string): Promise<void> {

@@ -5,6 +5,29 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.12.0] - 2026-04-04
+
+### Added
+
+- Sync user profile changes made in the Clerk dashboard (name, email, avatar) to the database and R2
+- Add delete account option on the account page with confirmation dialog
+- Display shimmer skeleton in the avatar editor while the full-size photo loads
+- Upload avatar to R2 automatically when a new user is created via webhook
+- Allow reverting avatar to the original Clerk profile photo
+
+### Fixed
+
+- Prevent avatar from reverting to cached version after photo change
+- Auto-create user record from Clerk data to avoid 404 on first account page visit
+- Ensure avatar editor displays the full-size image instead of a placeholder on the account page
+- Prevent avatar editor controls from resetting after saving or refreshing the page
+- Persist and restore zoom and pan crop state so the edited avatar is always displayed correctly
+- Keep account page name in sync with changes made in the Clerk dashboard
+- Ensure header avatar updates immediately after photo change
+- Prevent old avatar from briefly appearing on account page load before new one renders
+- Handle Google SSO sign-in for new users by automatically converting to account creation
+- Detect unsaved crop changes correctly when no prior crop state exists
+
 ## [0.11.0] - 2026-03-29
 
 ### Added
@@ -224,6 +247,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - PWA manifest and service worker configuration
 - GitHub issue templates
 
+[0.12.0]: https://github.com/mwiraszka/brewski-bets/compare/v0.11.0...v0.12.0
+[0.11.0]: https://github.com/mwiraszka/brewski-bets/compare/v0.10.0...v0.11.0
 [0.10.0]: https://github.com/mwiraszka/brewski-bets/compare/v0.9.2...v0.10.0
 [0.9.2]: https://github.com/mwiraszka/brewski-bets/compare/v0.9.1...v0.9.2
 [0.9.1]: https://github.com/mwiraszka/brewski-bets/compare/v0.9.0...v0.9.1

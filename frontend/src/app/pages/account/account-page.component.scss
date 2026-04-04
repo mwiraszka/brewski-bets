@@ -12,14 +12,12 @@
 }
 
 ea-card {
-  ::ng-deep .ea-card {
-    --color-bg-base: #ffffff;
-    --color-text-primary: #1a1a1a;
-    --color-text-secondary: #555555;
-    --color-text-inverse: #ffffff;
-    --color-border-default: #e0e0e0;
-    --color-neutral-400: #555555;
-  }
+  --color-bg-base: #ffffff;
+  --color-text-primary: #1a1a1a;
+  --color-text-secondary: #555555;
+  --color-text-inverse: #ffffff;
+  --color-border-default: #e0e0e0;
+  --color-neutral-400: #555555;
 }
 
 .avatar-section {
@@ -36,4 +34,11 @@ ea-card {
 
 .actions {
   margin-top: 24px;
+}
+
+.delete-section {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  margin-top: 32px;
 }

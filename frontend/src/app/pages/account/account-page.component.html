@@ -6,8 +6,11 @@
       <ea-avatar-editor
         shape="circle"
         [canvasSize]="200"
-        [currentSrc]="avatarSrc()"
-        (cropped)="onCropped($event)"
+        [currentSrc]="editorSrc()"
+        [revertSrc]="revertSrc()"
+        [cropState]="savedCropState()"
+        (fileSelected)="onFileSelected($event)"
+        (cropStateChange)="onCropStateChange($event)"
         (removed)="onRemoveAvatar()" />
     </div>
 
@@ -33,5 +36,36 @@
         Save
       </ea-button>
     </div>
+
+    <div class="delete-section">
+      <ea-divider />
+      <ea-button
+        variant="danger"
+        [fullWidth]="true"
+        [loading]="deleting()"
+        (clicked)="deleteDialogOpen.set(true)">
+        Delete account
+      </ea-button>
+    </div>
   </ea-card>
 </div>
+
+<ea-dialog
+  [(open)]="deleteDialogOpen"
+  size="sm">
+  <span slot="header">Delete account</span>
+  <p>Are you sure you want to delete your account? This action cannot be undone.</p>
+  <div slot="footer">
+    <ea-button
+      variant="secondary"
+      (clicked)="deleteDialogOpen.set(false)">
+      Cancel
+    </ea-button>
+    <ea-button
+      variant="danger"
+      [loading]="deleting()"
+      (clicked)="onConfirmDelete()">
+      Confirm
+    </ea-button>
+  </div>
+</ea-dialog>

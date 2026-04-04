@@ -1,4 +1,12 @@
-import { integer, pgEnum, pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core';
+import {
+  integer,
+  jsonb,
+  pgEnum,
+  pgTable,
+  text,
+  timestamp,
+  uuid,
+} from 'drizzle-orm/pg-core';
 
 export const betStatusEnum = pgEnum('bet_status', ['pending', 'active', 'complete']);
 export const betOutcomeEnum = pgEnum('bet_outcome', [
@@ -15,7 +23,13 @@ export const users = pgTable('users', {
   email: text('email').notNull(),
   firstName: text('first_name').notNull(),
   lastName: text('last_name').notNull(),
+  clerkImageUrl: text('clerk_image_url'),
   avatarOriginalUrl: text('avatar_original_url'),
+  avatarCropState: jsonb('avatar_crop_state').$type<{
+    zoom: number;
+    offsetX: number;
+    offsetY: number;
+  }>(),
   createdDate: timestamp('created_date', { withTimezone: true }).notNull().defaultNow(),
   lastModifiedDate: timestamp('last_modified_date', { withTimezone: true })
     .notNull()

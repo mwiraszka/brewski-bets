@@ -6,6 +6,7 @@ import {
 import { provideRouter } from '@angular/router';
 
 import { ClerkService } from '@app/services/clerk.service';
+import { UserService } from '@app/services/user.service';
 
 import { routes } from './app.routes';
 
@@ -15,8 +16,11 @@ export const appConfig: ApplicationConfig = {
     provideRouter(routes),
     {
       provide: APP_INITIALIZER,
-      useFactory: (clerk: ClerkService) => () => clerk.load(),
-      deps: [ClerkService],
+      useFactory: (clerk: ClerkService, user: UserService) => async () => {
+        await clerk.load();
+        await user.load();
+      },
+      deps: [ClerkService, UserService],
       multi: true,
     },
   ],

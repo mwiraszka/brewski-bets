@@ -1,10 +1,12 @@
-import { AvatarEditorCropEvent, ToastService } from '@eagami/ui';
+import { AvatarEditorCropState, ToastService } from '@eagami/ui';
 
 import { NO_ERRORS_SCHEMA, WritableSignal, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
+import { Router } from '@angular/router';
 
-import { ApiError, ApiService } from '@app/services/api.service';
+import { ApiService } from '@app/services/api.service';
 import { ClerkService } from '@app/services/clerk.service';
+import { UserService } from '@app/services/user.service';
 
 import { AccountPageComponent } from './account-page.component';
 
@@ -17,8 +19,6 @@ jest.mock('@env', () => ({
   },
 }));
 
-const MOCK_API_URL = 'http://localhost:3000/api';
-
 type MockUser = {
   firstName: string;
   lastName: string;
@@ -28,17 +28,32 @@ type MockUser = {
 
 type MockClerkService = {
   user: WritableSignal<MockUser | null>;
+  reloadUser: jest.Mock<Promise<void>>;
   updateProfile: jest.Mock<Promise<void>, [string, string]>;
-  setProfileImage: jest.Mock<Promise<void>, [Blob | null]>;
+  setProfileImage: jest.Mock<Promise<string | undefined>, [Blob | null]>;
+  logOut: jest.Mock<Promise<void>>;
   extractError: jest.Mock<string, [unknown]>;
+};
+
+type MockRouter = {
+  navigate: jest.Mock<Promise<boolean>, [string[]]>;
 };
 
 type MockApiService = {
   get: jest.Mock<Promise<unknown>>;
-  put: jest.Mock<Promise<unknown>>;
   patch: jest.Mock<Promise<unknown>>;
   post: jest.Mock<Promise<unknown>>;
   delete: jest.Mock<Promise<unknown>>;
+};
+
+type MockUserService = {
+  user: WritableSignal<{ firstName: string; lastName: string } | null>;
+  avatarUrl: WritableSignal<string | undefined>;
+  avatarCropState: WritableSignal<AvatarEditorCropState | null>;
+  hasAvatar: WritableSignal<boolean>;
+  load: jest.Mock<Promise<void>>;
+  setUser: jest.Mock<void>;
+  clearAvatar: jest.Mock<void>;
 };
 
 type MockToastService = {
@@ -56,7 +71,9 @@ const MOCK_USER: MockUser = {
 async function createComponent(
   mockClerk: MockClerkService,
   mockApi: MockApiService,
+  mockUserService: MockUserService,
   mockToast: MockToastService,
+  mockRouter: MockRouter,
 ): Promise<AccountPageComponent> {
   TestBed.resetTestingModule();
   await TestBed.configureTestingModule({
@@ -64,7 +81,9 @@ async function createComponent(
     providers: [
       { provide: ClerkService, useValue: mockClerk },
       { provide: ApiService, useValue: mockApi },
+      { provide: UserService, useValue: mockUserService },
       { provide: ToastService, useValue: mockToast },
+      { provide: Router, useValue: mockRouter },
     ],
   })
     .overrideComponent(AccountPageComponent, {
@@ -74,8 +93,6 @@ async function createComponent(
 
   const fixture = TestBed.createComponent(AccountPageComponent);
   fixture.detectChanges();
-  // ngOnInit's fire-and-forget fetchAvatarOriginalUrl resolves immediately (mockApi.get
-  // uses Promise.resolve), so it settles before the microtask that resumes the caller.
   return fixture.componentInstance;
 }
 
@@ -83,22 +100,44 @@ describe('AccountPageComponent', () => {
   let component: AccountPageComponent;
   let mockClerk: MockClerkService;
   let mockApi: MockApiService;
+  let mockUserService: MockUserService;
   let mockToast: MockToastService;
+  let mockRouter: MockRouter;
 
   beforeEach(async () => {
     mockClerk = {
       user: signal<MockUser | null>({ ...MOCK_USER }),
+      reloadUser: jest.fn().mockResolvedValue(undefined),
       updateProfile: jest.fn().mockResolvedValue(undefined),
-      setProfileImage: jest.fn().mockResolvedValue(undefined),
+      setProfileImage: jest.fn().mockResolvedValue('https://img.clerk.com/updated'),
+      logOut: jest.fn().mockResolvedValue(undefined),
       extractError: jest.fn().mockReturnValue('Something went wrong'),
     };
 
+    mockRouter = {
+      navigate: jest.fn().mockResolvedValue(true),
+    };
+
     mockApi = {
-      get: jest.fn().mockResolvedValue({ id: 'user-1', avatarOriginalUrl: null }),
-      put: jest.fn().mockResolvedValue({ id: 'user-1', avatarOriginalUrl: null }),
+      get: jest.fn().mockResolvedValue({}),
       patch: jest.fn().mockResolvedValue({}),
-      post: jest.fn().mockResolvedValue({ id: 'user-1', avatarOriginalUrl: null }),
+      post: jest.fn().mockResolvedValue({
+        id: 'user-1',
+        avatarOriginalUrl: null,
+        avatarCropState: null,
+        lastModifiedDate: '2026-04-02T00:00:00.000Z',
+      }),
       delete: jest.fn().mockResolvedValue({}),
+    };
+
+    mockUserService = {
+      user: signal(null),
+      avatarUrl: signal(undefined),
+      avatarCropState: signal(null),
+      hasAvatar: signal(false),
+      load: jest.fn().mockResolvedValue(undefined),
+      setUser: jest.fn(),
+      clearAvatar: jest.fn(),
     };
 
     mockToast = {
@@ -106,7 +145,13 @@ describe('AccountPageComponent', () => {
       error: jest.fn().mockReturnValue(2),
     };
 
-    component = await createComponent(mockClerk, mockApi, mockToast);
+    component = await createComponent(
+      mockClerk,
+      mockApi,
+      mockUserService,
+      mockToast,
+      mockRouter,
+    );
   });
 
   // ---------------------------------------------------------------------------
@@ -122,99 +167,90 @@ describe('AccountPageComponent', () => {
     it('sets empty strings when clerk user has no name', async () => {
       mockClerk.user = signal(null);
 
-      component = await createComponent(mockClerk, mockApi, mockToast);
+      component = await createComponent(
+        mockClerk,
+        mockApi,
+        mockUserService,
+        mockToast,
+        mockRouter,
+      );
 
       expect(component.firstName()).toBe('');
       expect(component.lastName()).toBe('');
     });
 
-    it('calls the API to load the avatar URL', async () => {
-      await component.fetchAvatarOriginalUrl();
+    it('sets editorSrc from userService.avatarUrl', async () => {
+      mockUserService.avatarUrl = signal('http://api/users/u1/avatar?t=123');
 
-      expect(mockApi.get).toHaveBeenCalledWith('/users/me');
+      component = await createComponent(
+        mockClerk,
+        mockApi,
+        mockUserService,
+        mockToast,
+        mockRouter,
+      );
+
+      expect(component.editorSrc()).toBe('http://api/users/u1/avatar?t=123');
     });
 
-    it('sets avatarOriginalUrl when the API returns a stored URL', async () => {
-      mockApi.get.mockResolvedValue({
-        id: 'user-1',
-        avatarOriginalUrl: 'http://s3/orig.jpg',
+    it('refreshes user data from backend on init', async () => {
+      mockUserService.load.mockImplementation(async () => {
+        mockUserService.user.set({ firstName: 'Jane', lastName: 'Smith' });
       });
 
-      await component.fetchAvatarOriginalUrl();
-
-      expect(component.avatarOriginalUrl()).toBe(`${MOCK_API_URL}/users/user-1/avatar`);
-    });
-
-    it('shows error toast for unexpected API errors on avatar load', async () => {
-      mockApi.get.mockRejectedValue(new ApiError('Server error', 500));
-
-      await component.fetchAvatarOriginalUrl();
-
-      expect(mockToast.error).toHaveBeenCalledWith('Full-size image could not be loaded');
-    });
-
-    it('silently ignores 401 errors on avatar load', async () => {
-      mockApi.get.mockRejectedValue(new ApiError('Unauthorized', 401));
-
-      await component.fetchAvatarOriginalUrl();
-
-      expect(mockToast.error).not.toHaveBeenCalled();
-    });
-
-    it('creates the user record and continues when GET returns 404', async () => {
-      mockApi.get.mockRejectedValue(new ApiError('Not found', 404));
-      mockApi.put.mockResolvedValue({ id: 'user-1', avatarOriginalUrl: null });
-
-      await component.fetchAvatarOriginalUrl();
-
-      expect(mockApi.put).toHaveBeenCalledWith(
-        '/users/me',
-        expect.objectContaining({
-          firstName: 'John',
-          lastName: 'Doe',
-        }),
+      component = await createComponent(
+        mockClerk,
+        mockApi,
+        mockUserService,
+        mockToast,
+        mockRouter,
       );
-      expect(mockToast.error).not.toHaveBeenCalled();
+
+      await mockUserService.load();
+
+      expect(mockUserService.load).toHaveBeenCalled();
+      expect(component.firstName()).toBe('Jane');
+      expect(component.lastName()).toBe('Smith');
     });
 
-    it('silently ignores network errors on avatar load', async () => {
-      mockApi.get.mockRejectedValue(new TypeError('Failed to fetch'));
+    it('sets savedCropState and liveCropState from userService.avatarCropState', async () => {
+      const cropState: AvatarEditorCropState = { zoom: 2, offsetX: 10, offsetY: 5 };
+      mockUserService.avatarCropState = signal(cropState);
 
-      await component.fetchAvatarOriginalUrl();
+      component = await createComponent(
+        mockClerk,
+        mockApi,
+        mockUserService,
+        mockToast,
+        mockRouter,
+      );
 
-      expect(mockToast.error).not.toHaveBeenCalled();
+      expect(component.savedCropState()).toEqual(cropState);
+      expect(component.liveCropState()).toEqual(cropState);
     });
   });
 
   // ---------------------------------------------------------------------------
-  // Computed: avatarSrc
+  // Signal: editorSrc
   // ---------------------------------------------------------------------------
 
-  describe('avatarSrc', () => {
-    it('returns the backend avatar URL when avatarOriginalUrl is set', () => {
-      component.avatarOriginalUrl.set(`${MOCK_API_URL}/users/u1/avatar`);
-
-      expect(component.avatarSrc()).toBe(`${MOCK_API_URL}/users/u1/avatar`);
+  describe('editorSrc', () => {
+    it('is undefined when userService has no avatar', () => {
+      expect(component.editorSrc()).toBeUndefined();
     });
 
-    it('falls back to the Clerk image when no original URL is stored', async () => {
-      mockClerk.user = signal({
-        ...MOCK_USER,
-        hasImage: true,
-        imageUrl: 'http://clerk/photo',
-      });
+    it('reflects the userService avatarUrl on init', async () => {
+      mockUserService.avatarUrl = signal('http://api/users/u1/avatar?t=123');
 
-      component = await createComponent(mockClerk, mockApi, mockToast);
+      component = await createComponent(
+        mockClerk,
+        mockApi,
+        mockUserService,
+        mockToast,
+        mockRouter,
+      );
 
-      expect(component.avatarSrc()).toBe('http://clerk/photo');
-    });
-
-    it('returns undefined when the user has no image at all', async () => {
-      mockClerk.user = signal({ ...MOCK_USER, hasImage: false });
-
-      component = await createComponent(mockClerk, mockApi, mockToast);
-
-      expect(component.avatarSrc()).toBeUndefined();
+      expect(component.editorSrc()).toBe('http://api/users/u1/avatar?t=123');
     });
   });
 
@@ -253,6 +289,29 @@ describe('AccountPageComponent', () => {
 
       expect(component.hasChanges()).toBe(false);
     });
+
+    it('is true when liveCropState differs from savedCropState', () => {
+      component.savedCropState.set({ zoom: 1, offsetX: 0, offsetY: 0 });
+      component.liveCropState.set({ zoom: 2, offsetX: 10, offsetY: 5 });
+
+      expect(component.hasChanges()).toBe(true);
+    });
+
+    it('is false when liveCropState matches savedCropState', () => {
+      const state: AvatarEditorCropState = { zoom: 2, offsetX: 10, offsetY: 5 };
+      component.savedCropState.set(state);
+      component.liveCropState.set({ ...state });
+
+      expect(component.hasChanges()).toBe(false);
+    });
+
+    it('is false for crop changes when avatarDirty is set (handled by photo save)', () => {
+      component.savedCropState.set({ zoom: 1, offsetX: 0, offsetY: 0 });
+      component.liveCropState.set({ zoom: 2, offsetX: 10, offsetY: 5 });
+      component.avatarDirty.set(true);
+
+      expect(component.hasChanges()).toBe(true); // true because avatarDirty, not cropChanged
+    });
   });
 
   // ---------------------------------------------------------------------------
@@ -282,26 +341,56 @@ describe('AccountPageComponent', () => {
   });
 
   // ---------------------------------------------------------------------------
-  // onCropped
+  // onFileSelected
   // ---------------------------------------------------------------------------
 
-  describe('onCropped', () => {
-    it('resolves the exportCrop promise with the provided blob', async () => {
-      const blob = new Blob(['img']);
-      const cropPromise = component.exportCrop();
+  describe('onFileSelected', () => {
+    it('sets originalFile', () => {
+      const file = new File(['data'], 'photo.jpg');
 
-      component.onCropped({ blob, dataUrl: 'data:image/jpeg;base64,abc' });
+      component.onFileSelected(file);
 
-      await expect(cropPromise).resolves.toBe(blob);
+      expect(component.originalFile).toBe(file);
     });
 
-    it('does nothing when no crop is pending', () => {
-      const event: AvatarEditorCropEvent = {
-        blob: new Blob(),
-        dataUrl: 'data:image/jpeg;base64,abc',
-      };
+    it('sets avatarDirty to true', () => {
+      const file = new File(['data'], 'photo.jpg');
 
-      expect(() => component.onCropped(event)).not.toThrow();
+      component.onFileSelected(file);
+
+      expect(component.avatarDirty()).toBe(true);
+    });
+
+    it('sets removeAvatar to false', () => {
+      component.removeAvatar.set(true);
+      const file = new File(['data'], 'photo.jpg');
+
+      component.onFileSelected(file);
+
+      expect(component.removeAvatar()).toBe(false);
+    });
+
+    it('resets liveCropState to null', () => {
+      component.liveCropState.set({ zoom: 2, offsetX: 10, offsetY: 5 });
+      const file = new File(['data'], 'photo.jpg');
+
+      component.onFileSelected(file);
+
+      expect(component.liveCropState()).toBeNull();
+    });
+  });
+
+  // ---------------------------------------------------------------------------
+  // onCropStateChange
+  // ---------------------------------------------------------------------------
+
+  describe('onCropStateChange', () => {
+    it('updates liveCropState', () => {
+      const state: AvatarEditorCropState = { zoom: 2, offsetX: 10, offsetY: 5 };
+
+      component.onCropStateChange(state);
+
+      expect(component.liveCropState()).toEqual(state);
     });
   });
 
@@ -381,7 +470,7 @@ describe('AccountPageComponent', () => {
 
     it('does not call clerk.updateProfile when only the photo changes', async () => {
       component.avatarDirty.set(true);
-      jest.spyOn(component, 'hasEditorImage').mockReturnValue(true);
+      component.originalFile = new File(['img'], 'photo.jpg');
       jest.spyOn(component, 'exportCrop').mockResolvedValue(new Blob());
 
       await component.onSave();
@@ -419,7 +508,7 @@ describe('AccountPageComponent', () => {
 
     it('does not patch the backend when the name is unchanged', async () => {
       component.avatarDirty.set(true);
-      jest.spyOn(component, 'hasEditorImage').mockReturnValue(true);
+      component.originalFile = new File(['img'], 'photo.jpg');
       jest.spyOn(component, 'exportCrop').mockResolvedValue(new Blob());
 
       await component.onSave();
@@ -460,7 +549,7 @@ describe('AccountPageComponent', () => {
 
     it('shows "Photo updated" when only the photo changes', async () => {
       component.avatarDirty.set(true);
-      jest.spyOn(component, 'hasEditorImage').mockReturnValue(true);
+      component.originalFile = new File(['img'], 'photo.jpg');
       jest.spyOn(component, 'exportCrop').mockResolvedValue(new Blob());
 
       await component.onSave();
@@ -472,7 +561,7 @@ describe('AccountPageComponent', () => {
       component.firstName.set('Jane');
       component.lastName.set('Smith');
       component.avatarDirty.set(true);
-      jest.spyOn(component, 'hasEditorImage').mockReturnValue(true);
+      component.originalFile = new File(['img'], 'photo.jpg');
       jest.spyOn(component, 'exportCrop').mockResolvedValue(new Blob());
 
       await component.onSave();
@@ -499,7 +588,7 @@ describe('AccountPageComponent', () => {
     beforeEach(() => {
       mockBlob = new Blob(['img'], { type: 'image/jpeg' });
       component.avatarDirty.set(true);
-      jest.spyOn(component, 'hasEditorImage').mockReturnValue(true);
+      component.originalFile = new File(['img'], 'photo.jpg');
       jest.spyOn(component, 'exportCrop').mockResolvedValue(mockBlob);
     });
 
@@ -509,11 +598,26 @@ describe('AccountPageComponent', () => {
       expect(mockClerk.setProfileImage).toHaveBeenCalledWith(mockBlob);
     });
 
+    it('retains editorSrc during setProfileImage to avoid flickering the old image', async () => {
+      const existingUrl = 'http://api/users/u1/avatar?t=123';
+      component.editorSrc.set(existingUrl);
+      const urlDuringUpload: (string | undefined)[] = [];
+      mockClerk.setProfileImage.mockImplementation(async () => {
+        urlDuringUpload.push(component.editorSrc());
+        return 'https://img.clerk.com/updated';
+      });
+
+      await component.onSave();
+
+      expect(urlDuringUpload).toEqual([existingUrl]);
+    });
+
     it('uploads the original file when one was captured', async () => {
       component.originalFile = new File(['raw'], 'photo.jpg');
       mockApi.post.mockResolvedValue({
         id: 'u1',
         avatarOriginalUrl: 'http://s3/orig.jpg',
+        avatarCropState: null,
       });
 
       await component.onSave();
@@ -540,6 +644,74 @@ describe('AccountPageComponent', () => {
       );
       expect(mockToast.success).toHaveBeenCalledWith('Photo updated');
     });
+
+    it('saves the current liveCropState when uploading the original file', async () => {
+      const cropState: AvatarEditorCropState = { zoom: 2, offsetX: 10, offsetY: 5 };
+      component.liveCropState.set(cropState);
+      component.originalFile = new File(['raw'], 'photo.jpg');
+      mockApi.post.mockResolvedValue({
+        id: 'u1',
+        avatarOriginalUrl: 'http://s3/orig.jpg',
+        avatarCropState: cropState,
+      });
+
+      await component.onSave();
+
+      expect(component.savedCropState()).toEqual(cropState);
+      expect(mockUserService.setUser).toHaveBeenCalled();
+    });
+  });
+
+  // ---------------------------------------------------------------------------
+  // onSave — crop state
+  // ---------------------------------------------------------------------------
+
+  describe('onSave — crop state', () => {
+    beforeEach(() => {
+      component.savedCropState.set({ zoom: 1, offsetX: 0, offsetY: 0 });
+      component.liveCropState.set({ zoom: 2, offsetX: 10, offsetY: 5 });
+      jest.spyOn(component, 'exportCrop').mockResolvedValue(new Blob(['img']));
+    });
+
+    it('calls clerk.setProfileImage with the cropped blob when only crop changes', async () => {
+      await component.onSave();
+
+      expect(mockClerk.setProfileImage).toHaveBeenCalledWith(expect.any(Blob));
+    });
+
+    it('patches the backend with the new crop state when only crop changes', async () => {
+      await component.onSave();
+
+      expect(mockApi.patch).toHaveBeenCalledWith('/users/me', {
+        avatarCropState: { zoom: 2, offsetX: 10, offsetY: 5 },
+        clerkImageUrl: 'https://img.clerk.com/updated',
+      });
+    });
+
+    it('updates savedCropState after saving crop state', async () => {
+      await component.onSave();
+
+      expect(component.savedCropState()).toEqual({ zoom: 2, offsetX: 10, offsetY: 5 });
+    });
+
+    it('shows "Photo updated" when only crop state changes', async () => {
+      await component.onSave();
+
+      expect(mockToast.success).toHaveBeenCalledWith('Photo updated');
+    });
+
+    it('does not patch for crop state when avatarDirty is set', async () => {
+      component.avatarDirty.set(true);
+      component.originalFile = new File(['img'], 'photo.jpg');
+      jest.spyOn(component, 'exportCrop').mockResolvedValue(new Blob());
+
+      await component.onSave();
+
+      expect(mockApi.patch).not.toHaveBeenCalledWith(
+        '/users/me',
+        expect.objectContaining({ avatarCropState: expect.anything() }),
+      );
+    });
   });
 
   // ---------------------------------------------------------------------------
@@ -553,7 +725,15 @@ describe('AccountPageComponent', () => {
         hasImage: true,
         imageUrl: 'http://clerk/img',
       });
-      component = await createComponent(mockClerk, mockApi, mockToast);
+      mockUserService.hasAvatar = signal(true);
+
+      component = await createComponent(
+        mockClerk,
+        mockApi,
+        mockUserService,
+        mockToast,
+        mockRouter,
+      );
       component.onRemoveAvatar();
     });
 
@@ -563,10 +743,18 @@ describe('AccountPageComponent', () => {
       expect(mockClerk.setProfileImage).toHaveBeenCalledWith(null);
     });
 
-    it('calls the delete avatar endpoint', async () => {
+    it('calls the delete avatar endpoint with the clerk image URL', async () => {
       await component.onSave();
 
-      expect(mockApi.delete).toHaveBeenCalledWith('/users/me/avatar');
+      expect(mockApi.delete).toHaveBeenCalledWith(
+        expect.stringContaining('/users/me/avatar?clerkImageUrl='),
+      );
+    });
+
+    it('clears the avatar via userService after deletion', async () => {
+      await component.onSave();
+
+      expect(mockUserService.clearAvatar).toHaveBeenCalled();
     });
 
     it('shows a toast when the delete fails but still reports photo updated', async () => {
@@ -582,7 +770,15 @@ describe('AccountPageComponent', () => {
 
     it('does not call setProfileImage when the user has no existing photo', async () => {
       mockClerk.user = signal({ ...MOCK_USER, hasImage: false });
-      component = await createComponent(mockClerk, mockApi, mockToast);
+      mockUserService.hasAvatar = signal(false);
+
+      component = await createComponent(
+        mockClerk,
+        mockApi,
+        mockUserService,
+        mockToast,
+        mockRouter,
+      );
       component.onRemoveAvatar();
 
       await component.onSave();
@@ -615,7 +811,7 @@ describe('AccountPageComponent', () => {
 
     it('resets avatarDirty after a successful save', async () => {
       component.avatarDirty.set(true);
-      jest.spyOn(component, 'hasEditorImage').mockReturnValue(true);
+      component.originalFile = new File(['img'], 'photo.jpg');
       jest.spyOn(component, 'exportCrop').mockResolvedValue(new Blob());
 
       await component.onSave();
@@ -629,7 +825,15 @@ describe('AccountPageComponent', () => {
         hasImage: true,
         imageUrl: 'http://clerk/img',
       });
-      component = await createComponent(mockClerk, mockApi, mockToast);
+      mockUserService.hasAvatar = signal(true);
+
+      component = await createComponent(
+        mockClerk,
+        mockApi,
+        mockUserService,
+        mockToast,
+        mockRouter,
+      );
       component.onRemoveAvatar();
 
       await component.onSave();
@@ -640,7 +844,6 @@ describe('AccountPageComponent', () => {
     it('resets originalFile after a successful save', async () => {
       component.avatarDirty.set(true);
       component.originalFile = new File([''], 'test.jpg');
-      jest.spyOn(component, 'hasEditorImage').mockReturnValue(true);
       jest.spyOn(component, 'exportCrop').mockResolvedValue(new Blob());
 
       await component.onSave();
@@ -660,113 +863,67 @@ describe('AccountPageComponent', () => {
   });
 
   // ---------------------------------------------------------------------------
-  // registerFileListeners
+  // onConfirmDelete
   // ---------------------------------------------------------------------------
 
-  describe('registerFileListeners', () => {
-    let hostEl: HTMLElement;
+  describe('onConfirmDelete', () => {
+    it('calls the delete user endpoint', async () => {
+      await component.onConfirmDelete();
 
-    beforeEach(() => {
-      hostEl = document.createElement('div');
-      component.registerFileListeners(hostEl);
+      expect(mockApi.delete).toHaveBeenCalledWith('/users/me');
     });
 
-    it('sets originalFile on a change event', () => {
-      const file = new File(['data'], 'photo.jpg');
-      const input = document.createElement('input');
-      Object.defineProperty(input, 'files', { value: [file], configurable: true });
-      hostEl.appendChild(input);
+    it('logs out and navigates to home after successful deletion', async () => {
+      await component.onConfirmDelete();
 
-      input.dispatchEvent(new Event('change', { bubbles: true }));
-
-      expect(component.originalFile).toBe(file);
+      expect(mockClerk.logOut).toHaveBeenCalled();
+      expect(mockRouter.navigate).toHaveBeenCalledWith(['/']);
     });
 
-    it('sets avatarDirty to true on a change event', () => {
-      const file = new File(['data'], 'photo.jpg');
-      const input = document.createElement('input');
-      Object.defineProperty(input, 'files', { value: [file], configurable: true });
-      hostEl.appendChild(input);
+    it('closes the dialog after successful deletion', async () => {
+      component.deleteDialogOpen.set(true);
 
-      input.dispatchEvent(new Event('change', { bubbles: true }));
+      await component.onConfirmDelete();
 
-      expect(component.avatarDirty()).toBe(true);
+      expect(component.deleteDialogOpen()).toBe(false);
     });
 
-    it('sets removeAvatar to false on a change event', () => {
-      component.removeAvatar.set(true);
-      const file = new File(['data'], 'photo.jpg');
-      const input = document.createElement('input');
-      Object.defineProperty(input, 'files', { value: [file], configurable: true });
-      hostEl.appendChild(input);
+    it('sets deleting to false after successful deletion', async () => {
+      await component.onConfirmDelete();
 
-      input.dispatchEvent(new Event('change', { bubbles: true }));
-
-      expect(component.removeAvatar()).toBe(false);
+      expect(component.deleting()).toBe(false);
     });
 
-    it('ignores change events with no files', () => {
-      const input = document.createElement('input');
-      Object.defineProperty(input, 'files', { value: [], configurable: true });
-      hostEl.appendChild(input);
+    it('still navigates when logOut throws', async () => {
+      mockClerk.logOut.mockRejectedValue(new Error('session invalid'));
 
-      input.dispatchEvent(new Event('change', { bubbles: true }));
+      await component.onConfirmDelete();
 
-      expect(component.originalFile).toBeNull();
-      expect(component.avatarDirty()).toBe(false);
+      expect(mockRouter.navigate).toHaveBeenCalledWith(['/']);
     });
 
-    it('sets originalFile on a drop event', () => {
-      const file = new File(['data'], 'dropped.jpg');
-      const dropEvent = new Event('drop') as Event & { dataTransfer: { files: File[] } };
-      Object.defineProperty(dropEvent, 'dataTransfer', {
-        value: { files: [file] },
-        configurable: true,
-      });
+    it('shows an error toast when the delete fails', async () => {
+      mockApi.delete.mockRejectedValue(new Error('Server error'));
 
-      hostEl.dispatchEvent(dropEvent);
+      await component.onConfirmDelete();
 
-      expect(component.originalFile).toBe(file);
+      expect(mockToast.error).toHaveBeenCalledWith('Something went wrong');
     });
 
-    it('sets avatarDirty to true on a drop event', () => {
-      const file = new File(['data'], 'dropped.jpg');
-      const dropEvent = new Event('drop') as Event & { dataTransfer: { files: File[] } };
-      Object.defineProperty(dropEvent, 'dataTransfer', {
-        value: { files: [file] },
-        configurable: true,
-      });
+    it('does not navigate when the delete fails', async () => {
+      mockApi.delete.mockRejectedValue(new Error('Server error'));
 
-      hostEl.dispatchEvent(dropEvent);
+      await component.onConfirmDelete();
 
-      expect(component.avatarDirty()).toBe(true);
+      expect(mockRouter.navigate).not.toHaveBeenCalled();
     });
 
-    it('sets removeAvatar to false on a drop event', () => {
-      component.removeAvatar.set(true);
-      const file = new File(['data'], 'dropped.jpg');
-      const dropEvent = new Event('drop') as Event & { dataTransfer: { files: File[] } };
-      Object.defineProperty(dropEvent, 'dataTransfer', {
-        value: { files: [file] },
-        configurable: true,
-      });
+    it('sets deleting to false when the delete fails', async () => {
+      mockApi.delete.mockRejectedValue(new Error('Server error'));
 
-      hostEl.dispatchEvent(dropEvent);
+      await component.onConfirmDelete();
 
-      expect(component.removeAvatar()).toBe(false);
-    });
-
-    it('ignores drop events with no files', () => {
-      const dropEvent = new Event('drop') as Event & { dataTransfer: { files: File[] } };
-      Object.defineProperty(dropEvent, 'dataTransfer', {
-        value: { files: [] },
-        configurable: true,
-      });
-
-      hostEl.dispatchEvent(dropEvent);
-
-      expect(component.originalFile).toBeNull();
-      expect(component.avatarDirty()).toBe(false);
+      expect(component.deleting()).toBe(false);
     });
   });
 });
