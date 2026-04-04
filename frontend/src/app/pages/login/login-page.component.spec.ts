@@ -16,7 +16,8 @@ jest.mock('@env', () => ({
 }));
 
 type MockClerkService = {
-  logIn: jest.Mock<Promise<void>, [string, string]>;
+  logIn: jest.Mock<Promise<{ needsSecondFactor: boolean }>, [string, string]>;
+  verifyLoginCode: jest.Mock<Promise<void>, [string]>;
   continueWithGoogle: jest.Mock<Promise<void>>;
   extractError: jest.Mock<string, [unknown]>;
 };
@@ -32,7 +33,8 @@ describe('LoginPageComponent', () => {
 
   beforeEach(async () => {
     mockClerk = {
-      logIn: jest.fn().mockResolvedValue(undefined),
+      logIn: jest.fn().mockResolvedValue({ needsSecondFactor: false }),
+      verifyLoginCode: jest.fn().mockResolvedValue(undefined),
       continueWithGoogle: jest.fn().mockResolvedValue(undefined),
       extractError: jest.fn().mockReturnValue('Something went wrong'),
     };
@@ -66,11 +68,14 @@ describe('LoginPageComponent', () => {
     it('has empty fields and no errors', () => {
       expect(component.email()).toBe('');
       expect(component.password()).toBe('');
+      expect(component.verificationCode()).toBe('');
       expect(component.emailError()).toBe('');
       expect(component.passwordError()).toBe('');
+      expect(component.verificationCodeError()).toBe('');
       expect(component.error()).toBe('');
       expect(component.loading()).toBe(false);
       expect(component.googleLoading()).toBe(false);
+      expect(component.pendingSecondFactor()).toBe(false);
     });
   });
 
@@ -202,6 +207,73 @@ describe('LoginPageComponent', () => {
 
       await component.onSubmit();
 
+      expect(component.error()).toBe('');
+    });
+  });
+
+  // ---------------------------------------------------------------------------
+  // onSubmit — second factor
+  // ---------------------------------------------------------------------------
+
+  describe('onSubmit — second factor', () => {
+    beforeEach(() => {
+      component.email.set('user@test.com');
+      component.password.set('password123');
+      mockClerk.logIn.mockResolvedValue({ needsSecondFactor: true });
+    });
+
+    it('sets pendingSecondFactor to true when second factor is needed', async () => {
+      await component.onSubmit();
+
+      expect(component.pendingSecondFactor()).toBe(true);
+    });
+
+    it('does not navigate when second factor is needed', async () => {
+      await component.onSubmit();
+
+      expect(mockRouter.navigate).not.toHaveBeenCalled();
+    });
+
+    it('sets loading to false after setting pendingSecondFactor', async () => {
+      await component.onSubmit();
+
+      expect(component.loading()).toBe(false);
+    });
+  });
+
+  // ---------------------------------------------------------------------------
+  // onVerify
+  // ---------------------------------------------------------------------------
+
+  describe('onVerify', () => {
+    it('calls clerk.verifyLoginCode and navigates on success', async () => {
+      component.verificationCode.set('123456');
+
+      await component.onVerify();
+
+      expect(mockClerk.verifyLoginCode).toHaveBeenCalledWith('123456');
+      expect(mockRouter.navigate).toHaveBeenCalledWith(['/']);
+      expect(component.loading()).toBe(false);
+    });
+
+    it('sets error on verification failure', async () => {
+      component.verificationCode.set('000000');
+      mockClerk.verifyLoginCode.mockRejectedValue(new Error('Bad code'));
+
+      await component.onVerify();
+
+      expect(component.error()).toBe('Something went wrong');
+      expect(component.loading()).toBe(false);
+    });
+
+    it('clears previous errors before verifying', async () => {
+      component.error.set('Old error');
+      component.verificationCodeError.set('Old code error');
+      component.verificationCode.set('123456');
+
+      await component.onVerify();
+
+      expect(component.verificationCodeError()).toBe('');
       expect(component.error()).toBe('');
     });
   });

@@ -23,6 +23,7 @@ type MockSignIn = {
   create: jest.Mock;
   authenticateWithRedirect: jest.Mock;
   attemptFirstFactor: jest.Mock;
+  attemptSecondFactor: jest.Mock;
   firstFactorVerification: { status: string } | null;
 };
 
@@ -69,6 +70,7 @@ jest.mock('@clerk/clerk-js', () => ({
           create: jest.fn(),
           authenticateWithRedirect: jest.fn().mockResolvedValue(undefined),
           attemptFirstFactor: jest.fn(),
+          attemptSecondFactor: jest.fn(),
           firstFactorVerification: null,
         },
       },
@@ -214,7 +216,7 @@ describe('ClerkService', () => {
         createdSessionId: 'session-3',
       });
 
-      await service.logIn('user@test.com', 'password');
+      const result = await service.logIn('user@test.com', 'password');
 
       expect(mockClerkInstance.client.signIn.create).toHaveBeenCalledWith({
         strategy: 'password',
@@ -222,14 +224,56 @@ describe('ClerkService', () => {
         password: 'password',
       });
       expect(mockClerkInstance.setActive).toHaveBeenCalledWith({ session: 'session-3' });
+      expect(result).toEqual({ needsSecondFactor: false });
     });
 
-    it('does not set session when sign-in is not complete', async () => {
+    it('prepares second factor and returns needsSecondFactor true', async () => {
+      const prepareSecondFactor = jest.fn().mockResolvedValue(undefined);
       mockClerkInstance.client.signIn.create.mockResolvedValue({
+        status: 'needs_second_factor',
+        prepareSecondFactor,
+      });
+
+      const result = await service.logIn('user@test.com', 'password');
+
+      expect(prepareSecondFactor).toHaveBeenCalledWith({ strategy: 'email_code' });
+      expect(mockClerkInstance.setActive).not.toHaveBeenCalled();
+      expect(result).toEqual({ needsSecondFactor: true });
+    });
+  });
+
+  // ---------------------------------------------------------------------------
+  // verifyLoginCode
+  // ---------------------------------------------------------------------------
+
+  describe('verifyLoginCode', () => {
+    beforeEach(async () => {
+      await service.load();
+    });
+
+    it('attempts second factor and sets session on success', async () => {
+      mockClerkInstance.client.signIn.attemptSecondFactor.mockResolvedValue({
+        status: 'complete',
+        createdSessionId: 'session-2fa',
+      });
+
+      await service.verifyLoginCode('123456');
+
+      expect(mockClerkInstance.client.signIn.attemptSecondFactor).toHaveBeenCalledWith({
+        strategy: 'email_code',
+        code: '123456',
+      });
+      expect(mockClerkInstance.setActive).toHaveBeenCalledWith({
+        session: 'session-2fa',
+      });
+    });
+
+    it('does not set session when verification is not complete', async () => {
+      mockClerkInstance.client.signIn.attemptSecondFactor.mockResolvedValue({
         status: 'needs_second_factor',
       });
 
-      await service.logIn('user@test.com', 'password');
+      await service.verifyLoginCode('123456');
 
       expect(mockClerkInstance.setActive).not.toHaveBeenCalled();
     });
