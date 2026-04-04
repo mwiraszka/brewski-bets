@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Show toast notification on the account page when profile changes are made externally via the Clerk dashboard
+- Automatically redirect to home with a toast when the user's account is deleted externally
 - Add unit tests for all frontend components, services, guards, and pages achieving 100% line and function coverage
 
 ### Fixed
