@@ -31,6 +31,7 @@ type MockClerkService = {
   reloadUser: jest.Mock<Promise<void>>;
   updateProfile: jest.Mock<Promise<void>, [string, string]>;
   setProfileImage: jest.Mock<Promise<string | undefined>, [Blob | null]>;
+  expectSessionEnd: jest.Mock<void>;
   logOut: jest.Mock<Promise<void>>;
   extractError: jest.Mock<string, [unknown]>;
 };
@@ -110,6 +111,7 @@ describe('AccountPageComponent', () => {
       reloadUser: jest.fn().mockResolvedValue(undefined),
       updateProfile: jest.fn().mockResolvedValue(undefined),
       setProfileImage: jest.fn().mockResolvedValue('https://img.clerk.com/updated'),
+      expectSessionEnd: jest.fn(),
       logOut: jest.fn().mockResolvedValue(undefined),
       extractError: jest.fn().mockReturnValue('Something went wrong'),
     };
@@ -206,7 +208,7 @@ describe('AccountPageComponent', () => {
         mockRouter,
       );
 
-      await mockUserService.load();
+      await new Promise(resolve => setTimeout(resolve));
 
       expect(mockUserService.load).toHaveBeenCalled();
       expect(component.firstName()).toBe('Jane');
@@ -943,7 +945,7 @@ describe('AccountPageComponent', () => {
       });
       document.dispatchEvent(new Event('visibilitychange'));
 
-      await mockUserService.load();
+      await new Promise(resolve => setTimeout(resolve));
 
       expect(component.firstName()).toBe('Refreshed');
     });
