@@ -59,6 +59,7 @@ export class AccountPageComponent implements OnInit {
   readonly avatarDirty = signal(false);
 
   readonly editorSrc = signal<string | undefined>(undefined);
+  readonly revertSrc = signal<string | undefined>(undefined);
   readonly removeAvatar = signal(false);
   readonly savedCropState = signal<AvatarEditorCropState | null>(null);
   readonly liveCropState = signal<AvatarEditorCropState | null>(null);
@@ -85,6 +86,9 @@ export class AccountPageComponent implements OnInit {
     this.liveCropState.set(cropState);
 
     this.editorSrc.set(this.userService.avatarUrl());
+
+    const clerkUser = this.clerk.user();
+    this.revertSrc.set(clerkUser?.hasImage ? clerkUser.imageUrl : undefined);
 
     this.refreshFromClerk();
 
@@ -252,7 +256,10 @@ export class AccountPageComponent implements OnInit {
     if (this.avatarDirty()) return false;
     const saved = this.savedCropState();
     const live = this.liveCropState();
-    if (!live || !saved) return false;
+    if (!live) return false;
+    if (!saved) {
+      return live.zoom !== 1 || live.offsetX !== 0 || live.offsetY !== 0;
+    }
     return (
       live.zoom !== saved.zoom ||
       live.offsetX !== saved.offsetX ||
