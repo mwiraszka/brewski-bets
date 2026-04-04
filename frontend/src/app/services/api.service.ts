@@ -60,6 +60,7 @@ export class ApiService {
     const response = await fetch(`${environment.apiUrl}${path}`, {
       ...init,
       headers,
+      cache: 'no-store',
     });
 
     if (!response.ok) {
