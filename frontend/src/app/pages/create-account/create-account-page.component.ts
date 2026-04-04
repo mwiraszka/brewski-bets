@@ -10,7 +10,6 @@ import {
   Component,
   ElementRef,
   OnDestroy,
-  afterNextRender,
   inject,
   signal,
   viewChild,
@@ -153,9 +152,7 @@ export class CreateAccountPageComponent implements OnDestroy {
 
       if (needsVerification) {
         this.pendingVerification.set(true);
-        afterNextRender(() =>
-          this.codeInput()?.nativeElement.querySelector('input')?.focus(),
-        );
+        setTimeout(() => this.codeInput()?.nativeElement.querySelector('input')?.focus());
       } else {
         await this.router.navigate(['/']);
       }
