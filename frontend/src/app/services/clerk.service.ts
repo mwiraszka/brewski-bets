@@ -13,6 +13,9 @@ export class ClerkService {
   readonly isLoaded = signal(false);
   readonly isLoggedIn = signal(false);
   readonly user = signal<Clerk['user']>(null, { equal: () => false });
+  readonly externallyDeleted = signal(false);
+
+  private _sessionEndExpected = false;
 
   async load(): Promise<void> {
     this.clerk = new Clerk(environment.clerkPublishableKey);
@@ -122,7 +125,12 @@ export class ClerkService {
     });
   }
 
+  expectSessionEnd(): void {
+    this._sessionEndExpected = true;
+  }
+
   async logOut(): Promise<void> {
+    this._sessionEndExpected = true;
     await this.clerk.signOut();
   }
 
@@ -202,8 +210,14 @@ export class ClerkService {
   }
 
   private syncState(): void {
+    const wasLoggedIn = this.isLoggedIn();
+
     this.isLoaded.set(true);
     this.isLoggedIn.set(!!this.clerk.user);
     this.user.set(this.clerk.user ?? null);
+
+    if (wasLoggedIn && !this.clerk.user && !this._sessionEndExpected) {
+      this.externallyDeleted.set(true);
+    }
   }
 }

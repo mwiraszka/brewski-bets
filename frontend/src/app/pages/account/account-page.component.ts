@@ -90,11 +90,11 @@ export class AccountPageComponent implements OnInit {
     const clerkUser = this.clerk.user();
     this.revertSrc.set(clerkUser?.hasImage ? clerkUser.imageUrl : undefined);
 
-    this.refreshFromClerk();
+    this.refreshFromClerk(false);
 
     const onVisibilityChange = () => {
       if (document.visibilityState === 'visible') {
-        this.refreshFromClerk();
+        this.refreshFromClerk(true);
       }
     };
     document.addEventListener('visibilitychange', onVisibilityChange);
@@ -103,15 +103,43 @@ export class AccountPageComponent implements OnInit {
     });
   }
 
-  private async refreshFromClerk(): Promise<void> {
+  private async refreshFromClerk(notify: boolean): Promise<void> {
+    const previousRevertSrc = this.revertSrc();
+
+    await this.clerk.reloadUser();
     await this.userService.load();
+
+    const changes: string[] = [];
 
     const user = this.userService.user();
     if (user) {
+      const currentFirst = this.originalFirstName();
+      const currentLast = this.originalLastName();
+
+      if (currentFirst && user.firstName !== currentFirst) {
+        changes.push('first name');
+      }
+      if (currentLast && user.lastName !== currentLast) {
+        changes.push('last name');
+      }
+
       this.firstName.set(user.firstName);
       this.lastName.set(user.lastName);
       this.originalFirstName.set(user.firstName);
       this.originalLastName.set(user.lastName);
+    }
+
+    const clerkUser = this.clerk.user();
+    const newRevertSrc = clerkUser?.hasImage ? clerkUser.imageUrl : undefined;
+
+    if (newRevertSrc !== previousRevertSrc) {
+      changes.push('photo');
+      this.revertSrc.set(newRevertSrc);
+      this.editorSrc.set(newRevertSrc);
+    }
+
+    if (notify && changes.length) {
+      this.toast.success(this.buildSuccessMessage(changes));
     }
   }
 
@@ -299,6 +327,7 @@ export class AccountPageComponent implements OnInit {
     this.deleting.set(true);
 
     try {
+      this.clerk.expectSessionEnd();
       await this.api.delete('/users/me');
       this.deleteDialogOpen.set(false);
 
