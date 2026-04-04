@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Handle Clerk's new device verification by prompting for an email code during login
 - Fix `stringifyContentPathRegex` in Jest config using incompatible regex literal instead of string
 
 ## [0.12.0] - 2026-04-04

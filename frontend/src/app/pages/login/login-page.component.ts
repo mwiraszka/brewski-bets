@@ -1,6 +1,7 @@
 import {
   ButtonComponent,
   CardComponent,
+  CodeInputComponent,
   DividerComponent,
   InputComponent,
 } from '@eagami/ui';
@@ -23,6 +24,7 @@ const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
     RouterLink,
     ButtonComponent,
     CardComponent,
+    CodeInputComponent,
     DividerComponent,
     InputComponent,
     GoogleIconComponent,
@@ -35,11 +37,15 @@ export class LoginPageComponent {
   email = signal('');
   password = signal('');
 
+  verificationCode = signal('');
+
   emailError = signal('');
   passwordError = signal('');
+  verificationCodeError = signal('');
   error = signal('');
   loading = signal(false);
   googleLoading = signal(false);
+  pendingSecondFactor = signal(false);
 
   onEmailBlur(): void {
     if (!this.email()) return;
@@ -80,6 +86,21 @@ export class LoginPageComponent {
     }
   }
 
+  async onVerify(): Promise<void> {
+    this.verificationCodeError.set('');
+    this.error.set('');
+    this.loading.set(true);
+
+    try {
+      await this.clerk.verifyLoginCode(this.verificationCode());
+      await this.router.navigate(['/']);
+    } catch (e: unknown) {
+      this.error.set(this.clerk.extractError(e));
+    } finally {
+      this.loading.set(false);
+    }
+  }
+
   async onSubmit(): Promise<void> {
     if (!this.validateAll()) return;
 
@@ -87,8 +108,13 @@ export class LoginPageComponent {
     this.loading.set(true);
 
     try {
-      await this.clerk.logIn(this.email(), this.password());
-      await this.router.navigate(['/']);
+      const { needsSecondFactor } = await this.clerk.logIn(this.email(), this.password());
+
+      if (needsSecondFactor) {
+        this.pendingSecondFactor.set(true);
+      } else {
+        await this.router.navigate(['/']);
+      }
     } catch (e: unknown) {
       this.error.set(this.clerk.extractError(e));
     } finally {
