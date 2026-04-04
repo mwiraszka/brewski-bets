@@ -6,7 +6,14 @@ import {
   InputComponent,
 } from '@eagami/ui';
 
-import { Component, inject, signal } from '@angular/core';
+import {
+  Component,
+  ElementRef,
+  afterNextRender,
+  inject,
+  signal,
+  viewChild,
+} from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 
@@ -33,6 +40,8 @@ const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 export class LoginPageComponent {
   private readonly clerk = inject(ClerkService);
   private readonly router = inject(Router);
+
+  private readonly codeInput = viewChild<ElementRef>('codeInput');
 
   email = signal('');
   password = signal('');
@@ -112,6 +121,9 @@ export class LoginPageComponent {
 
       if (needsSecondFactor) {
         this.pendingSecondFactor.set(true);
+        afterNextRender(() =>
+          this.codeInput()?.nativeElement.querySelector('input')?.focus(),
+        );
       } else {
         await this.router.navigate(['/']);
       }

@@ -103,7 +103,9 @@
     <div class="auth-form">
       <p class="hint">We sent a verification code to {{ email() }}.</p>
 
-      <div class="code-input">
+      <div
+        class="code-input"
+        #codeInput>
         <ea-code-input
           label="Verification code"
           [error]="verificationCodeError()"
