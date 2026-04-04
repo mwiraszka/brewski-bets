@@ -15,7 +15,7 @@ const bindings = process.env as unknown as AppBindings;
 
 let cachedDb: Db | null = null;
 
-const app = new Hono<AppContext>().basePath('/api');
+export const app = new Hono<AppContext>().basePath('/api');
 
 app.use('*', async (c, next) => {
   Object.assign(c.env, bindings);
@@ -88,6 +88,8 @@ app.use('/bets/*', authMiddleware);
 app.route('/users', userRoutes);
 app.route('/bets', betRoutes);
 
-const port = Number(process.env['PORT'] ?? 3000);
-serve({ fetch: app.fetch, port });
-console.log(`Server running on http://localhost:${port}`);
+if (!process.env['VERCEL']) {
+  const port = Number(process.env['PORT'] ?? 3000);
+  serve({ fetch: app.fetch, port });
+  console.log(`Server running on http://localhost:${port}`);
+}
