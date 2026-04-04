@@ -9,6 +9,8 @@ import { environment } from '@env';
 
 export interface UserRecord {
   id: string;
+  firstName: string;
+  lastName: string;
   avatarOriginalUrl: string | null;
   avatarCropState: AvatarEditorCropState | null;
   lastModifiedDate: string;
@@ -22,6 +24,8 @@ export class UserService {
   private readonly clerk = inject(ClerkService);
 
   private readonly _user = signal<UserRecord | null>(null);
+
+  readonly user = this._user.asReadonly();
 
   readonly avatarUrl = computed((): string | undefined => {
     const user = this._user();

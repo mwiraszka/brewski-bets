@@ -9,7 +9,15 @@ import {
   ToastService,
 } from '@eagami/ui';
 
-import { Component, OnInit, computed, inject, signal, viewChild } from '@angular/core';
+import {
+  Component,
+  DestroyRef,
+  OnInit,
+  computed,
+  inject,
+  signal,
+  viewChild,
+} from '@angular/core';
 import { Router } from '@angular/router';
 
 import { ApiService } from '@app/services/api.service';
@@ -32,6 +40,7 @@ import { UserRecord, UserService } from '@app/services/user.service';
 export class AccountPageComponent implements OnInit {
   private readonly api = inject(ApiService);
   private readonly clerk = inject(ClerkService);
+  private readonly destroyRef = inject(DestroyRef);
   private readonly router = inject(Router);
   private readonly userService = inject(UserService);
   private readonly toast = inject(ToastService);
@@ -40,6 +49,8 @@ export class AccountPageComponent implements OnInit {
 
   readonly firstName = signal('');
   readonly lastName = signal('');
+  private readonly originalFirstName = signal('');
+  private readonly originalLastName = signal('');
   readonly firstNameError = signal('');
   readonly lastNameError = signal('');
   readonly saving = signal(false);
@@ -54,10 +65,9 @@ export class AccountPageComponent implements OnInit {
   originalFile: File | null = null;
 
   readonly hasChanges = computed(() => {
-    const user = this.clerk.user();
     return (
-      this.firstName() !== (user?.firstName ?? '') ||
-      this.lastName() !== (user?.lastName ?? '') ||
+      this.firstName() !== this.originalFirstName() ||
+      this.lastName() !== this.originalLastName() ||
       this.avatarDirty() ||
       this.isCropChanged()
     );
@@ -67,6 +77,8 @@ export class AccountPageComponent implements OnInit {
     const user = this.clerk.user();
     this.firstName.set(user?.firstName ?? '');
     this.lastName.set(user?.lastName ?? '');
+    this.originalFirstName.set(user?.firstName ?? '');
+    this.originalLastName.set(user?.lastName ?? '');
 
     const cropState = this.userService.avatarCropState();
     this.savedCropState.set(cropState);
@@ -74,11 +86,29 @@ export class AccountPageComponent implements OnInit {
 
     this.editorSrc.set(this.userService.avatarUrl());
 
-    this.clerk.reloadUser().then(() => {
-      const updated = this.clerk.user();
-      this.firstName.set(updated?.firstName ?? '');
-      this.lastName.set(updated?.lastName ?? '');
+    this.refreshFromClerk();
+
+    const onVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        this.refreshFromClerk();
+      }
+    };
+    document.addEventListener('visibilitychange', onVisibilityChange);
+    this.destroyRef.onDestroy(() => {
+      document.removeEventListener('visibilitychange', onVisibilityChange);
     });
+  }
+
+  private async refreshFromClerk(): Promise<void> {
+    await this.userService.load();
+
+    const user = this.userService.user();
+    if (user) {
+      this.firstName.set(user.firstName);
+      this.lastName.set(user.lastName);
+      this.originalFirstName.set(user.firstName);
+      this.originalLastName.set(user.lastName);
+    }
   }
 
   onFileSelected(file: File): void {
@@ -110,6 +140,8 @@ export class AccountPageComponent implements OnInit {
         this.toast.success(this.buildSuccessMessage(changes));
       }
 
+      this.originalFirstName.set(this.firstName());
+      this.originalLastName.set(this.lastName());
       this.avatarDirty.set(false);
       this.removeAvatar.set(false);
       this.originalFile = null;
@@ -134,11 +166,10 @@ export class AccountPageComponent implements OnInit {
   }
 
   private async applyChanges(): Promise<string[]> {
-    const user = this.clerk.user();
     const changes: string[] = [];
 
-    const firstChanged = this.firstName() !== (user?.firstName ?? '');
-    const lastChanged = this.lastName() !== (user?.lastName ?? '');
+    const firstChanged = this.firstName() !== this.originalFirstName();
+    const lastChanged = this.lastName() !== this.originalLastName();
     const photoChanged =
       this.avatarDirty() && !this.removeAvatar() && !!this.originalFile;
     const photoRemoved =

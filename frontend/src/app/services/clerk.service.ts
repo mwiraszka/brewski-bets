@@ -110,6 +110,7 @@ export class ClerkService {
 
   async reloadUser(): Promise<void> {
     await this.clerk.user?.reload();
+    this.syncState();
   }
 
   async getToken(): Promise<string | null> {
