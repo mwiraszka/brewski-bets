@@ -26,6 +26,7 @@ type MockUser = {
 };
 
 type MockClerkService = {
+  isLoaded: WritableSignal<boolean>;
   isLoggedIn: WritableSignal<boolean>;
   user: WritableSignal<MockUser | null>;
   logOut: jest.Mock<Promise<void>>;
@@ -38,6 +39,7 @@ describe('HeaderComponent', () => {
 
   beforeEach(async () => {
     mockClerk = {
+      isLoaded: signal(true),
       isLoggedIn: signal(false),
       user: signal<MockUser | null>(null),
       logOut: jest.fn().mockResolvedValue(undefined),
@@ -94,8 +96,16 @@ describe('HeaderComponent', () => {
   // ---------------------------------------------------------------------------
 
   describe('showLoginButton', () => {
-    it('returns true when not logged in and not on /login', () => {
+    it('returns true when loaded, not logged in, and on a public page', () => {
+      routerEvents$.next(new NavigationEnd(1, '/privacy-policy', '/privacy-policy'));
+
       expect(component.showLoginButton()).toBe(true);
+    });
+
+    it('returns false when clerk has not loaded yet', () => {
+      mockClerk.isLoaded.set(false);
+
+      expect(component.showLoginButton()).toBe(false);
     });
 
     it('returns false when logged in', () => {
@@ -104,8 +114,24 @@ describe('HeaderComponent', () => {
       expect(component.showLoginButton()).toBe(false);
     });
 
-    it('returns false when on /login', () => {
+    it('returns false on /', () => {
+      expect(component.showLoginButton()).toBe(false);
+    });
+
+    it('returns false on /login', () => {
       routerEvents$.next(new NavigationEnd(1, '/login', '/login'));
+
+      expect(component.showLoginButton()).toBe(false);
+    });
+
+    it('returns false on /create-account', () => {
+      routerEvents$.next(new NavigationEnd(1, '/create-account', '/create-account'));
+
+      expect(component.showLoginButton()).toBe(false);
+    });
+
+    it('returns false on /forgot-password', () => {
+      routerEvents$.next(new NavigationEnd(1, '/forgot-password', '/forgot-password'));
 
       expect(component.showLoginButton()).toBe(false);
     });
