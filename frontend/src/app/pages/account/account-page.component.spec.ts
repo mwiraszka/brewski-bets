@@ -508,14 +508,21 @@ describe('AccountPageComponent', () => {
       });
     });
 
-    it('does not patch the backend when the name is unchanged', async () => {
+    it('does not patch the backend with name fields when the name is unchanged', async () => {
       component.avatarDirty.set(true);
       component.originalFile = new File(['img'], 'photo.jpg');
       jest.spyOn(component, 'exportCrop').mockResolvedValue(new Blob());
 
       await component.onSave();
 
-      expect(mockApi.patch).not.toHaveBeenCalled();
+      expect(mockApi.patch).not.toHaveBeenCalledWith(
+        '/users/me',
+        expect.objectContaining({ firstName: expect.anything() }),
+      );
+      expect(mockApi.patch).not.toHaveBeenCalledWith(
+        '/users/me',
+        expect.objectContaining({ lastName: expect.anything() }),
+      );
     });
   });
 

@@ -244,6 +244,8 @@ export class AccountPageComponent implements OnInit {
     const cropState = this.liveCropState() ?? { zoom: 1, offsetX: 0, offsetY: 0 };
     const clerkImageUrl = await this.clerk.setProfileImage(blob);
 
+    await this.api.patch('/users/me', { clerkImageUrl });
+
     if (this.originalFile) {
       try {
         await this.uploadOriginalAvatar(this.originalFile, cropState, clerkImageUrl);
