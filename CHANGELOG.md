@@ -12,6 +12,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Prevent Clerk webhook from overwriting the full-size avatar in R2 with the cropped version after saving a photo
 - Ensure the avatar editor always displays the full-size image from R2, never the cropped Clerk thumbnail
 - Load the full-size avatar immediately after logging in without requiring a page refresh
+- Show a skeleton placeholder while the avatar loads instead of the upload dropzone
+- Restore the original image and crop values when clicking the revert button in the avatar editor
 
 ## [0.13.0] - 2026-04-04
 
