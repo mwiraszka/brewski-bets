@@ -89,6 +89,37 @@ describe('UserService', () => {
   });
 
   // ---------------------------------------------------------------------------
+  // fullSizeAvatarUrl
+  // ---------------------------------------------------------------------------
+
+  describe('fullSizeAvatarUrl', () => {
+    it('returns the backend avatar URL with cache buster when user has an original avatar', async () => {
+      await service.load();
+
+      const url = service.fullSizeAvatarUrl();
+      const expectedTimestamp = new Date(MOCK_USER_RECORD.lastModifiedDate).getTime();
+
+      expect(url).toBe(
+        `http://localhost:3000/api/users/user-1/avatar?t=${expectedTimestamp}`,
+      );
+    });
+
+    it('returns undefined when user has no original avatar', async () => {
+      mockApi.get.mockResolvedValue({
+        ...MOCK_USER_RECORD,
+        avatarOriginalUrl: null,
+      });
+      await service.load();
+
+      expect(service.fullSizeAvatarUrl()).toBeUndefined();
+    });
+
+    it('returns undefined when user record is null', () => {
+      expect(service.fullSizeAvatarUrl()).toBeUndefined();
+    });
+  });
+
+  // ---------------------------------------------------------------------------
   // avatarUrl
   // ---------------------------------------------------------------------------
 

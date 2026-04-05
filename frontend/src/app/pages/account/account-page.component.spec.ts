@@ -49,6 +49,7 @@ type MockApiService = {
 
 type MockUserService = {
   user: WritableSignal<{ firstName: string; lastName: string } | null>;
+  fullSizeAvatarUrl: WritableSignal<string | undefined>;
   avatarUrl: WritableSignal<string | undefined>;
   avatarCropState: WritableSignal<AvatarEditorCropState | null>;
   hasAvatar: WritableSignal<boolean>;
@@ -134,6 +135,7 @@ describe('AccountPageComponent', () => {
 
     mockUserService = {
       user: signal(null),
+      fullSizeAvatarUrl: signal(undefined),
       avatarUrl: signal(undefined),
       avatarCropState: signal(null),
       hasAvatar: signal(false),
@@ -181,8 +183,8 @@ describe('AccountPageComponent', () => {
       expect(component.lastName()).toBe('');
     });
 
-    it('sets editorSrc from userService.avatarUrl', async () => {
-      mockUserService.avatarUrl = signal('http://api/users/u1/avatar?t=123');
+    it('sets editorSrc from userService.fullSizeAvatarUrl', async () => {
+      mockUserService.fullSizeAvatarUrl = signal('http://api/users/u1/avatar?t=123');
 
       component = await createComponent(
         mockClerk,
@@ -241,8 +243,8 @@ describe('AccountPageComponent', () => {
       expect(component.editorSrc()).toBeUndefined();
     });
 
-    it('reflects the userService avatarUrl on init', async () => {
-      mockUserService.avatarUrl = signal('http://api/users/u1/avatar?t=123');
+    it('reflects the userService fullSizeAvatarUrl on init', async () => {
+      mockUserService.fullSizeAvatarUrl = signal('http://api/users/u1/avatar?t=123');
 
       component = await createComponent(
         mockClerk,
@@ -508,14 +510,21 @@ describe('AccountPageComponent', () => {
       });
     });
 
-    it('does not patch the backend when the name is unchanged', async () => {
+    it('does not patch the backend with name fields when the name is unchanged', async () => {
       component.avatarDirty.set(true);
       component.originalFile = new File(['img'], 'photo.jpg');
       jest.spyOn(component, 'exportCrop').mockResolvedValue(new Blob());
 
       await component.onSave();
 
-      expect(mockApi.patch).not.toHaveBeenCalled();
+      expect(mockApi.patch).not.toHaveBeenCalledWith(
+        '/users/me',
+        expect.objectContaining({ firstName: expect.anything() }),
+      );
+      expect(mockApi.patch).not.toHaveBeenCalledWith(
+        '/users/me',
+        expect.objectContaining({ lastName: expect.anything() }),
+      );
     });
   });
 

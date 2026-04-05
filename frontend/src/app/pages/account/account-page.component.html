@@ -6,8 +6,8 @@
       <ea-avatar-editor
         shape="circle"
         [canvasSize]="200"
+        [loading]="avatarLoading()"
         [currentSrc]="editorSrc()"
-        [revertSrc]="revertSrc()"
         [cropState]="savedCropState()"
         (fileSelected)="onFileSelected($event)"
         (cropStateChange)="onCropStateChange($event)"
