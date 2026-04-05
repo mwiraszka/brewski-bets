@@ -57,9 +57,10 @@ export class AccountPageComponent implements OnInit {
   readonly deleting = signal(false);
   readonly deleteDialogOpen = signal(false);
   readonly avatarDirty = signal(false);
+  readonly avatarLoading = signal(false);
 
   readonly editorSrc = signal<string | undefined>(undefined);
-  readonly revertSrc = signal<string | undefined>(undefined);
+  private readonly lastClerkImageUrl = signal<string | undefined>(undefined);
   readonly removeAvatar = signal(false);
   readonly savedCropState = signal<AvatarEditorCropState | null>(null);
   readonly liveCropState = signal<AvatarEditorCropState | null>(null);
@@ -88,9 +89,10 @@ export class AccountPageComponent implements OnInit {
     this.editorSrc.set(this.userService.fullSizeAvatarUrl());
 
     const clerkUser = this.clerk.user();
-    this.revertSrc.set(clerkUser?.hasImage ? clerkUser.imageUrl : undefined);
+    this.lastClerkImageUrl.set(clerkUser?.hasImage ? clerkUser.imageUrl : undefined);
+    this.avatarLoading.set(!this.editorSrc() && !!clerkUser?.hasImage);
 
-    this.refreshFromClerk(false);
+    this.refreshFromClerk(false).then(() => this.avatarLoading.set(false));
 
     const onVisibilityChange = () => {
       if (document.visibilityState === 'visible') {
@@ -104,7 +106,7 @@ export class AccountPageComponent implements OnInit {
   }
 
   private async refreshFromClerk(notify: boolean): Promise<void> {
-    const previousRevertSrc = this.revertSrc();
+    const previousClerkImageUrl = this.lastClerkImageUrl();
 
     await this.clerk.reloadUser();
     await this.userService.load();
@@ -130,11 +132,11 @@ export class AccountPageComponent implements OnInit {
     }
 
     const clerkUser = this.clerk.user();
-    const newRevertSrc = clerkUser?.hasImage ? clerkUser.imageUrl : undefined;
+    const newClerkImageUrl = clerkUser?.hasImage ? clerkUser.imageUrl : undefined;
 
-    if (newRevertSrc !== previousRevertSrc) {
+    if (newClerkImageUrl !== previousClerkImageUrl) {
       changes.push('photo');
-      this.revertSrc.set(newRevertSrc);
+      this.lastClerkImageUrl.set(newClerkImageUrl);
       this.editorSrc.set(this.userService.fullSizeAvatarUrl());
 
       const cropState = this.userService.avatarCropState();
@@ -253,7 +255,7 @@ export class AccountPageComponent implements OnInit {
     const blob = await this.exportCrop();
     const cropState = this.liveCropState() ?? { zoom: 1, offsetX: 0, offsetY: 0 };
     const clerkImageUrl = await this.clerk.setProfileImage(blob);
-    this.revertSrc.set(clerkImageUrl);
+    this.lastClerkImageUrl.set(clerkImageUrl);
 
     if (this.originalFile) {
       try {
@@ -266,7 +268,7 @@ export class AccountPageComponent implements OnInit {
 
   private async removePhoto(): Promise<void> {
     const clerkImageUrl = await this.clerk.setProfileImage(null);
-    this.revertSrc.set(clerkImageUrl);
+    this.lastClerkImageUrl.set(clerkImageUrl);
 
     try {
       await this.deleteOriginalAvatar(clerkImageUrl);
@@ -280,7 +282,7 @@ export class AccountPageComponent implements OnInit {
     if (!cropState) return;
     const blob = await this.exportCrop();
     const clerkImageUrl = await this.clerk.setProfileImage(blob);
-    this.revertSrc.set(clerkImageUrl);
+    this.lastClerkImageUrl.set(clerkImageUrl);
     await this.api.patch('/users/me', { avatarCropState: cropState, clerkImageUrl });
     this.savedCropState.set(cropState);
   }
