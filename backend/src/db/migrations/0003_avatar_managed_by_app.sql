@@ -1,0 +1,1 @@
+ALTER TABLE "users" ADD COLUMN "avatar_managed_by_app" boolean DEFAULT false NOT NULL;

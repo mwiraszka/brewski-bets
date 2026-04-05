@@ -22,6 +22,13 @@
       "when": 1775257309542,
       "tag": "0002_friendly_phil_sheldon",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1775413644333,
+      "tag": "0003_avatar_managed_by_app",
+      "breakpoints": true
     }
   ]
 }

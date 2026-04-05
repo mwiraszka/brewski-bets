@@ -1,4 +1,5 @@
 import {
+  boolean,
   integer,
   jsonb,
   pgEnum,
@@ -25,6 +26,7 @@ export const users = pgTable('users', {
   lastName: text('last_name').notNull(),
   clerkImageUrl: text('clerk_image_url'),
   avatarOriginalUrl: text('avatar_original_url'),
+  avatarManagedByApp: boolean('avatar_managed_by_app').notNull().default(false),
   avatarCropState: jsonb('avatar_crop_state').$type<{
     zoom: number;
     offsetX: number;
