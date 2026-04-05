@@ -27,12 +27,20 @@ export class UserService {
 
   readonly user = this._user.asReadonly();
 
-  readonly avatarUrl = computed((): string | undefined => {
+  readonly fullSizeAvatarUrl = computed((): string | undefined => {
     const user = this._user();
     if (user?.avatarOriginalUrl) {
       const cacheBuster = new Date(user.lastModifiedDate).getTime();
       return `${environment.apiUrl}/users/${user.id}/avatar?t=${cacheBuster}`;
     }
+    return undefined;
+  });
+
+  readonly avatarUrl = computed((): string | undefined => {
+    return this.fullSizeAvatarUrl() ?? this.clerkAvatarUrl();
+  });
+
+  private readonly clerkAvatarUrl = computed((): string | undefined => {
     const clerkUser = this.clerk.user();
     return clerkUser?.hasImage ? clerkUser.imageUrl : undefined;
   });
