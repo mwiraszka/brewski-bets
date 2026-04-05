@@ -110,6 +110,7 @@ export const userRoutes = new Hono<AppContext>()
       .set({
         avatarOriginalUrl: url,
         avatarCropState: cropState,
+        avatarManagedByApp: true,
         ...(clerkImageUrl && { clerkImageUrl }),
         lastModifiedDate: new Date(),
       })
@@ -162,6 +163,7 @@ export const userRoutes = new Hono<AppContext>()
       .set({
         avatarOriginalUrl: null,
         avatarCropState: null,
+        avatarManagedByApp: false,
         ...(clerkImageUrl && { clerkImageUrl }),
         lastModifiedDate: new Date(),
       })

@@ -91,7 +91,16 @@ export const webhookRoutes = new Hono<AppContext>().post('/clerk', async c => {
     if (user) {
       const imageChanged = event.data.image_url !== user.clerkImageUrl;
 
-      if (imageChanged && event.data.has_image) {
+      const profileFields = {
+        email: event.data.email_addresses[0].email_address,
+        firstName: event.data.first_name ?? '',
+        lastName: event.data.last_name ?? '',
+        clerkImageUrl: event.data.image_url,
+        lastModifiedDate: new Date(),
+      };
+
+      if (imageChanged && event.data.has_image && !user.avatarManagedByApp) {
+        // Avatar was set via Clerk dashboard (not the app) — sync it to R2
         try {
           const response = await fetch(event.data.image_url);
           const buffer = await response.arrayBuffer();
@@ -101,26 +110,13 @@ export const webhookRoutes = new Hono<AppContext>().post('/clerk', async c => {
           await db
             .update(users)
             .set({
-              email: event.data.email_addresses[0].email_address,
-              firstName: event.data.first_name ?? '',
-              lastName: event.data.last_name ?? '',
-              clerkImageUrl: event.data.image_url,
+              ...profileFields,
               avatarOriginalUrl: url,
               avatarCropState: { zoom: 1, offsetX: 0, offsetY: 0 },
-              lastModifiedDate: new Date(),
             })
             .where(eq(users.id, user.id));
         } catch {
-          await db
-            .update(users)
-            .set({
-              email: event.data.email_addresses[0].email_address,
-              firstName: event.data.first_name ?? '',
-              lastName: event.data.last_name ?? '',
-              clerkImageUrl: event.data.image_url,
-              lastModifiedDate: new Date(),
-            })
-            .where(eq(users.id, user.id));
+          await db.update(users).set(profileFields).where(eq(users.id, user.id));
         }
       } else if (imageChanged && !event.data.has_image) {
         try {
@@ -132,26 +128,14 @@ export const webhookRoutes = new Hono<AppContext>().post('/clerk', async c => {
         await db
           .update(users)
           .set({
-            email: event.data.email_addresses[0].email_address,
-            firstName: event.data.first_name ?? '',
-            lastName: event.data.last_name ?? '',
-            clerkImageUrl: event.data.image_url,
+            ...profileFields,
             avatarOriginalUrl: null,
             avatarCropState: null,
-            lastModifiedDate: new Date(),
+            avatarManagedByApp: false,
           })
           .where(eq(users.id, user.id));
       } else {
-        await db
-          .update(users)
-          .set({
-            email: event.data.email_addresses[0].email_address,
-            firstName: event.data.first_name ?? '',
-            lastName: event.data.last_name ?? '',
-            clerkImageUrl: event.data.image_url,
-            lastModifiedDate: new Date(),
-          })
-          .where(eq(users.id, user.id));
+        await db.update(users).set(profileFields).where(eq(users.id, user.id));
       }
     }
   }
