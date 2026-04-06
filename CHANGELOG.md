@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.14.1] - 2026-04-06
+
+### Changed
+
+- Add manual workflow dispatch trigger to production deployment workflows
+
 ## [0.14.0] - 2026-04-05
 
 ### Fixed
@@ -273,6 +279,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - PWA manifest and service worker configuration
 - GitHub issue templates
 
+[0.14.1]: https://github.com/mwiraszka/brewski-bets/compare/v0.14.0...v0.14.1
 [0.14.0]: https://github.com/mwiraszka/brewski-bets/compare/v0.13.0...v0.14.0
 [0.13.0]: https://github.com/mwiraszka/brewski-bets/compare/v0.12.0...v0.13.0
 [0.12.0]: https://github.com/mwiraszka/brewski-bets/compare/v0.11.0...v0.12.0
