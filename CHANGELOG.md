@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.14.2] - 2026-04-08
 
+### Changed
+
+- Update app slogan to "because broskis bet brewskis"
+
 ### Fixed
 
 - Fix corrupted avatar uploads and broken image responses caused by binary data being text-encoded in the Vercel serverless adapter
