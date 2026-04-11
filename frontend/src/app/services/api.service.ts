@@ -38,11 +38,16 @@ export class ApiService {
     });
   }
 
-  async patch<T>(path: string, body: unknown): Promise<T> {
+  async patch<T>(path: string, body: BodyInit | unknown): Promise<T> {
+    const isFormData = body instanceof FormData;
     return this.request<T>(path, {
       method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body),
+      ...(isFormData
+        ? { body }
+        : {
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body),
+          }),
     });
   }
 
