@@ -1,0 +1,179 @@
+@if (loading()) {
+  <div class="bet-form-page">
+    <p class="loading">Loading...</p>
+  </div>
+} @else {
+  <div class="bet-form-page">
+    <ea-card variant="outlined">
+      <h2 eaCardHeader>{{ mode() === 'create' ? 'Create a bet' : 'Edit bet' }}</h2>
+
+      @if (mode() === 'edit' && !isMyTurn()) {
+        <div class="waiting-banner">Waiting for {{ opponentName() }} to respond</div>
+      }
+
+      <fieldset [disabled]="mode() === 'edit' && !isMyTurn()">
+        @if (mode() === 'create') {
+          <div class="form-field">
+            <ea-dropdown
+              label="Bet against"
+              placeholder="Select a friend"
+              [options]="friendOptions()"
+              [required]="true"
+              [error]="friendError()"
+              [(value)]="selectedFriendId" />
+          </div>
+        }
+
+        <div class="form-field">
+          <ea-input
+            label="Title"
+            [required]="true"
+            [error]="titleError()"
+            [(value)]="title" />
+        </div>
+
+        <div class="form-field">
+          <ea-textarea
+            label="Description"
+            [required]="true"
+            [error]="descriptionError()"
+            [(value)]="description" />
+        </div>
+
+        <div class="form-field">
+          <label class="field-label">Image</label>
+          <div class="image-grid">
+            @for (img of stockImages; track img.slug) {
+              <button
+                type="button"
+                class="image-option"
+                [class.image-option--selected]="imageSlug() === img.slug"
+                (click)="selectImage(img.slug)">
+                <img
+                  [src]="'assets/bet-images/' + img.slug + '.svg'"
+                  [alt]="img.label" />
+              </button>
+            }
+          </div>
+        </div>
+
+        <div class="form-field">
+          <label class="field-label">Results</label>
+
+          @if (mode() === 'edit') {
+            <ea-radio-group
+              name="result-selection"
+              [(value)]="selectedResultIndex">
+              <div class="results-list">
+                @for (result of results(); track $index) {
+                  <div class="result-row">
+                    <ea-radio [value]="'' + $index" />
+                    <ea-input
+                      placeholder="Result name"
+                      [value]="result.name"
+                      (valueChange)="updateResultName($index, $event)" />
+                    <ea-input
+                      placeholder="Beers"
+                      [value]="'' + result.brewskiCount"
+                      (valueChange)="updateResultBrewskiCount($index, $event)" />
+                    <ea-dropdown
+                      placeholder="Owes"
+                      [options]="assignedToOptions()"
+                      [value]="result.assignedTo ?? ''"
+                      (valueChange)="updateResultAssignedTo($index, $event)" />
+                    @if (results().length > 1) {
+                      <ea-button
+                        variant="ghost"
+                        size="sm"
+                        (clicked)="removeResult($index)">
+                        Remove
+                      </ea-button>
+                    }
+                  </div>
+                }
+
+                @for (special of specialResults(); track special.isSpecial) {
+                  <div class="result-row result-row--special">
+                    <ea-radio
+                      [value]="'' + (results().length + $index)"
+                      [label]="special.name" />
+                    <ea-tag>{{ special.name }}</ea-tag>
+                  </div>
+                }
+              </div>
+            </ea-radio-group>
+          } @else {
+            <div class="results-list">
+              @for (result of results(); track $index) {
+                <div class="result-row">
+                  <ea-input
+                    placeholder="Result name"
+                    [value]="result.name"
+                    (valueChange)="updateResultName($index, $event)" />
+                  <ea-input
+                    placeholder="Beers"
+                    [value]="'' + result.brewskiCount"
+                    (valueChange)="updateResultBrewskiCount($index, $event)" />
+                  <ea-dropdown
+                    placeholder="Owes"
+                    [options]="assignedToOptions()"
+                    [value]="result.assignedTo ?? ''"
+                    (valueChange)="updateResultAssignedTo($index, $event)" />
+                  @if (results().length > 1) {
+                    <ea-button
+                      variant="ghost"
+                      size="sm"
+                      (clicked)="removeResult($index)">
+                      Remove
+                    </ea-button>
+                  }
+                </div>
+              }
+            </div>
+          }
+
+          @if (results().length < 20) {
+            <ea-button
+              variant="secondary"
+              size="sm"
+              (clicked)="addResult()">
+              Add result
+            </ea-button>
+          }
+        </div>
+      </fieldset>
+
+      <div class="actions">
+        @if (mode() === 'create') {
+          <ea-button
+            [fullWidth]="true"
+            [loading]="saving()"
+            (clicked)="onSubmitForReview()">
+            Submit for review
+          </ea-button>
+        } @else if (isMyTurn()) {
+          <div class="action-row">
+            <ea-button
+              [loading]="saving()"
+              (clicked)="onSubmitForReview()">
+              Submit for review
+            </ea-button>
+            <ea-button
+              variant="secondary"
+              [loading]="saving()"
+              (clicked)="onAccept()">
+              Accept
+            </ea-button>
+          </div>
+          <ea-button
+            variant="danger"
+            size="sm"
+            [loading]="saving()"
+            (clicked)="onProposeVoid()">
+            Propose void
+          </ea-button>
+        }
+      </div>
+    </ea-card>
+  </div>
+}
