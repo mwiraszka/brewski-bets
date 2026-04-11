@@ -67,6 +67,7 @@ export const userRoutes = new Hono<AppContext>()
 
   .post('/me/avatar', async c => {
     const db = c.get('db');
+    const clerkId = c.get('clerkId');
     const userId = c.get('userId');
     if (!userId) {
       return c.json({ error: 'User not found' }, 404);
@@ -86,6 +87,11 @@ export const userRoutes = new Hono<AppContext>()
       return c.json({ error: 'File must be under 5 MB' }, 400);
     }
 
+    const cropped = body['cropped'];
+    if (!(cropped instanceof File)) {
+      return c.json({ error: 'Cropped file is required' }, 400);
+    }
+
     const cropStateRaw = body['cropState'];
     let cropState: { zoom: number; offsetX: number; offsetY: number } | null = null;
     if (typeof cropStateRaw === 'string') {
@@ -100,18 +106,72 @@ export const userRoutes = new Hono<AppContext>()
       }
     }
 
-    const clerkImageUrlRaw = body['clerkImageUrl'];
-    const clerkImageUrl =
-      typeof clerkImageUrlRaw === 'string' ? clerkImageUrlRaw : undefined;
-
     const url = await uploadAvatar(c.env, userId, await file.arrayBuffer(), file.type);
+
+    const clerk = createClerkClient({ secretKey: c.env.CLERK_SECRET_KEY });
+    const clerkUser = await clerk.users.updateUserProfileImage(clerkId, {
+      file: cropped,
+    });
+    const clerkImageUrl = clerkUser.imageUrl;
+
     const [user] = await db
       .update(users)
       .set({
         avatarOriginalUrl: url,
         avatarCropState: cropState,
         avatarManagedByApp: true,
-        ...(clerkImageUrl && { clerkImageUrl }),
+        clerkImageUrl,
+        lastModifiedDate: new Date(),
+      })
+      .where(eq(users.id, userId))
+      .returning();
+
+    if (!user) {
+      return c.json({ error: 'User not found' }, 404);
+    }
+
+    return c.json(user);
+  })
+
+  .patch('/me/avatar', async c => {
+    const db = c.get('db');
+    const clerkId = c.get('clerkId');
+    const userId = c.get('userId');
+    if (!userId) {
+      return c.json({ error: 'User not found' }, 404);
+    }
+
+    const body = await c.req.parseBody();
+    const cropped = body['cropped'];
+    if (!(cropped instanceof File)) {
+      return c.json({ error: 'Cropped file is required' }, 400);
+    }
+
+    const cropStateRaw = body['cropState'];
+    let cropState: { zoom: number; offsetX: number; offsetY: number } | null = null;
+    if (typeof cropStateRaw === 'string') {
+      try {
+        cropState = JSON.parse(cropStateRaw) as {
+          zoom: number;
+          offsetX: number;
+          offsetY: number;
+        };
+      } catch {
+        // ignore invalid crop state
+      }
+    }
+
+    const clerk = createClerkClient({ secretKey: c.env.CLERK_SECRET_KEY });
+    const clerkUser = await clerk.users.updateUserProfileImage(clerkId, {
+      file: cropped,
+    });
+    const clerkImageUrl = clerkUser.imageUrl;
+
+    const [user] = await db
+      .update(users)
+      .set({
+        avatarCropState: cropState,
+        clerkImageUrl,
         lastModifiedDate: new Date(),
       })
       .where(eq(users.id, userId))
@@ -150,21 +210,26 @@ export const userRoutes = new Hono<AppContext>()
 
   .delete('/me/avatar', async c => {
     const db = c.get('db');
+    const clerkId = c.get('clerkId');
     const userId = c.get('userId');
     if (!userId) {
       return c.json({ error: 'User not found' }, 404);
     }
 
-    const clerkImageUrl = c.req.query('clerkImageUrl');
-
     await deleteAvatar(c.env, userId);
+
+    const clerk = createClerkClient({ secretKey: c.env.CLERK_SECRET_KEY });
+    await clerk.users.deleteUserProfileImage(clerkId);
+    const clerkUser = await clerk.users.getUser(clerkId);
+    const clerkImageUrl = clerkUser.imageUrl;
+
     const [user] = await db
       .update(users)
       .set({
         avatarOriginalUrl: null,
         avatarCropState: null,
         avatarManagedByApp: false,
-        ...(clerkImageUrl && { clerkImageUrl }),
+        clerkImageUrl,
         lastModifiedDate: new Date(),
       })
       .where(eq(users.id, userId))
