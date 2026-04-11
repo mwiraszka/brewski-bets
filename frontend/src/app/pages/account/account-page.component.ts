@@ -190,6 +190,7 @@ export class AccountPageComponent implements OnInit {
       this.avatarDirty.set(false);
       this.removeAvatar.set(false);
       this.originalFile = null;
+      this.avatarEditor()?.captureOriginal();
     } catch (e: unknown) {
       this.toast.error(this.clerk.extractError(e));
     } finally {
