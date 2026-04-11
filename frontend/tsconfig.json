@@ -30,6 +30,7 @@
     "sourceMap": true,
     "strict": true,
     "target": "ES2022",
+    "types": ["jest"],
     "useDefineForClassFields": false
   }
 }

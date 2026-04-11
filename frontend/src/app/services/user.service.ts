@@ -11,6 +11,7 @@ export interface UserRecord {
   id: string;
   firstName: string;
   lastName: string;
+  clerkImageUrl: string | null;
   avatarOriginalUrl: string | null;
   avatarCropState: AvatarEditorCropState | null;
   lastModifiedDate: string;

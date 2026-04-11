@@ -67,12 +67,14 @@ export class AccountPageComponent implements OnInit {
   originalFile: File | null = null;
 
   readonly hasChanges = computed(() => {
-    return (
+    const nameChanged =
       this.firstName() !== this.originalFirstName() ||
-      this.lastName() !== this.originalLastName() ||
-      this.avatarDirty() ||
-      this.isCropChanged()
-    );
+      this.lastName() !== this.originalLastName();
+    const photoChanged =
+      this.avatarDirty() && !this.removeAvatar() && !!this.originalFile;
+    const photoRemoved =
+      this.avatarDirty() && this.removeAvatar() && this.userService.hasAvatar();
+    return nameChanged || photoChanged || photoRemoved || this.isCropChanged();
   });
 
   ngOnInit(): void {
@@ -118,17 +120,16 @@ export class AccountPageComponent implements OnInit {
       const currentFirst = this.originalFirstName();
       const currentLast = this.originalLastName();
 
-      if (currentFirst && user.firstName !== currentFirst) {
-        changes.push('first name');
+      if (user.firstName !== currentFirst) {
+        if (currentFirst) changes.push('first name');
+        this.firstName.set(user.firstName);
+        this.originalFirstName.set(user.firstName);
       }
-      if (currentLast && user.lastName !== currentLast) {
-        changes.push('last name');
+      if (user.lastName !== currentLast) {
+        if (currentLast) changes.push('last name');
+        this.lastName.set(user.lastName);
+        this.originalLastName.set(user.lastName);
       }
-
-      this.firstName.set(user.firstName);
-      this.lastName.set(user.lastName);
-      this.originalFirstName.set(user.firstName);
-      this.originalLastName.set(user.lastName);
     }
 
     const clerkUser = this.clerk.user();
@@ -253,38 +254,33 @@ export class AccountPageComponent implements OnInit {
 
   private async savePhoto(): Promise<void> {
     const blob = await this.exportCrop();
-    const cropState = this.liveCropState() ?? { zoom: 1, offsetX: 0, offsetY: 0 };
-    const clerkImageUrl = await this.clerk.setProfileImage(blob);
-    this.lastClerkImageUrl.set(clerkImageUrl);
+    const cropState = this.liveCropState();
 
     if (this.originalFile) {
-      try {
-        await this.uploadOriginalAvatar(this.originalFile, cropState, clerkImageUrl);
-      } catch {
-        this.toast.error('Full-size image could not be saved for future editing');
-      }
+      await this.uploadOriginalAvatar(this.originalFile, blob, cropState);
+      await this.clerk.reloadUser();
+      this.lastClerkImageUrl.set(this.clerk.user()?.imageUrl);
     }
   }
 
   private async removePhoto(): Promise<void> {
-    const clerkImageUrl = await this.clerk.setProfileImage(null);
-    this.lastClerkImageUrl.set(clerkImageUrl);
-
-    try {
-      await this.deleteOriginalAvatar(clerkImageUrl);
-    } catch {
-      this.toast.error('Full-size image could not be removed');
-    }
+    await this.deleteOriginalAvatar();
+    await this.clerk.reloadUser();
+    this.lastClerkImageUrl.set(this.clerk.user()?.imageUrl);
   }
 
   private async saveCropState(): Promise<void> {
     const cropState = this.liveCropState();
     if (!cropState) return;
     const blob = await this.exportCrop();
-    const clerkImageUrl = await this.clerk.setProfileImage(blob);
-    this.lastClerkImageUrl.set(clerkImageUrl);
-    await this.api.patch('/users/me', { avatarCropState: cropState, clerkImageUrl });
+    const formData = new FormData();
+    formData.append('cropped', blob, 'cropped.png');
+    formData.append('cropState', JSON.stringify(cropState));
+    const user = await this.api.patch<UserRecord>('/users/me/avatar', formData);
+    this.userService.setUser(user);
+    this.lastClerkImageUrl.set(user.clerkImageUrl ?? undefined);
     this.savedCropState.set(cropState);
+    await this.clerk.reloadUser();
   }
 
   private buildSuccessMessage(changes: string[]): string {
@@ -312,26 +308,24 @@ export class AccountPageComponent implements OnInit {
 
   private async uploadOriginalAvatar(
     file: File,
-    cropState: AvatarEditorCropState,
-    clerkImageUrl?: string,
+    cropped: Blob,
+    cropState: AvatarEditorCropState | null,
   ): Promise<void> {
     const formData = new FormData();
     formData.append('file', file);
-    formData.append('cropState', JSON.stringify(cropState));
-    if (clerkImageUrl) {
-      formData.append('clerkImageUrl', clerkImageUrl);
+    formData.append('cropped', cropped, 'cropped.png');
+    if (cropState) {
+      formData.append('cropState', JSON.stringify(cropState));
     }
     const user = await this.api.post<UserRecord>('/users/me/avatar', formData);
     this.userService.setUser(user);
+    this.lastClerkImageUrl.set(user.clerkImageUrl ?? undefined);
     this.savedCropState.set(cropState);
     this.liveCropState.set(cropState);
   }
 
-  private async deleteOriginalAvatar(clerkImageUrl?: string): Promise<void> {
-    const query = clerkImageUrl
-      ? `?clerkImageUrl=${encodeURIComponent(clerkImageUrl)}`
-      : '';
-    await this.api.delete(`/users/me/avatar${query}`);
+  private async deleteOriginalAvatar(): Promise<void> {
+    await this.api.delete('/users/me/avatar');
     this.userService.clearAvatar();
     this.editorSrc.set(undefined);
     this.savedCropState.set(null);

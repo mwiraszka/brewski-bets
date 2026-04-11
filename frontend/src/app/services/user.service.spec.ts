@@ -28,6 +28,7 @@ const MOCK_USER_RECORD: UserRecord = {
   id: 'user-1',
   firstName: 'John',
   lastName: 'Doe',
+  clerkImageUrl: 'https://img.clerk.com/abc',
   avatarOriginalUrl: 'https://s3.example.com/avatar.jpg',
   avatarCropState: { zoom: 1.5, offsetX: 10, offsetY: 5 },
   lastModifiedDate: '2026-04-01T00:00:00.000Z',

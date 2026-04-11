@@ -126,6 +126,7 @@ describe('AccountPageComponent', () => {
       patch: jest.fn().mockResolvedValue({}),
       post: jest.fn().mockResolvedValue({
         id: 'user-1',
+        clerkImageUrl: 'https://img.clerk.com/updated',
         avatarOriginalUrl: null,
         avatarCropState: null,
         lastModifiedDate: '2026-04-02T00:00:00.000Z',
@@ -279,7 +280,8 @@ describe('AccountPageComponent', () => {
       expect(component.hasChanges()).toBe(true);
     });
 
-    it('is true when avatarDirty is set', () => {
+    it('is true when a new file is selected', () => {
+      component.originalFile = new File(['x'], 'avatar.png');
       component.avatarDirty.set(true);
 
       expect(component.hasChanges()).toBe(true);
@@ -309,12 +311,23 @@ describe('AccountPageComponent', () => {
       expect(component.hasChanges()).toBe(false);
     });
 
-    it('is false for crop changes when avatarDirty is set (handled by photo save)', () => {
+    it('is true for crop changes when a new file is selected (handled by photo save)', () => {
       component.savedCropState.set({ zoom: 1, offsetX: 0, offsetY: 0 });
       component.liveCropState.set({ zoom: 2, offsetX: 10, offsetY: 5 });
+      component.originalFile = new File(['x'], 'avatar.png');
       component.avatarDirty.set(true);
 
-      expect(component.hasChanges()).toBe(true); // true because avatarDirty, not cropChanged
+      expect(component.hasChanges()).toBe(true);
+    });
+
+    it('is false when avatar is selected then removed on account with no avatar', () => {
+      component.originalFile = new File(['x'], 'avatar.png');
+      component.avatarDirty.set(true);
+      expect(component.hasChanges()).toBe(true);
+
+      component.onRemoveAvatar();
+
+      expect(component.hasChanges()).toBe(false);
     });
   });
 
@@ -603,24 +616,19 @@ describe('AccountPageComponent', () => {
       jest.spyOn(component, 'exportCrop').mockResolvedValue(mockBlob);
     });
 
-    it('calls clerk.setProfileImage with the cropped blob', async () => {
+    it('sends both original and cropped files to the backend', async () => {
       await component.onSave();
 
-      expect(mockClerk.setProfileImage).toHaveBeenCalledWith(mockBlob);
+      const formData = mockApi.post.mock.calls[0][1] as FormData;
+      expect(mockApi.post).toHaveBeenCalledWith('/users/me/avatar', expect.any(FormData));
+      expect(formData.get('file')).toBeInstanceOf(File);
+      expect(formData.get('cropped')).toBeInstanceOf(File);
     });
 
-    it('retains editorSrc during setProfileImage to avoid flickering the old image', async () => {
-      const existingUrl = 'http://api/users/u1/avatar?t=123';
-      component.editorSrc.set(existingUrl);
-      const urlDuringUpload: (string | undefined)[] = [];
-      mockClerk.setProfileImage.mockImplementation(async () => {
-        urlDuringUpload.push(component.editorSrc());
-        return 'https://img.clerk.com/updated';
-      });
-
+    it('reloads the clerk user after saving', async () => {
       await component.onSave();
 
-      expect(urlDuringUpload).toEqual([existingUrl]);
+      expect(mockClerk.reloadUser).toHaveBeenCalled();
     });
 
     it('uploads the original file when one was captured', async () => {
@@ -644,16 +652,14 @@ describe('AccountPageComponent', () => {
       expect(mockApi.post).not.toHaveBeenCalled();
     });
 
-    it('shows a toast when the original upload fails but still reports photo updated', async () => {
+    it('shows an error toast when the backend upload fails', async () => {
       component.originalFile = new File(['raw'], 'photo.jpg');
       mockApi.post.mockRejectedValue(new Error('S3 error'));
 
       await component.onSave();
 
-      expect(mockToast.error).toHaveBeenCalledWith(
-        'Full-size image could not be saved for future editing',
-      );
-      expect(mockToast.success).toHaveBeenCalledWith('Photo updated');
+      expect(mockToast.error).toHaveBeenCalledWith('Something went wrong');
+      expect(mockToast.success).not.toHaveBeenCalled();
     });
 
     it('saves the current liveCropState when uploading the original file', async () => {
@@ -684,28 +690,61 @@ describe('AccountPageComponent', () => {
       jest.spyOn(component, 'exportCrop').mockResolvedValue(new Blob(['img']));
     });
 
-    it('calls clerk.setProfileImage with the cropped blob when only crop changes', async () => {
+    it('sends the cropped blob and crop state to the backend', async () => {
+      mockApi.patch.mockResolvedValue({
+        id: 'u1',
+        clerkImageUrl: 'https://img.clerk.com/updated',
+        avatarCropState: { zoom: 2, offsetX: 10, offsetY: 5 },
+        lastModifiedDate: '2026-04-02T00:00:00.000Z',
+      });
+
       await component.onSave();
 
-      expect(mockClerk.setProfileImage).toHaveBeenCalledWith(expect.any(Blob));
+      const formData = mockApi.patch.mock.calls[0][1] as FormData;
+      expect(mockApi.patch).toHaveBeenCalledWith(
+        '/users/me/avatar',
+        expect.any(FormData),
+      );
+      expect(formData.get('cropped')).toBeInstanceOf(File);
+      expect(formData.get('cropState')).toBe(
+        JSON.stringify({ zoom: 2, offsetX: 10, offsetY: 5 }),
+      );
     });
 
-    it('patches the backend with the new crop state when only crop changes', async () => {
+    it('reloads the clerk user after saving crop state', async () => {
+      mockApi.patch.mockResolvedValue({
+        id: 'u1',
+        clerkImageUrl: 'https://img.clerk.com/updated',
+        avatarCropState: { zoom: 2, offsetX: 10, offsetY: 5 },
+        lastModifiedDate: '2026-04-02T00:00:00.000Z',
+      });
+
       await component.onSave();
 
-      expect(mockApi.patch).toHaveBeenCalledWith('/users/me', {
-        avatarCropState: { zoom: 2, offsetX: 10, offsetY: 5 },
-        clerkImageUrl: 'https://img.clerk.com/updated',
-      });
+      expect(mockClerk.reloadUser).toHaveBeenCalled();
     });
 
     it('updates savedCropState after saving crop state', async () => {
+      mockApi.patch.mockResolvedValue({
+        id: 'u1',
+        clerkImageUrl: 'https://img.clerk.com/updated',
+        avatarCropState: { zoom: 2, offsetX: 10, offsetY: 5 },
+        lastModifiedDate: '2026-04-02T00:00:00.000Z',
+      });
+
       await component.onSave();
 
       expect(component.savedCropState()).toEqual({ zoom: 2, offsetX: 10, offsetY: 5 });
     });
 
     it('shows "Photo updated" when only crop state changes', async () => {
+      mockApi.patch.mockResolvedValue({
+        id: 'u1',
+        clerkImageUrl: 'https://img.clerk.com/updated',
+        avatarCropState: { zoom: 2, offsetX: 10, offsetY: 5 },
+        lastModifiedDate: '2026-04-02T00:00:00.000Z',
+      });
+
       await component.onSave();
 
       expect(mockToast.success).toHaveBeenCalledWith('Photo updated');
@@ -748,18 +787,11 @@ describe('AccountPageComponent', () => {
       component.onRemoveAvatar();
     });
 
-    it('calls clerk.setProfileImage with null', async () => {
+    it('calls the delete avatar endpoint and reloads the clerk user', async () => {
       await component.onSave();
 
-      expect(mockClerk.setProfileImage).toHaveBeenCalledWith(null);
-    });
-
-    it('calls the delete avatar endpoint with the clerk image URL', async () => {
-      await component.onSave();
-
-      expect(mockApi.delete).toHaveBeenCalledWith(
-        expect.stringContaining('/users/me/avatar?clerkImageUrl='),
-      );
+      expect(mockApi.delete).toHaveBeenCalledWith('/users/me/avatar');
+      expect(mockClerk.reloadUser).toHaveBeenCalled();
     });
 
     it('clears the avatar via userService after deletion', async () => {
@@ -768,18 +800,16 @@ describe('AccountPageComponent', () => {
       expect(mockUserService.clearAvatar).toHaveBeenCalled();
     });
 
-    it('shows a toast when the delete fails but still reports photo updated', async () => {
+    it('shows an error toast when the delete fails', async () => {
       mockApi.delete.mockRejectedValue(new Error('Delete error'));
 
       await component.onSave();
 
-      expect(mockToast.error).toHaveBeenCalledWith(
-        'Full-size image could not be removed',
-      );
-      expect(mockToast.success).toHaveBeenCalledWith('Photo updated');
+      expect(mockToast.error).toHaveBeenCalledWith('Something went wrong');
+      expect(mockToast.success).not.toHaveBeenCalled();
     });
 
-    it('does not call setProfileImage when the user has no existing photo', async () => {
+    it('does not call the delete endpoint when the user has no existing photo', async () => {
       mockClerk.user = signal({ ...MOCK_USER, hasImage: false });
       mockUserService.hasAvatar = signal(false);
 
@@ -794,7 +824,7 @@ describe('AccountPageComponent', () => {
 
       await component.onSave();
 
-      expect(mockClerk.setProfileImage).not.toHaveBeenCalled();
+      expect(mockApi.delete).not.toHaveBeenCalled();
     });
   });
 
