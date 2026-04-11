@@ -38,7 +38,7 @@ jobs:
         run: |
           SHORT_SHA=$(echo "${{ github.sha }}" | cut -c1-7)
           COMMIT_DATE=$(git log -1 --format=%ci)
-          PR_URL=$(gh pr view "$GITHUB_REF_NAME" --json url --jq .url)
+          PR_URL=$(gh pr view "$GITHUB_REF_NAME" --json url --jq .url 2>/dev/null || echo "")
           sed -i "s|preview: null.*|preview: { branch: '${GITHUB_REF_NAME}', commit: '${SHORT_SHA}', date: '${COMMIT_DATE}', prUrl: '${PR_URL}' },|" src/environments/environment.preview.ts
 
       - name: Override Build Command for Preview
