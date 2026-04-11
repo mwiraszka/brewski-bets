@@ -5,9 +5,8 @@ env:
   VERCEL_PROJECT_ID: ${{ secrets.VERCEL_FRONTEND_PROJECT_ID }}
 
 on:
-  push:
-    branches-ignore:
-      - main
+  pull_request:
+    types: [opened, synchronize]
 
 permissions:
   contents: read
@@ -21,6 +20,8 @@ jobs:
         working-directory: frontend
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
 
       - uses: pnpm/action-setup@v3
         with:
@@ -33,13 +34,12 @@ jobs:
         run: vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
 
       - name: Inject Preview Build Info
-        env:
-          GH_TOKEN: ${{ github.token }}
         run: |
-          SHORT_SHA=$(echo "${{ github.sha }}" | cut -c1-7)
+          SHORT_SHA=$(echo "${{ github.event.pull_request.head.sha }}" | cut -c1-7)
           COMMIT_DATE=$(git log -1 --format=%ci)
-          PR_URL=$(gh pr view "$GITHUB_REF_NAME" --json url --jq .url)
-          sed -i "s|preview: null.*|preview: { branch: '${GITHUB_REF_NAME}', commit: '${SHORT_SHA}', date: '${COMMIT_DATE}', prUrl: '${PR_URL}' },|" src/environments/environment.preview.ts
+          PR_URL="${{ github.event.pull_request.html_url }}"
+          BRANCH="${{ github.event.pull_request.head.ref }}"
+          sed -i "s|preview: null.*|preview: { branch: '${BRANCH}', commit: '${SHORT_SHA}', date: '${COMMIT_DATE}', prUrl: '${PR_URL}' },|" src/environments/environment.preview.ts
 
       - name: Override Build Command for Preview
         run: |
@@ -59,8 +59,8 @@ jobs:
         run: |
           DEPLOY_URL=$(vercel deploy --prebuilt \
             --token=${{ secrets.VERCEL_TOKEN }} \
-            --meta githubCommitRef=${{ github.ref_name }} \
-            --meta githubCommitSha=${{ github.sha }} \
+            --meta githubCommitRef=${{ github.event.pull_request.head.ref }} \
+            --meta githubCommitSha=${{ github.event.pull_request.head.sha }} \
             --meta githubCommitOrg=${{ github.repository_owner }} \
             --meta githubCommitRepo=${{ github.event.repository.name }} \
             --meta githubDeployment=1)
