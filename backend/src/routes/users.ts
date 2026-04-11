@@ -1,10 +1,10 @@
 import { createClerkClient } from '@clerk/backend';
 import { zValidator } from '@hono/zod-validator';
-import { eq, or } from 'drizzle-orm';
+import { and, eq, ilike, ne, or } from 'drizzle-orm';
 import { Hono } from 'hono';
 import { z } from 'zod';
 
-import { bets, users } from '../db/schema.js';
+import { bets, friendships, users } from '../db/schema.js';
 import { deleteAvatar, uploadAvatar } from '../services/storage.js';
 import type { AppContext } from '../types/index.js';
 
@@ -27,6 +27,42 @@ const updateUserSchema = z.object({
 });
 
 export const userRoutes = new Hono<AppContext>()
+
+  .get('/search', async c => {
+    const db = c.get('db');
+    const userId = c.get('userId');
+    if (!userId) {
+      return c.json({ error: 'User not found' }, 404);
+    }
+
+    const q = c.req.query('q')?.trim();
+    if (!q || q.length < 2) {
+      return c.json([]);
+    }
+
+    const pattern = `%${q}%`;
+    const results = await db
+      .select({
+        id: users.id,
+        firstName: users.firstName,
+        lastName: users.lastName,
+        clerkImageUrl: users.clerkImageUrl,
+      })
+      .from(users)
+      .where(
+        and(
+          ne(users.id, userId),
+          or(
+            ilike(users.firstName, pattern),
+            ilike(users.lastName, pattern),
+            ilike(users.email, pattern),
+          ),
+        ),
+      )
+      .limit(20);
+
+    return c.json(results);
+  })
 
   .get('/me', async c => {
     const db = c.get('db');
@@ -193,6 +229,11 @@ export const userRoutes = new Hono<AppContext>()
     }
 
     await db.delete(bets).where(or(eq(bets.user1Id, userId), eq(bets.user2Id, userId)));
+    await db
+      .delete(friendships)
+      .where(
+        or(eq(friendships.requesterId, userId), eq(friendships.addresseeId, userId)),
+      );
 
     try {
       await deleteAvatar(c.env, userId);

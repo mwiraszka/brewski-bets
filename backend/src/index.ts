@@ -7,6 +7,7 @@ import { type Db, createDb } from './db/index.js';
 import { users } from './db/schema.js';
 import { authMiddleware } from './middleware/auth.js';
 import { betRoutes } from './routes/bets.js';
+import { friendRoutes } from './routes/friends.js';
 import { userRoutes } from './routes/users.js';
 import { webhookRoutes } from './routes/webhooks.js';
 import type { AppBindings, AppContext } from './types/index.js';
@@ -83,9 +84,11 @@ app.get('/users/:id/avatar', async c => {
 });
 
 app.use('/users/*', authMiddleware);
+app.use('/friends/*', authMiddleware);
 app.use('/bets/*', authMiddleware);
 
 app.route('/users', userRoutes);
+app.route('/friends', friendRoutes);
 app.route('/bets', betRoutes);
 
 if (!process.env['VERCEL']) {

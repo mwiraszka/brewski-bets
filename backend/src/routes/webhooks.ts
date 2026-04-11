@@ -2,7 +2,7 @@ import { eq, or } from 'drizzle-orm';
 import { Hono } from 'hono';
 import { Webhook } from 'svix';
 
-import { bets, users } from '../db/schema.js';
+import { bets, friendships, users } from '../db/schema.js';
 import { deleteAvatar, uploadAvatar } from '../services/storage.js';
 import type { AppContext } from '../types/index.js';
 
@@ -151,6 +151,11 @@ export const webhookRoutes = new Hono<AppContext>().post('/clerk', async c => {
       await db
         .delete(bets)
         .where(or(eq(bets.user1Id, user.id), eq(bets.user2Id, user.id)));
+      await db
+        .delete(friendships)
+        .where(
+          or(eq(friendships.requesterId, user.id), eq(friendships.addresseeId, user.id)),
+        );
 
       try {
         await deleteAvatar(c.env, user.id);
