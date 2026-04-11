@@ -29,6 +29,13 @@
       "when": 1775413644333,
       "tag": "0003_avatar_managed_by_app",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1775931480647,
+      "tag": "0004_friends_and_bets_redesign",
+      "breakpoints": true
     }
   ]
 }
