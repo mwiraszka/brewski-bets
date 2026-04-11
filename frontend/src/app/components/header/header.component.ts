@@ -1,11 +1,13 @@
-import { AvatarComponent, ButtonComponent } from '@eagami/ui';
+import { AvatarComponent, BadgeComponent, ButtonComponent } from '@eagami/ui';
 import { filter, map } from 'rxjs';
 
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router, RouterLink } from '@angular/router';
 
+import { BetsService } from '@app/services/bets.service';
 import { ClerkService } from '@app/services/clerk.service';
+import { UserService } from '@app/services/user.service';
 
 import { environment } from '@env';
 
@@ -13,11 +15,13 @@ import { environment } from '@env';
   selector: 'bb-header',
   templateUrl: './header.component.html',
   styleUrl: './header.component.scss',
-  imports: [RouterLink, AvatarComponent, ButtonComponent],
+  imports: [RouterLink, AvatarComponent, BadgeComponent, ButtonComponent],
 })
-export class HeaderComponent {
+export class HeaderComponent implements OnInit {
+  private readonly betsService = inject(BetsService);
   private readonly clerk = inject(ClerkService);
   private readonly router = inject(Router);
+  private readonly userService = inject(UserService);
   private readonly currentUrl = toSignal(
     this.router.events.pipe(
       filter((e): e is NavigationEnd => e instanceof NavigationEnd),
@@ -54,12 +58,35 @@ export class HeaderComponent {
     return (first + last).toUpperCase() || undefined;
   });
 
+  readonly pendingCount = this.betsService.pendingCount;
+  readonly pendingBets = this.betsService.pendingBets;
+
+  async ngOnInit(): Promise<void> {
+    if (this.clerk.isLoggedIn()) {
+      const user = this.userService.user();
+      if (user) {
+        this.betsService.setCurrentUserId(user.id);
+      }
+      try {
+        await this.betsService.loadPendingCount();
+        await this.betsService.loadBets();
+      } catch {
+        // silently ignore — badge still works without data
+      }
+    }
+  }
+
   toggleMenu(): void {
     this.menuOpen.update(open => !open);
   }
 
   closeMenu(): void {
     this.menuOpen.set(false);
+  }
+
+  navigateToBet(betId: string): void {
+    this.menuOpen.set(false);
+    this.router.navigate(['/bets', betId]);
   }
 
   async onLogOut(): Promise<void> {
