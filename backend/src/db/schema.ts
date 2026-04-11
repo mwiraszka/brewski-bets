@@ -6,17 +6,22 @@ import {
   pgTable,
   text,
   timestamp,
+  unique,
   uuid,
 } from 'drizzle-orm/pg-core';
 
+export const friendshipStatusEnum = pgEnum('friendship_status', ['pending', 'accepted']);
+
 export const betStatusEnum = pgEnum('bet_status', ['pending', 'active', 'complete']);
-export const betOutcomeEnum = pgEnum('bet_outcome', [
-  'user1_win',
-  'user2_win',
-  'draw',
-  'open',
-  'void',
-]);
+export const betOutcomeEnum = pgEnum('bet_outcome', ['open', 'resolved', 'void']);
+export const betActionEnum = pgEnum('bet_action', ['user1', 'user2']);
+
+export interface BetResult {
+  name: string;
+  brewskiCount: number;
+  assignedTo: 'user1' | 'user2' | null;
+  isSpecial?: 'void' | 'active';
+}
 
 export const users = pgTable('users', {
   id: uuid('id').primaryKey().defaultRandom(),
@@ -38,22 +43,41 @@ export const users = pgTable('users', {
     .defaultNow(),
 });
 
+export const friendships = pgTable(
+  'friendships',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    requesterId: uuid('requester_id')
+      .notNull()
+      .references(() => users.id),
+    addresseeId: uuid('addressee_id')
+      .notNull()
+      .references(() => users.id),
+    status: friendshipStatusEnum('status').notNull().default('pending'),
+    createdDate: timestamp('created_date', { withTimezone: true }).notNull().defaultNow(),
+    lastModifiedDate: timestamp('last_modified_date', { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  t => [unique().on(t.requesterId, t.addresseeId)],
+);
+
 export const bets = pgTable('bets', {
   id: uuid('id').primaryKey().defaultRandom(),
   title: text('title').notNull(),
   description: text('description').notNull(),
+  imageSlug: text('image_slug'),
   user1Id: uuid('user1_id')
     .notNull()
     .references(() => users.id),
   user2Id: uuid('user2_id')
     .notNull()
     .references(() => users.id),
-  user1WagerBrewskis: integer('user1_wager_brewskis').notNull(),
-  user1WagerBrewskiType: text('user1_wager_brewski_type').notNull(),
-  user2WagerBrewskis: integer('user2_wager_brewskis').notNull(),
-  user2WagerBrewskiType: text('user2_wager_brewski_type').notNull(),
+  results: jsonb('results').notNull().$type<BetResult[]>(),
+  selectedResultIndex: integer('selected_result_index'),
   status: betStatusEnum('status').notNull().default('pending'),
   outcome: betOutcomeEnum('outcome').notNull().default('open'),
+  pendingAction: betActionEnum('pending_action'),
   createdDate: timestamp('created_date', { withTimezone: true }).notNull().defaultNow(),
   lastModifiedDate: timestamp('last_modified_date', { withTimezone: true })
     .notNull()

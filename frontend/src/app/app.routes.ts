@@ -16,6 +16,34 @@ export const routes: Routes = [
     canActivate: [authGuard],
   },
   {
+    path: 'friends',
+    loadComponent: () =>
+      import('./pages/friends/friends-page.component').then(c => c.FriendsPageComponent),
+    canActivate: [authGuard],
+  },
+  {
+    path: 'bets',
+    loadComponent: () =>
+      import('./pages/bets/bets-page.component').then(c => c.BetsPageComponent),
+    canActivate: [authGuard],
+  },
+  {
+    path: 'bets/new',
+    loadComponent: () =>
+      import('./pages/bet-form/bet-form-page.component').then(
+        c => c.BetFormPageComponent,
+      ),
+    canActivate: [authGuard],
+  },
+  {
+    path: 'bets/:id',
+    loadComponent: () =>
+      import('./pages/bet-form/bet-form-page.component').then(
+        c => c.BetFormPageComponent,
+      ),
+    canActivate: [authGuard],
+  },
+  {
     path: '',
     loadComponent: () =>
       import('./layouts/auth-layout/auth-layout.component').then(

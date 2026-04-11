@@ -23,10 +23,16 @@ export class ApiService {
     return this.request<T>(path);
   }
 
-  async post<T>(path: string, body?: BodyInit): Promise<T> {
+  async post<T>(path: string, body?: BodyInit | unknown): Promise<T> {
+    const isFormData = body instanceof FormData;
     return this.request<T>(path, {
       method: 'POST',
-      body,
+      ...(isFormData || !body
+        ? { body: body as BodyInit }
+        : {
+            headers: { 'Content-Type': 'application/json' },
+            body: typeof body === 'string' ? body : JSON.stringify(body),
+          }),
     });
   }
 

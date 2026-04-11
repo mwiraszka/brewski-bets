@@ -1,0 +1,86 @@
+:host {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  height: 100%;
+  padding-top: 48px;
+}
+
+.friends-page {
+  width: 100%;
+  max-width: 560px;
+  padding: 24px;
+}
+
+ea-card {
+  --color-bg-base: #ffffff;
+  --color-text-primary: #1a1a1a;
+  --color-text-secondary: #555555;
+  --color-text-inverse: #ffffff;
+  --color-border-default: #e0e0e0;
+  --color-neutral-400: #555555;
+}
+
+.friend-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.friend-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px;
+  border-radius: 8px;
+  background: #f7f7f8;
+}
+
+.friend-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.friend-name {
+  font-weight: 500;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.section-label {
+  font-size: 14px;
+  font-weight: 600;
+  text-transform: uppercase;
+  margin-top: 16px;
+  margin-bottom: 8px;
+  letter-spacing: 0.5px;
+  color: #888888;
+}
+
+.section-label:first-child {
+  margin-top: 0;
+}
+
+.search-section {
+  margin-bottom: 16px;
+}
+
+.status-label {
+  font-size: 13px;
+  font-weight: 500;
+  color: #888888;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 32px 0;
+  color: #888888;
+}

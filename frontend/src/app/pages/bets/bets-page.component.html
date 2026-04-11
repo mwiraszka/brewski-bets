@@ -1,0 +1,63 @@
+<div class="bets-page">
+  <div class="top-bar">
+    <ea-button routerLink="/bets/new">Create a bet</ea-button>
+  </div>
+
+  <ea-card variant="outlined">
+    <h2 eaCardHeader>My bets</h2>
+
+    <div class="filters">
+      <ea-input
+        label="Search"
+        [value]="filterText()"
+        (valueChange)="filterText.set($event)" />
+      <ea-dropdown
+        label="Status"
+        [options]="statusOptions"
+        [value]="filterStatus()"
+        (valueChange)="filterStatus.set($event)" />
+    </div>
+
+    @if (loading()) {
+      <p class="empty-state">Loading...</p>
+    } @else {
+      <ea-data-table
+        [columns]="columns()"
+        [data]="filteredBets()"
+        trackBy="id"
+        [hoverable]="true"
+        [(sort)]="sort"
+        noDataText="No bets yet. Create your first bet!" />
+    }
+  </ea-card>
+</div>
+
+<ng-template
+  #opponentCell
+  let-bet>
+  @if (bet.opponent) {
+    <div class="opponent-cell">
+      <ea-avatar
+        [src]="getAvatarSrc(bet.opponent.clerkImageUrl)"
+        [initials]="getInitials(bet.opponent.firstName, bet.opponent.lastName)"
+        size="xs" />
+      <span>{{ bet.opponent.firstName }} {{ bet.opponent.lastName }}</span>
+    </div>
+  }
+</ng-template>
+
+<ng-template
+  #statusCell
+  let-bet>
+  <ea-badge [variant]="getStatusVariant(bet.status)">
+    {{ bet.status }}
+  </ea-badge>
+</ng-template>
+
+<ng-template
+  #actionCell
+  let-bet>
+  @if (isMyTurn(bet)) {
+    <ea-badge variant="info">Your turn</ea-badge>
+  }
+</ng-template>

@@ -1,0 +1,182 @@
+<div class="friends-page">
+  <ea-card variant="outlined">
+    <h2 eaCardHeader>Friends</h2>
+
+    <ea-tabs [(activeTab)]="activeTab">
+      <ea-tab
+        value="friends"
+        label="Friends">
+        @if (loading()) {
+          <p class="empty-state">Loading...</p>
+        } @else if (friends().length === 0) {
+          <p class="empty-state">No friends yet. Find someone to add!</p>
+        } @else {
+          <ul class="friend-list">
+            @for (friend of friends(); track friend.id) {
+              <li class="friend-item">
+                <div class="friend-info">
+                  <ea-avatar
+                    [src]="getAvatarSrc(friend.clerkImageUrl)"
+                    [initials]="getInitials(friend.firstName, friend.lastName)"
+                    size="sm" />
+                  <span class="friend-name">
+                    {{ friend.firstName }} {{ friend.lastName }}
+                  </span>
+                </div>
+                <ea-button
+                  variant="danger"
+                  size="sm"
+                  (clicked)="confirmRemoveFriend(friend)">
+                  Remove
+                </ea-button>
+              </li>
+            }
+          </ul>
+        }
+      </ea-tab>
+
+      <ea-tab
+        value="requests"
+        [label]="requestsTabLabel()">
+        @if (loading()) {
+          <p class="empty-state">Loading...</p>
+        } @else {
+          @if (incomingRequests().length > 0) {
+            <h3 class="section-label">Received</h3>
+            <ul class="friend-list">
+              @for (request of incomingRequests(); track request.id) {
+                <li class="friend-item">
+                  <div class="friend-info">
+                    <ea-avatar
+                      [src]="getAvatarSrc(request.requester.clerkImageUrl)"
+                      [initials]="
+                        getInitials(
+                          request.requester.firstName,
+                          request.requester.lastName
+                        )
+                      "
+                      size="sm" />
+                    <span class="friend-name">
+                      {{ request.requester.firstName }} {{ request.requester.lastName }}
+                    </span>
+                  </div>
+                  <div class="action-buttons">
+                    <ea-button
+                      size="sm"
+                      (clicked)="onAcceptRequest(request)">
+                      Accept
+                    </ea-button>
+                    <ea-button
+                      variant="secondary"
+                      size="sm"
+                      (clicked)="onDeclineRequest(request)">
+                      Decline
+                    </ea-button>
+                  </div>
+                </li>
+              }
+            </ul>
+          }
+
+          @if (sentRequests().length > 0) {
+            <h3 class="section-label">Sent</h3>
+            <ul class="friend-list">
+              @for (request of sentRequests(); track request.id) {
+                <li class="friend-item">
+                  <div class="friend-info">
+                    <ea-avatar
+                      [src]="getAvatarSrc(request.addressee.clerkImageUrl)"
+                      [initials]="
+                        getInitials(
+                          request.addressee.firstName,
+                          request.addressee.lastName
+                        )
+                      "
+                      size="sm" />
+                    <span class="friend-name">
+                      {{ request.addressee.firstName }} {{ request.addressee.lastName }}
+                    </span>
+                  </div>
+                  <ea-button
+                    variant="secondary"
+                    size="sm"
+                    (clicked)="onCancelSentRequest(request)">
+                    Cancel
+                  </ea-button>
+                </li>
+              }
+            </ul>
+          }
+
+          @if (incomingRequests().length === 0 && sentRequests().length === 0) {
+            <p class="empty-state">No pending requests</p>
+          }
+        }
+      </ea-tab>
+
+      <ea-tab
+        value="find"
+        label="Find Friends">
+        <div class="search-section">
+          <ea-input
+            label="Search by name or email"
+            [value]="searchQuery()"
+            (valueChange)="onSearchInput($event)" />
+        </div>
+
+        @if (searching()) {
+          <p class="empty-state">Searching...</p>
+        } @else if (searchQuery().length >= 2 && searchResults().length === 0) {
+          <p class="empty-state">No users found</p>
+        } @else if (searchResults().length > 0) {
+          <ul class="friend-list">
+            @for (user of searchResults(); track user.id) {
+              <li class="friend-item">
+                <div class="friend-info">
+                  <ea-avatar
+                    [src]="getAvatarSrc(user.clerkImageUrl)"
+                    [initials]="getInitials(user.firstName, user.lastName)"
+                    size="sm" />
+                  <span class="friend-name">
+                    {{ user.firstName }} {{ user.lastName }}
+                  </span>
+                </div>
+                @if (isAlreadyFriend(user.id)) {
+                  <span class="status-label">Friends</span>
+                } @else if (hasPendingRequest(user.id)) {
+                  <span class="status-label">Pending</span>
+                } @else {
+                  <ea-button
+                    size="sm"
+                    (clicked)="onSendRequest(user.id)">
+                    Add friend
+                  </ea-button>
+                }
+              </li>
+            }
+          </ul>
+        }
+      </ea-tab>
+    </ea-tabs>
+  </ea-card>
+</div>
+
+<ea-dialog
+  [(open)]="removeDialogOpen"
+  size="sm">
+  <span slot="header">Remove friend</span>
+  <p>Are you sure you want to remove this friend?</p>
+  <div slot="footer">
+    <ea-button
+      variant="secondary"
+      (clicked)="removeDialogOpen.set(false)">
+      Cancel
+    </ea-button>
+    <ea-button
+      variant="danger"
+      [loading]="!!removingId()"
+      (clicked)="onConfirmRemove()">
+      Remove
+    </ea-button>
+  </div>
+</ea-dialog>
