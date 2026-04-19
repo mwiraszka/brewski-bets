@@ -1,0 +1,35 @@
+<footer class="footer">
+  <div class="footer-top">
+    <div class="footer-meta">
+      <span class="copyright">&copy; {{ currentYear }} Brewski Bets</span>
+      <a
+        class="version"
+        [href]="releaseUrl"
+        target="_blank"
+        rel="noopener noreferrer">
+        v{{ version }}
+      </a>
+    </div>
+
+    <div class="footer-links">
+      <a
+        routerLink="/privacy-policy"
+        class="footer-link">
+        Privacy Policy
+      </a>
+      <span class="footer-separator"></span>
+      <a
+        routerLink="/terms-of-service"
+        class="footer-link">
+        Terms of Service
+      </a>
+    </div>
+  </div>
+
+  <div class="footer-bottom">
+    <ea-eagami-wordmark
+      variant="signature"
+      size="sm"
+      class="wordmark" />
+  </div>
+</footer>

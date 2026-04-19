@@ -4,4 +4,8 @@
   <router-outlet />
 </main>
 
+@if (isLoggedIn()) {
+  <bb-footer />
+}
+
 <ea-toast />
