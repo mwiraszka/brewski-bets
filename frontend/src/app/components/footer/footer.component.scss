@@ -1,0 +1,86 @@
+@use '../../../styles/mixins' as *;
+
+.footer {
+  display: flex;
+  flex-direction: column;
+  padding: 16px 24px;
+  border-top: 1px solid #e8e8e8;
+  background: var(--bb-color-appHeaderBackground);
+  color: var(--bb-color-textPrimaryDark);
+}
+
+.footer-top {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.footer-meta {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.copyright {
+  font-size: 13px;
+  white-space: nowrap;
+  color: var(--bb-color-textSecondary);
+}
+
+.version {
+  font-size: 11px;
+  text-decoration: none;
+  color: var(--bb-color-textSecondary);
+  opacity: 0.5;
+
+  &:hover {
+    opacity: 1;
+  }
+}
+
+.footer-links {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.footer-link {
+  font-size: 13px;
+  white-space: nowrap;
+  text-decoration: none;
+  color: var(--bb-color-textSecondary);
+
+  &:hover {
+    color: var(--bb-color-textPrimaryDark);
+  }
+}
+
+.footer-separator {
+  width: 1px;
+  height: 12px;
+  background: #d0d0d0;
+}
+
+.footer-bottom {
+  display: flex;
+  align-items: center;
+
+  ::ng-deep .ea-eagami-wordmark__overline {
+    font-family: inherit;
+    letter-spacing: normal;
+  }
+}
+
+@include respond-to('lt-sm') {
+  .footer {
+    align-items: center;
+  }
+
+  .footer-top {
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+  }
+}

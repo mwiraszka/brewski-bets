@@ -1,4 +1,10 @@
-import { AvatarComponent, BadgeComponent, ButtonComponent } from '@eagami/ui';
+import {
+  AvatarComponent,
+  BadgeComponent,
+  ButtonComponent,
+  MenuIconComponent,
+  XIconComponent,
+} from '@eagami/ui';
 import { filter, map } from 'rxjs';
 
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
@@ -15,7 +21,14 @@ import { environment } from '@env';
   selector: 'bb-header',
   templateUrl: './header.component.html',
   styleUrl: './header.component.scss',
-  imports: [RouterLink, AvatarComponent, BadgeComponent, ButtonComponent],
+  imports: [
+    RouterLink,
+    AvatarComponent,
+    BadgeComponent,
+    ButtonComponent,
+    MenuIconComponent,
+    XIconComponent,
+  ],
 })
 export class HeaderComponent implements OnInit {
   private readonly betsService = inject(BetsService);
