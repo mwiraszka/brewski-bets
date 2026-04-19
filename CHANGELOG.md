@@ -15,7 +15,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Move pending bets notification from header dropdown to inline badge next to "Bets" nav link
-- Upgrade `@eagami/ui` to 0.10.0
+- Remove redundant privacy policy and terms of service links from login and create account cards
+- Upgrade `@eagami/ui` to 0.10.1
 
 ### Fixed
 
