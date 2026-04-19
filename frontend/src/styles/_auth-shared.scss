@@ -68,27 +68,6 @@ ea-card {
   color: var(--bb-color-textSecondary);
 }
 
-.legal-links {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  margin-top: 24px;
-  font-size: 12px;
-  color: var(--bb-color-textSecondary);
-
-  a {
-    font-size: inherit;
-    text-decoration: none;
-    color: var(--bb-color-textSecondary);
-
-    &:hover {
-      text-decoration: underline;
-      color: #999999;
-    }
-  }
-}
-
 .auth-link {
   font-size: 14px;
   line-height: 20px;
