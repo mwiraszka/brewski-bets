@@ -66,12 +66,11 @@
 .footer-bottom {
   display: flex;
   align-items: center;
-}
 
-.wordmark {
-  font-size: 0.8em;
-  transform: scale(0.85);
-  transform-origin: left center;
+  ::ng-deep .ea-eagami-wordmark__overline {
+    font-family: inherit;
+    letter-spacing: normal;
+  }
 }
 
 @include respond-to('lt-sm') {
@@ -83,9 +82,5 @@
     flex-direction: column;
     align-items: center;
     gap: 4px;
-  }
-
-  .wordmark {
-    transform-origin: center center;
   }
 }

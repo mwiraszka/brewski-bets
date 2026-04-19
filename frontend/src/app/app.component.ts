@@ -18,8 +18,6 @@ export class AppComponent {
   private readonly router = inject(Router);
   private readonly toast = inject(ToastService);
 
-  readonly isLoggedIn = this.clerk.isLoggedIn;
-
   constructor() {
     effect(() => {
       if (this.clerk.externallyDeleted()) {
