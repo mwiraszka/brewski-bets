@@ -1,3 +1,5 @@
+@use '../../../styles/mixins' as *;
+
 :host {
   display: flex;
   align-items: center;
@@ -12,12 +14,7 @@
 }
 
 ea-card {
-  --color-bg-base: #ffffff;
-  --color-text-primary: #1a1a1a;
-  --color-text-secondary: #555555;
-  --color-text-inverse: #ffffff;
-  --color-border-default: #e0e0e0;
-  --color-neutral-400: #555555;
+  @include eagami-light-theme;
 }
 
 .avatar-section {

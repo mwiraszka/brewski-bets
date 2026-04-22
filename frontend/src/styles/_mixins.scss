@@ -36,6 +36,17 @@ $breakpoints: (
   ),
 );
 
+/// Applies the light-theme token overrides expected by @eagami/ui
+/// components (e.g. ea-card) using centralized app color variables.
+@mixin eagami-light-theme {
+  --color-bg-base: var(--bb-color-white);
+  --color-text-primary: var(--bb-color-textStrong);
+  --color-text-secondary: var(--bb-color-textBody);
+  --color-text-inverse: var(--bb-color-white);
+  --color-border-default: var(--bb-color-borderDefault);
+  --color-neutral-400: var(--bb-color-textBody);
+}
+
 /// Responsive breakpoint manager
 /// @access public
 /// @param {String} $breakpoint - Breakpoint

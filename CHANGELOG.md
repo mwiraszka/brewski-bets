@@ -5,6 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.18.0] - 2026-04-21
+
+### Added
+
+- Make the header translucent with a frosted-glass blur when the main content is scrolled
+- Give header navigation links a button-style grey hover matching the log in button
+- Show the log in button in the header on the create account and forgot password pages
+
+### Changed
+
+- Refresh the app with a cream background palette, replacing the dark navy
+- Restyle the home page background with a subtle warm cream gradient
+- Refactor privacy policy and terms of service pages to a full-height natural scroll layout with deep-link anchors, dropping the scrollable card
+- Darken the footer version link for better legibility
+
+
 ## [0.17.0] - 2026-04-19
 
 ### Added
@@ -337,6 +353,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - PWA manifest and service worker configuration
 - GitHub issue templates
 
+[0.18.0]: https://github.com/mwiraszka/brewski-bets/compare/v0.17.0...v0.18.0
 [0.17.0]: https://github.com/mwiraszka/brewski-bets/compare/v0.16.0...v0.17.0
 [0.16.0]: https://github.com/mwiraszka/brewski-bets/compare/v0.15.0...v0.16.0
 [0.15.0]: https://github.com/mwiraszka/brewski-bets/compare/v0.14.2...v0.15.0

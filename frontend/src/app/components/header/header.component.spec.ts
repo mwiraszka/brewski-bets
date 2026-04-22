@@ -124,16 +124,16 @@ describe('HeaderComponent', () => {
       expect(component.showLoginButton()).toBe(false);
     });
 
-    it('returns false on /create-account', () => {
+    it('returns true on /create-account', () => {
       routerEvents$.next(new NavigationEnd(1, '/create-account', '/create-account'));
 
-      expect(component.showLoginButton()).toBe(false);
+      expect(component.showLoginButton()).toBe(true);
     });
 
-    it('returns false on /forgot-password', () => {
+    it('returns true on /forgot-password', () => {
       routerEvents$.next(new NavigationEnd(1, '/forgot-password', '/forgot-password'));
 
-      expect(component.showLoginButton()).toBe(false);
+      expect(component.showLoginButton()).toBe(true);
     });
   });
 

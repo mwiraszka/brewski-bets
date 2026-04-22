@@ -4,8 +4,8 @@
   display: flex;
   flex-direction: column;
   padding: 16px 24px;
-  border-top: 1px solid #e8e8e8;
-  background: var(--bb-color-appHeaderBackground);
+  border-top: 1px solid var(--bb-color-borderSubtle);
+  background-color: var(--bb-color-white);
   color: var(--bb-color-textPrimaryDark);
 }
 
@@ -33,7 +33,7 @@
   font-size: 11px;
   text-decoration: none;
   color: var(--bb-color-textSecondary);
-  opacity: 0.5;
+  opacity: 0.75;
 
   &:hover {
     opacity: 1;
@@ -60,7 +60,7 @@
 .footer-separator {
   width: 1px;
   height: 12px;
-  background: #d0d0d0;
+  background-color: var(--bb-color-borderDivider);
 }
 
 .footer-bottom {

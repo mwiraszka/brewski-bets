@@ -7,7 +7,7 @@ import {
 } from '@eagami/ui';
 import { filter, map } from 'rxjs';
 
-import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import { Component, OnInit, computed, inject, input, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router, RouterLink } from '@angular/router';
 
@@ -43,20 +43,17 @@ export class HeaderComponent implements OnInit {
     { initialValue: this.router.url },
   );
 
+  readonly scrolled = input(false);
+
   readonly previewInfo = environment.preview;
 
   readonly isLoggedIn = computed(() => this.clerk.isLoggedIn());
-  private readonly authRoutes = new Set([
-    '/',
-    '/login',
-    '/create-account',
-    '/forgot-password',
-  ]);
+  private readonly hideLoginButtonRoutes = new Set(['/', '/login']);
   readonly showLoginButton = computed(
     () =>
       this.clerk.isLoaded() &&
       !this.isLoggedIn() &&
-      !this.authRoutes.has(this.currentUrl()),
+      !this.hideLoginButtonRoutes.has(this.currentUrl()),
   );
   readonly menuOpen = signal(false);
 
