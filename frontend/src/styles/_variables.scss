@@ -1,27 +1,54 @@
 :root {
-  /* Colour palette */
-  --bb-color-appBackground: #313843;
-  --bb-color-appHeaderBackground: #ffffff;
-  --bb-color-appCard: #fafafa;
+  /* App surfaces */
+  --bb-color-appBackground: #faf7f2;
 
+  /* Brand palette */
   --bb-color-primary: #cba855;
-  --bb-color-primaryDark: #866925;
   --bb-color-primarySemiTransparent: #cba8554e;
-  --bb-color-primaryHover: #4f5e7e36;
+  --bb-color-primaryLink: #d4be82;
 
-  --bb-color-secondary: #8a3838;
-  --bb-color-secondaryLight: #ff8181;
+  /* Neutral surfaces */
+  --bb-color-white: #ffffff;
+  --bb-color-surfaceMuted: #f7f7f8;
+  --bb-color-surfaceHover: #f5f5f5;
+  --bb-color-surfaceDisabled: #f0f0f0;
+  --bb-color-surfacePrimaryTint: #fdf8ec;
+  --bb-color-surfaceCreamWarm: #f3ead3;
+  --bb-color-surfaceWarningTint: #fff3e0;
+  --bb-color-surfaceAuth: #2e3440;
+  --bb-color-surfaceAuthTranslucent: #2e344080;
 
+  /* Borders & dividers */
+  --bb-color-borderDefault: #e0e0e0;
+  --bb-color-borderSubtle: #e8e8e8;
+  --bb-color-borderDivider: #d0d0d0;
+
+  /* Text */
+  --bb-color-textStrong: #1a1a1a;
   --bb-color-textPrimaryDark: #444444;
   --bb-color-textPrimaryLight: #eeeeee;
+  --bb-color-textBody: #555555;
   --bb-color-textSecondary: #777777;
+  --bb-color-textMuted: #888888;
+  --bb-color-textWarning: #8a6d00;
+  --bb-color-textDanger: #e53935;
+  --bb-color-textPreview: #e65100;
+
+  /* Effects / overlays */
+  --bb-color-glassBackground: rgba(255, 255, 255, 0.55);
+  --bb-color-glassBorder: rgba(0, 0, 0, 0.06);
+  --bb-color-scrollbarThumb: rgba(0, 0, 0, 0.2);
+  --bb-color-shadowSoft: rgba(0, 0, 0, 0.04);
+  --bb-color-shadowMedium: rgba(0, 0, 0, 0.15);
+  --bb-color-shadowDeep: #000000cc;
+  --bb-color-backdropOverlay: rgba(0, 0, 0, 0.3);
 
   /* Container widths & heights */
   --bb-width-appContent: 1140px;
   --bb-height-header: 74px;
   --bb-height-mobileDropdown: 256px;
 
-  /* Other */
+  /* Shadows */
   --bb-boxShadow: 0 4px 8px #0000001a;
   --bb-boxShadowRaised: 0 6px 12px #0000001f;
 }

@@ -1,55 +1,27 @@
 :host {
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  width: 100%;
-  height: 100%;
-  padding: 24px;
-}
-
-ea-card {
-  overflow: hidden;
-  display: flex;
-  flex: 1;
+  display: block;
   width: 100%;
   max-width: 800px;
-  min-height: 0;
-  --color-bg-base: #ffffff;
-  --color-text-primary: #1a1a1a;
-  --color-text-secondary: #555555;
-  --color-border-default: #e0e0e0;
-  --ea-card-body-padding: 32px;
-
-  ::ng-deep .ea-card {
-    display: flex;
-    flex-direction: column;
-    flex: 1;
-    min-height: 0;
-  }
-
-  ::ng-deep .ea-card__body {
-    overflow-y: auto;
-    flex: 1;
-    min-height: 0;
-  }
+  padding: 48px 24px 64px;
+  margin: 0 auto;
 }
 
 .legal-page {
   h2.legal-title {
     margin-bottom: 4px;
-    font-size: 24px;
+    font-size: 32px;
     color: var(--bb-color-primaryText);
   }
 
   .effective-date {
     margin-bottom: 32px;
     font-size: 14px;
-    color: #555555;
+    color: var(--bb-color-textBody);
   }
 
   section {
     margin-bottom: 24px;
+    scroll-margin-top: 24px;
   }
 
   h3 {
@@ -62,7 +34,7 @@ ea-card {
   li {
     font-size: 15px;
     line-height: 24px;
-    color: #333333;
+    color: var(--bb-color-textPrimaryDark);
   }
 
   p {
@@ -85,7 +57,7 @@ ea-card {
     color: var(--bb-color-primary);
 
     &:hover {
-      color: #d4be82;
+      color: var(--bb-color-primaryLink);
     }
   }
 }

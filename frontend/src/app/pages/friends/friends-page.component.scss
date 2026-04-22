@@ -1,3 +1,5 @@
+@use '../../../styles/mixins' as *;
+
 :host {
   display: flex;
   align-items: flex-start;
@@ -13,12 +15,7 @@
 }
 
 ea-card {
-  --color-bg-base: #ffffff;
-  --color-text-primary: #1a1a1a;
-  --color-text-secondary: #555555;
-  --color-text-inverse: #ffffff;
-  --color-border-default: #e0e0e0;
-  --color-neutral-400: #555555;
+  @include eagami-light-theme;
 }
 
 .friend-list {
@@ -37,7 +34,7 @@ ea-card {
   gap: 12px;
   padding: 12px;
   border-radius: 8px;
-  background: #f7f7f8;
+  background-color: var(--bb-color-surfaceMuted);
 }
 
 .friend-info {
@@ -62,7 +59,7 @@ ea-card {
   margin-top: 16px;
   margin-bottom: 8px;
   letter-spacing: 0.5px;
-  color: #888888;
+  color: var(--bb-color-textMuted);
 }
 
 .section-label:first-child {
@@ -76,11 +73,11 @@ ea-card {
 .status-label {
   font-size: 13px;
   font-weight: 500;
-  color: #888888;
+  color: var(--bb-color-textMuted);
 }
 
 .empty-state {
   text-align: center;
   padding: 32px 0;
-  color: #888888;
+  color: var(--bb-color-textMuted);
 }

@@ -1,3 +1,5 @@
+@use '../../../styles/mixins' as *;
+
 :host {
   display: flex;
   align-items: flex-start;
@@ -13,12 +15,7 @@
 }
 
 ea-card {
-  --color-bg-base: #ffffff;
-  --color-text-primary: #1a1a1a;
-  --color-text-secondary: #555555;
-  --color-text-inverse: #ffffff;
-  --color-border-default: #e0e0e0;
-  --color-neutral-400: #555555;
+  @include eagami-light-theme;
 }
 
 .top-bar {
@@ -42,5 +39,5 @@ ea-card {
 .empty-state {
   text-align: center;
   padding: 32px 0;
-  color: #888888;
+  color: var(--bb-color-textMuted);
 }

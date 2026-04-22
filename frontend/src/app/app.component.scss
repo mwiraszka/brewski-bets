@@ -2,9 +2,26 @@
   display: flex;
   flex-direction: column;
   height: 100%;
+  background-color: var(--bb-color-appBackground);
 
   main {
-    flex: 1;
     overflow: auto;
+    flex: 1;
+    padding-top: var(--bb-height-header);
+    overscroll-behavior: none;
+
+    &::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    &::-webkit-scrollbar-track {
+      margin-top: var(--bb-height-header);
+      background-color: transparent;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      border-radius: 4px;
+      background-color: var(--bb-color-scrollbarThumb);
+    }
   }
 }

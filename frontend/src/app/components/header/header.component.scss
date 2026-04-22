@@ -1,5 +1,14 @@
 @use '../../../styles/mixins' as *;
 
+:host {
+  position: fixed;
+  top: 0;
+  right: 0;
+  left: 0;
+  z-index: 100;
+  display: block;
+}
+
 .header {
   position: relative;
   display: flex;
@@ -7,9 +16,22 @@
   justify-content: space-between;
   height: var(--bb-height-header);
   padding: 0 24px;
-  background: var(--bb-color-appHeaderBackground);
+  background-color: var(--bb-color-white);
   box-shadow: var(--bb-boxShadow);
-  --color-text-primary: #1a1a1a;
+  transition:
+    background-color 0.2s,
+    backdrop-filter 0.2s,
+    box-shadow 0.2s,
+    border-color 0.2s;
+  --color-text-primary: var(--bb-color-textStrong);
+}
+
+.header--scrolled {
+  border-bottom: 1px solid var(--bb-color-glassBorder);
+  background-color: var(--bb-color-glassBackground);
+  backdrop-filter: saturate(180%) blur(16px);
+  -webkit-backdrop-filter: saturate(180%) blur(16px);
+  box-shadow: 0 1px 4px var(--bb-color-shadowSoft);
 }
 
 .branding {
@@ -38,8 +60,8 @@
   text-transform: uppercase;
   letter-spacing: 0.5px;
   border-radius: 4px;
-  background: #fff3e0;
-  color: #e65100;
+  background-color: var(--bb-color-surfaceWarningTint);
+  color: var(--bb-color-textPreview);
   text-decoration: none;
   cursor: pointer;
 
@@ -65,34 +87,40 @@
   text-transform: none;
   letter-spacing: 0;
   border-radius: 4px;
-  background: #1a1a1a;
-  color: #ffffff;
+  background-color: var(--bb-color-textStrong);
+  color: var(--bb-color-white);
   transition: opacity 0.15s;
 }
 
 .preview-label {
-  color: #999999;
+  color: var(--bb-color-textMuted);
 }
 
 .nav-links {
   display: flex;
-  gap: 24px;
+  gap: 4px;
   margin-left: auto;
-  margin-right: 24px;
+  margin-right: 16px;
 }
 
 .nav-link {
   display: flex;
   align-items: center;
   gap: 8px;
+  padding: 6px 12px;
   font-size: 14px;
   font-weight: 500;
   white-space: nowrap;
   text-decoration: none;
-  color: #555555;
+  border-radius: 6px;
+  color: var(--bb-color-textBody);
+  transition:
+    background-color 0.15s,
+    color 0.15s;
 
   &:hover {
-    color: #1a1a1a;
+    background-color: var(--color-bg-muted);
+    color: var(--bb-color-textStrong);
   }
 }
 
@@ -108,7 +136,7 @@
   line-height: 0;
   border: 2px solid transparent;
   border-radius: 50%;
-  background: none;
+  background-color: transparent;
   cursor: pointer;
   transition: border-color 0.2s;
 
@@ -141,10 +169,10 @@
   flex-direction: column;
   min-width: 140px;
   padding: 4px;
-  border: 1px solid #e0e0e0;
+  border: 1px solid var(--bb-color-borderDefault);
   border-radius: 4px;
-  background: #ffffff;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  background-color: var(--bb-color-white);
+  box-shadow: 0 8px 24px var(--bb-color-shadowMedium);
 }
 
 .menu-item {
@@ -156,23 +184,23 @@
   white-space: nowrap;
   border: none;
   border-radius: 2px;
-  background: none;
-  color: #1a1a1a;
+  background-color: transparent;
+  color: var(--bb-color-textStrong);
   cursor: pointer;
 
   &:hover {
-    background: #f5f5f5;
+    background-color: var(--bb-color-surfaceHover);
   }
 
   &--danger {
-    color: #e53935;
+    color: var(--bb-color-textDanger);
   }
 }
 
 .menu-divider {
   height: 1px;
   margin: 4px 0;
-  background: #e0e0e0;
+  background-color: var(--bb-color-borderDefault);
 }
 
 // Hamburger button
@@ -189,12 +217,12 @@
   line-height: 0;
   border: none;
   border-radius: 4px;
-  background: none;
-  color: #555555;
+  background-color: transparent;
+  color: var(--bb-color-textBody);
   cursor: pointer;
 
   &:hover {
-    background: #f5f5f5;
+    background-color: var(--color-bg-muted);
   }
 }
 
@@ -207,7 +235,7 @@
   bottom: 0;
   left: 0;
   z-index: 99;
-  background: rgba(0, 0, 0, 0.3);
+  background-color: var(--bb-color-backdropOverlay);
 }
 
 .mobile-menu {
@@ -219,8 +247,8 @@
   display: flex;
   flex-direction: column;
   padding: 8px;
-  background: #ffffff;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  background-color: var(--bb-color-white);
+  box-shadow: 0 8px 24px var(--bb-color-shadowMedium);
 }
 
 .mobile-menu-item {
@@ -234,16 +262,16 @@
   text-decoration: none;
   border: none;
   border-radius: 4px;
-  background: none;
-  color: #1a1a1a;
+  background-color: transparent;
+  color: var(--bb-color-textStrong);
   cursor: pointer;
 
   &:hover {
-    background: #f5f5f5;
+    background-color: var(--bb-color-surfaceHover);
   }
 
   &--danger {
-    color: #e53935;
+    color: var(--bb-color-textDanger);
   }
 }
 

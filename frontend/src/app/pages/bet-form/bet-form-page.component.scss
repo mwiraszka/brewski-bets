@@ -1,3 +1,5 @@
+@use '../../../styles/mixins' as *;
+
 :host {
   display: flex;
   align-items: flex-start;
@@ -13,12 +15,7 @@
 }
 
 ea-card {
-  --color-bg-base: #ffffff;
-  --color-text-primary: #1a1a1a;
-  --color-text-secondary: #555555;
-  --color-text-inverse: #ffffff;
-  --color-border-default: #e0e0e0;
-  --color-neutral-400: #555555;
+  @include eagami-light-theme;
 }
 
 fieldset {
@@ -41,7 +38,7 @@ fieldset[disabled] {
   font-size: 14px;
   font-weight: 500;
   margin-bottom: 8px;
-  color: #1a1a1a;
+  color: var(--bb-color-textStrong);
 }
 
 .image-grid {
@@ -56,20 +53,20 @@ fieldset[disabled] {
   justify-content: center;
   aspect-ratio: 1;
   padding: 8px;
-  border: 2px solid #e0e0e0;
+  border: 2px solid var(--bb-color-borderDefault);
   border-radius: 8px;
-  background: #f7f7f8;
+  background-color: var(--bb-color-surfaceMuted);
   cursor: pointer;
   transition: border-color 0.15s;
 }
 
 .image-option:hover {
-  border-color: #cba855;
+  border-color: var(--bb-color-primary);
 }
 
 .image-option--selected {
-  border-color: #cba855;
-  background: #fdf8ec;
+  border-color: var(--bb-color-primary);
+  background-color: var(--bb-color-surfacePrimaryTint);
 }
 
 .image-option img {
@@ -95,7 +92,7 @@ fieldset[disabled] {
   opacity: 0.6;
   padding: 8px;
   border-radius: 4px;
-  background: #f0f0f0;
+  background-color: var(--bb-color-surfaceDisabled);
 }
 
 .waiting-banner {
@@ -104,8 +101,8 @@ fieldset[disabled] {
   margin-bottom: 16px;
   font-weight: 500;
   border-radius: 8px;
-  background: #fdf8ec;
-  color: #8a6d00;
+  background-color: var(--bb-color-surfacePrimaryTint);
+  color: var(--bb-color-textWarning);
 }
 
 .actions {
@@ -123,5 +120,5 @@ fieldset[disabled] {
 .loading {
   text-align: center;
   padding: 48px 0;
-  color: #888888;
+  color: var(--bb-color-textMuted);
 }

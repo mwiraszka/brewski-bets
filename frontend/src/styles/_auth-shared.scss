@@ -6,15 +6,10 @@
 
 ea-card {
   width: 100%;
-  --color-bg-base: #ffffff;
-  --color-text-primary: #1a1a1a;
-  --color-text-secondary: #555555;
-  --color-text-inverse: #ffffff;
-  --color-border-default: #e0e0e0;
-  --color-neutral-400: #555555;
+  @include eagami-light-theme;
 
   ::ng-deep .ea-card {
-    box-shadow: 0 16px 64px #000000cc;
+    box-shadow: 0 16px 64px var(--bb-color-shadowDeep);
   }
 }
 
@@ -58,7 +53,7 @@ ea-card {
   font-size: 14px;
   line-height: 20px;
   text-align: center;
-  color: #e53935;
+  color: var(--bb-color-textDanger);
 }
 
 .hint {
@@ -81,7 +76,7 @@ ea-card {
     color: var(--bb-color-primary);
 
     &:hover {
-      color: #d4be82;
+      color: var(--bb-color-primaryLink);
     }
   }
 }
