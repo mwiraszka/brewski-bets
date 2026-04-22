@@ -9,7 +9,7 @@ ea-card {
   @include eagami-light-theme;
 
   ::ng-deep .ea-card {
-    box-shadow: 0 16px 64px var(--bb-color-shadowDeep);
+    box-shadow: 0 8px 24px var(--bb-color-shadowMedium);
   }
 }
 
