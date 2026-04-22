@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Make the header translucent with a frosted-glass blur when the main content is scrolled
 - Give header navigation links a button-style grey hover matching the log in button
+- Show the log in button in the header on the create account and forgot password pages
 
 ### Changed
 

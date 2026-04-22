@@ -48,17 +48,12 @@ export class HeaderComponent implements OnInit {
   readonly previewInfo = environment.preview;
 
   readonly isLoggedIn = computed(() => this.clerk.isLoggedIn());
-  private readonly authRoutes = new Set([
-    '/',
-    '/login',
-    '/create-account',
-    '/forgot-password',
-  ]);
+  private readonly hideLoginButtonRoutes = new Set(['/', '/login']);
   readonly showLoginButton = computed(
     () =>
       this.clerk.isLoaded() &&
       !this.isLoggedIn() &&
-      !this.authRoutes.has(this.currentUrl()),
+      !this.hideLoginButtonRoutes.has(this.currentUrl()),
   );
   readonly menuOpen = signal(false);
 
