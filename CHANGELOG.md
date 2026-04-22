@@ -19,10 +19,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Refactor privacy policy and terms of service pages to a full-height natural scroll layout with deep-link anchors, dropping the scrollable card
 - Darken the footer version link for better legibility
 
-### Fixed
-
-- Stop the main-content scrollbar below the header so it no longer runs behind it
-- Prevent a dark background from flashing through when overshooting the scroll at the top of a page
 
 ## [0.17.0] - 2026-04-19
 
