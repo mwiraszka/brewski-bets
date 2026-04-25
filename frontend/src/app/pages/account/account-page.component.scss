@@ -1,11 +1,5 @@
 @use '../../../styles/mixins' as *;
 
-:host {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-}
-
 .account-page {
   margin: auto;
   width: 100%;

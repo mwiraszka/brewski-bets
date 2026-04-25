@@ -1,12 +1,9 @@
 @use '../../../styles/mixins' as *;
 
 :host {
-  position: fixed;
-  top: 0;
-  right: 0;
-  left: 0;
   z-index: 100;
   display: block;
+  flex-shrink: 0;
 }
 
 .header {
