@@ -4,6 +4,7 @@ import {
   CardComponent,
   DialogComponent,
   InputComponent,
+  SkeletonComponent,
   TabComponent,
   TabsComponent,
   ToastService,
@@ -25,6 +26,7 @@ import { FriendsService } from '@app/services/friends.service';
     CardComponent,
     DialogComponent,
     InputComponent,
+    SkeletonComponent,
     TabComponent,
     TabsComponent,
   ],
@@ -36,6 +38,7 @@ export class FriendsPageComponent implements OnInit {
 
   readonly activeTab = signal('friends');
   readonly loading = signal(true);
+  readonly skeletonRows = Array.from({ length: 4 });
 
   readonly friends = this.friendsService.friends;
   readonly incomingRequests = this.friendsService.incomingRequests;

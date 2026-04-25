@@ -8,6 +8,7 @@ import {
   DataTableSortState,
   DropdownComponent,
   InputComponent,
+  SkeletonComponent,
   ToastService,
 } from '@eagami/ui';
 
@@ -38,6 +39,7 @@ import { UserService } from '@app/services/user.service';
     DataTableComponent,
     DropdownComponent,
     InputComponent,
+    SkeletonComponent,
   ],
 })
 export class BetsPageComponent implements OnInit {
@@ -47,6 +49,7 @@ export class BetsPageComponent implements OnInit {
   private readonly toast = inject(ToastService);
 
   readonly loading = signal(true);
+  readonly skeletonRows = Array.from({ length: 5 });
   readonly filterText = signal('');
   readonly filterStatus = signal('all');
   readonly sort = signal<DataTableSortState>({ column: '', direction: null });
