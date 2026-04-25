@@ -2,8 +2,11 @@
 
 :host {
   z-index: 100;
+  position: fixed;
+  top: 0;
+  right: 0;
+  left: 0;
   display: block;
-  flex-shrink: 0;
 }
 
 .header {
@@ -26,8 +29,8 @@
 .header--scrolled {
   border-bottom: 1px solid var(--bb-color-glassBorder);
   background-color: var(--bb-color-glassBackground);
-  backdrop-filter: saturate(180%) blur(16px);
-  -webkit-backdrop-filter: saturate(180%) blur(16px);
+  backdrop-filter: saturate(180%) blur(24px);
+  -webkit-backdrop-filter: saturate(180%) blur(24px);
   box-shadow: 0 1px 4px var(--bb-color-shadowSoft);
 }
 
