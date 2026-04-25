@@ -2,51 +2,111 @@
   <ea-card variant="outlined">
     <h2 eaCardHeader>Account</h2>
 
-    <div class="avatar-section">
-      <ea-avatar-editor
-        shape="circle"
-        [canvasSize]="200"
-        [loading]="avatarLoading()"
-        [currentSrc]="editorSrc()"
-        [cropState]="savedCropState()"
-        (fileSelected)="onFileSelected($event)"
-        (cropStateChange)="onCropStateChange($event)"
-        (removed)="onRemoveAvatar()" />
-    </div>
+    @if (loading()) {
+      <div class="avatar-section">
+        <div class="avatar-skeleton">
+          <ea-skeleton
+            variant="circle"
+            width="200px"
+            height="200px" />
+          <ea-skeleton
+            variant="rect"
+            width="256px"
+            height="28px" />
+        </div>
+      </div>
 
-    <div class="name-fields">
-      <ea-input
-        label="First name"
-        [required]="true"
-        [error]="firstNameError()"
-        [(value)]="firstName" />
-      <ea-input
-        label="Last name"
-        [required]="true"
-        [error]="lastNameError()"
-        [(value)]="lastName" />
-    </div>
+      <div class="email-skeleton">
+        <ea-skeleton
+          variant="text"
+          width="220px"
+          height="20px" />
+      </div>
 
-    <div class="actions">
-      <ea-button
-        [fullWidth]="true"
-        [disabled]="!hasChanges()"
-        [loading]="saving()"
-        (clicked)="onSave()">
-        Save
-      </ea-button>
-    </div>
+      <div class="fields">
+        <div class="field-skeleton">
+          <ea-skeleton
+            variant="text"
+            width="80px"
+            height="18px" />
+          <ea-skeleton
+            variant="rect"
+            height="40px" />
+        </div>
+        <div class="field-skeleton">
+          <ea-skeleton
+            variant="text"
+            width="80px"
+            height="18px" />
+          <ea-skeleton
+            variant="rect"
+            height="40px" />
+        </div>
+      </div>
 
-    <div class="delete-section">
-      <ea-divider />
-      <ea-button
-        variant="danger"
-        [fullWidth]="true"
-        [loading]="deleting()"
-        (clicked)="deleteDialogOpen.set(true)">
-        Delete account
-      </ea-button>
-    </div>
+      <div class="actions">
+        <ea-skeleton
+          variant="rect"
+          height="40px" />
+      </div>
+
+      <div class="delete-section">
+        <ea-skeleton
+          variant="rect"
+          height="1px" />
+        <ea-skeleton
+          variant="rect"
+          height="40px" />
+      </div>
+    } @else {
+      <div class="avatar-section">
+        <ea-avatar-editor
+          shape="circle"
+          [canvasSize]="200"
+          [loading]="avatarLoading()"
+          [currentSrc]="editorSrc()"
+          [cropState]="savedCropState()"
+          (fileSelected)="onFileSelected($event)"
+          (cropStateChange)="onCropStateChange($event)"
+          (removed)="onRemoveAvatar()" />
+      </div>
+
+      <p class="email">{{ email() }}</p>
+
+      <div class="fields">
+        <ea-input
+          label="First name"
+          [required]="true"
+          [error]="firstNameError()"
+          [(value)]="firstName" />
+        <ea-input
+          label="Last name"
+          [required]="true"
+          [error]="lastNameError()"
+          [(value)]="lastName" />
+      </div>
+
+      <div class="actions">
+        <ea-button
+          [fullWidth]="true"
+          [disabled]="!hasChanges()"
+          [loading]="saving()"
+          (clicked)="onSave()">
+          Save
+        </ea-button>
+      </div>
+
+      <div class="delete-section">
+        <ea-divider />
+        <ea-button
+          variant="danger"
+          [fullWidth]="true"
+          [loading]="deleting()"
+          (clicked)="deleteDialogOpen.set(true)">
+          Delete account
+        </ea-button>
+      </div>
+    }
   </ea-card>
 </div>
 

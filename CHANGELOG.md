@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.19.0] - 2026-04-22
+
+### Added
+
+- Add a translucent effect to app header when content is scrolled behind it
+- Add a boot spinner that appears while the app initializes
+- Display the logged-in user's email on the account page
+- Replace the "Loading..." placeholder text on the account, bets, and friends pages with skeleton loaders that mirror the final layout
+
+### Fixed
+
+- Anchor the footer to the bottom of the viewport on short pages and prevent it from rendering between page content
+
+
 ## [0.18.0] - 2026-04-21
 
 ### Added
@@ -353,6 +367,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - PWA manifest and service worker configuration
 - GitHub issue templates
 
+[0.19.0]: https://github.com/mwiraszka/brewski-bets/compare/v0.18.0...v0.19.0
 [0.18.0]: https://github.com/mwiraszka/brewski-bets/compare/v0.17.0...v0.18.0
 [0.17.0]: https://github.com/mwiraszka/brewski-bets/compare/v0.16.0...v0.17.0
 [0.16.0]: https://github.com/mwiraszka/brewski-bets/compare/v0.15.0...v0.16.0

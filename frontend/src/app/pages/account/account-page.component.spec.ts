@@ -24,6 +24,7 @@ type MockUser = {
   lastName: string;
   hasImage: boolean;
   imageUrl: string;
+  primaryEmailAddress: { emailAddress: string } | null;
 };
 
 type MockClerkService = {
@@ -68,6 +69,7 @@ const MOCK_USER: MockUser = {
   lastName: 'Doe',
   hasImage: false,
   imageUrl: '',
+  primaryEmailAddress: { emailAddress: 'john@example.com' },
 };
 
 async function createComponent(
@@ -169,6 +171,10 @@ describe('AccountPageComponent', () => {
       expect(component.lastName()).toBe('Doe');
     });
 
+    it('sets email from clerk user primaryEmailAddress', () => {
+      expect(component.email()).toBe('john@example.com');
+    });
+
     it('sets empty strings when clerk user has no name', async () => {
       mockClerk.user = signal(null);
 
@@ -182,6 +188,13 @@ describe('AccountPageComponent', () => {
 
       expect(component.firstName()).toBe('');
       expect(component.lastName()).toBe('');
+      expect(component.email()).toBe('');
+    });
+
+    it('sets loading to false after initial data loads', async () => {
+      await new Promise(resolve => setTimeout(resolve));
+
+      expect(component.loading()).toBe(false);
     });
 
     it('sets editorSrc from userService.fullSizeAvatarUrl', async () => {

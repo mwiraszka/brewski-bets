@@ -4,6 +4,10 @@ import { environment } from '@env';
 
 import { ClerkService } from './clerk.service';
 
+// Dev-only: artificial latency on every API request to preview loading states.
+// Set to 0 to disable. Has no effect in production builds.
+const DEV_ARTIFICIAL_DELAY_MS = 2000;
+
 export class ApiError extends Error {
   constructor(
     message: string,
@@ -62,6 +66,10 @@ export class ApiService {
   }
 
   private async request<T>(path: string, init?: RequestInit): Promise<T> {
+    if (!environment.production && DEV_ARTIFICIAL_DELAY_MS > 0) {
+      await new Promise(resolve => setTimeout(resolve, DEV_ARTIFICIAL_DELAY_MS));
+    }
+
     const token = await this.clerk.getToken();
     const headers = new Headers(init?.headers);
     if (token) {

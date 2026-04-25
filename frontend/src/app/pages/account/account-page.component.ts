@@ -6,6 +6,7 @@ import {
   DialogComponent,
   DividerComponent,
   InputComponent,
+  SkeletonComponent,
   ToastService,
 } from '@eagami/ui';
 
@@ -35,6 +36,7 @@ import { UserRecord, UserService } from '@app/services/user.service';
     DialogComponent,
     DividerComponent,
     InputComponent,
+    SkeletonComponent,
   ],
 })
 export class AccountPageComponent implements OnInit {
@@ -49,10 +51,12 @@ export class AccountPageComponent implements OnInit {
 
   readonly firstName = signal('');
   readonly lastName = signal('');
+  readonly email = signal('');
   private readonly originalFirstName = signal('');
   private readonly originalLastName = signal('');
   readonly firstNameError = signal('');
   readonly lastNameError = signal('');
+  readonly loading = signal(true);
   readonly saving = signal(false);
   readonly deleting = signal(false);
   readonly deleteDialogOpen = signal(false);
@@ -81,6 +85,7 @@ export class AccountPageComponent implements OnInit {
     const user = this.clerk.user();
     this.firstName.set(user?.firstName ?? '');
     this.lastName.set(user?.lastName ?? '');
+    this.email.set(user?.primaryEmailAddress?.emailAddress ?? '');
     this.originalFirstName.set(user?.firstName ?? '');
     this.originalLastName.set(user?.lastName ?? '');
 
@@ -94,7 +99,10 @@ export class AccountPageComponent implements OnInit {
     this.lastClerkImageUrl.set(clerkUser?.hasImage ? clerkUser.imageUrl : undefined);
     this.avatarLoading.set(!this.editorSrc() && !!clerkUser?.hasImage);
 
-    this.refreshFromClerk(false).then(() => this.avatarLoading.set(false));
+    this.refreshFromClerk(false).then(() => {
+      this.avatarLoading.set(false);
+      this.loading.set(false);
+    });
 
     const onVisibilityChange = () => {
       if (document.visibilityState === 'visible') {
@@ -133,6 +141,7 @@ export class AccountPageComponent implements OnInit {
     }
 
     const clerkUser = this.clerk.user();
+    this.email.set(clerkUser?.primaryEmailAddress?.emailAddress ?? '');
     const newClerkImageUrl = clerkUser?.hasImage ? clerkUser.imageUrl : undefined;
 
     if (newClerkImageUrl !== previousClerkImageUrl) {

@@ -19,7 +19,52 @@
     </div>
 
     @if (loading()) {
-      <p class="empty-state">Loading...</p>
+      <div class="skeleton-table">
+        <div class="skeleton-row skeleton-row--header">
+          <ea-skeleton
+            variant="text"
+            width="60px"
+            height="14px" />
+          <ea-skeleton
+            variant="text"
+            width="80px"
+            height="14px" />
+          <ea-skeleton
+            variant="text"
+            width="50px"
+            height="14px" />
+          <ea-skeleton
+            variant="text"
+            width="60px"
+            height="14px" />
+        </div>
+        @for (_ of skeletonRows; track $index) {
+          <div class="skeleton-row">
+            <ea-skeleton
+              variant="text"
+              width="140px"
+              height="16px" />
+            <div class="skeleton-opponent">
+              <ea-skeleton
+                variant="circle"
+                width="24px"
+                height="24px" />
+              <ea-skeleton
+                variant="text"
+                width="100px"
+                height="16px" />
+            </div>
+            <ea-skeleton
+              variant="rect"
+              width="64px"
+              height="20px" />
+            <ea-skeleton
+              variant="rect"
+              width="80px"
+              height="20px" />
+          </div>
+        }
+      </div>
     } @else {
       <ea-data-table
         [columns]="columns()"

@@ -99,6 +99,29 @@
         font-family: arial, sans-serif;
         font-weight: 100;
       }
+
+      .app-boot {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100vh;
+        background-color: #faf7f2;
+      }
+
+      .app-boot__spinner {
+        width: 48px;
+        height: 48px;
+        border: 4px solid rgba(0, 0, 0, 0.08);
+        border-top-color: #cba855;
+        border-radius: 50%;
+        animation: app-boot-spin 0.8s linear infinite;
+      }
+
+      @keyframes app-boot-spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
     </style>
     <!-- Privacy-friendly analytics by Plausible -->
     <script
@@ -119,6 +142,14 @@
     </script>
   </head>
   <body>
-    <bb-root></bb-root>
+    <bb-root>
+      <div class="app-boot">
+        <div
+          class="app-boot__spinner"
+          role="status"
+          aria-label="Loading">
+        </div>
+      </div>
+    </bb-root>
   </body>
 </html>
