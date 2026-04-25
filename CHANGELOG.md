@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Add a translucent effect to app header when content is scrolled behind it
 - Add a boot spinner that appears while the app initializes
 - Display the logged-in user's email on the account page
 - Replace the "Loading..." placeholder text on the account, bets, and friends pages with skeleton loaders that mirror the final layout
@@ -16,7 +17,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Anchor the footer to the bottom of the viewport on short pages and prevent it from rendering between page content
-- Remove the fixed-header overlap that caused page content to bleed behind the header on scroll
 
 
 ## [0.18.0] - 2026-04-21
