@@ -5,7 +5,7 @@
 } @else {
   <div class="bet-form-page">
     <ea-card variant="outlined">
-      <h2 eaCardHeader>{{ mode() === 'create' ? 'Create a bet' : 'Edit bet' }}</h2>
+      <h2 slot="header">{{ mode() === 'create' ? 'Create a bet' : 'Edit bet' }}</h2>
 
       @if (mode() === 'edit' && !isMyTurn()) {
         <div class="waiting-banner">Waiting for {{ opponentName() }} to respond</div>
@@ -19,7 +19,7 @@
               placeholder="Select a friend"
               [options]="friendOptions()"
               [required]="true"
-              [error]="friendError()"
+              [errorMsg]="friendError()"
               [(value)]="selectedFriendId" />
           </div>
         }
@@ -28,7 +28,7 @@
           <ea-input
             label="Title"
             [required]="true"
-            [error]="titleError()"
+            [errorMsg]="titleError()"
             [(value)]="title" />
         </div>
 
@@ -36,7 +36,7 @@
           <ea-textarea
             label="Description"
             [required]="true"
-            [error]="descriptionError()"
+            [errorMsg]="descriptionError()"
             [(value)]="description" />
         </div>
 
