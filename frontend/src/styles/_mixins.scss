@@ -58,7 +58,7 @@ $breakpoints: (
     $query: if(
       sass(meta.type-of($raw-query) == 'string'): meta.unquote($raw-query)
         ;
-        else: meta.inspect($raw-query),
+        else: meta.inspect($raw-query)
     );
 
     @media #{$query} {
