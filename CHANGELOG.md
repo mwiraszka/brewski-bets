@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.20.0] - 2026-05-09
+
+### Changed
+
+- Upgrade `@eagami/ui` to 1.0.0, migrating templates to the new slot-based card content, `errorMsg` form-field input, and past-tense event outputs
+- Bump Angular to 21.2.12, TypeScript to 6.0.3, and refresh remaining frontend and backend dependencies to their latest versions
+
+### Fixed
+
+- Resolve all known dependency vulnerabilities reported by `pnpm audit` across both packages
+
+
 ## [0.19.0] - 2026-04-22
 
 ### Added
@@ -367,6 +379,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - PWA manifest and service worker configuration
 - GitHub issue templates
 
+[0.20.0]: https://github.com/mwiraszka/brewski-bets/compare/v0.19.0...v0.20.0
 [0.19.0]: https://github.com/mwiraszka/brewski-bets/compare/v0.18.0...v0.19.0
 [0.18.0]: https://github.com/mwiraszka/brewski-bets/compare/v0.17.0...v0.18.0
 [0.17.0]: https://github.com/mwiraszka/brewski-bets/compare/v0.16.0...v0.17.0
