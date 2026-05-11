@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Upgrade `@eagami/ui` to 1.0.0, migrating templates to the new slot-based card content, `errorMsg` form-field input, and past-tense event outputs
+- Upgrade `@eagami/ui` to 1.0.2, migrating templates to the new slot-based card content, `errorMsg` form-field input, and past-tense event outputs
 - Bump Angular to 21.2.12, TypeScript to 6.0.3, and refresh remaining frontend and backend dependencies to their latest versions
 
 ### Fixed
