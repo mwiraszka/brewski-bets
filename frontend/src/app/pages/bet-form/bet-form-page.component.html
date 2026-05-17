@@ -165,15 +165,51 @@
               Accept
             </ea-button>
           </div>
-          <ea-button
-            variant="danger"
-            size="sm"
-            [loading]="saving()"
-            (clicked)="onProposeVoid()">
-            Propose void
-          </ea-button>
+          <div class="danger-actions">
+            <ea-button
+              variant="danger"
+              size="sm"
+              [loading]="saving()"
+              (clicked)="onProposeVoid()">
+              Propose void
+            </ea-button>
+            <ea-button
+              variant="danger"
+              size="sm"
+              [loading]="saving()"
+              (clicked)="openDeleteDialog()">
+              Delete bet
+            </ea-button>
+          </div>
         }
       </div>
     </ea-card>
   </div>
+
+  <ea-dialog
+    size="sm"
+    aria-label="Confirm delete bet"
+    [(open)]="deleteDialogOpen">
+    <h3 slot="header">Delete this bet?</h3>
+    <p>
+      This permanently removes the bet for both you and {{ opponentName() }}. This action
+      cannot be undone.
+    </p>
+    <div
+      slot="footer"
+      class="dialog-actions">
+      <ea-button
+        variant="secondary"
+        [disabled]="saving()"
+        (clicked)="cancelDelete()">
+        Cancel
+      </ea-button>
+      <ea-button
+        variant="danger"
+        [loading]="saving()"
+        (clicked)="confirmDelete()">
+        Delete
+      </ea-button>
+    </div>
+  </ea-dialog>
 }

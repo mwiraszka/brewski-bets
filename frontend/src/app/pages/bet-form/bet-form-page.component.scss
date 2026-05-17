@@ -110,6 +110,18 @@ fieldset[disabled] {
   gap: 12px;
 }
 
+.danger-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
 .loading {
   text-align: center;
   padding: 48px 0;
