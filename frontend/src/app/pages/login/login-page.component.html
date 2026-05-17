@@ -2,7 +2,7 @@
   <ea-card
     variant="outlined"
     headerAlign="center">
-    <h2 eaCardHeader>Log in</h2>
+    <h2 slot="header">Log in</h2>
 
     <div class="auth-form">
       <ea-button
@@ -26,8 +26,8 @@
           placeholder="you@example.com"
           [autofocus]="true"
           [required]="true"
-          [error]="emailError()"
-          (inputBlurred)="onEmailBlur()"
+          [errorMsg]="emailError()"
+          (blurred)="onEmailBlur()"
           [(value)]="email" />
 
         <ea-input
@@ -35,8 +35,8 @@
           type="password"
           autocomplete="current-password"
           [required]="true"
-          [error]="passwordError()"
-          (inputBlurred)="onPasswordBlur()"
+          [errorMsg]="passwordError()"
+          (blurred)="onPasswordBlur()"
           [(value)]="password" />
 
         @if (error()) {
@@ -54,7 +54,7 @@
     </div>
 
     <div
-      eaCardFooter
+      slot="footer"
       class="auth-footer">
       <p class="auth-link">
         <a routerLink="/forgot-password">Forgot password?</a>
@@ -69,7 +69,7 @@
   <ea-card
     variant="outlined"
     headerAlign="center">
-    <h2 eaCardHeader>Verify your identity</h2>
+    <h2 slot="header">Verify your identity</h2>
 
     <div class="auth-form">
       <p class="hint">We sent a verification code to {{ email() }}.</p>
@@ -79,7 +79,7 @@
         #codeInput>
         <ea-code-input
           label="Verification code"
-          [error]="verificationCodeError()"
+          [errorMsg]="verificationCodeError()"
           (completed)="onVerify()"
           [(value)]="verificationCode" />
       </div>

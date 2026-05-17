@@ -3,6 +3,7 @@ import {
   BadgeComponent,
   ButtonComponent,
   MenuIconComponent,
+  ToastService,
   XIconComponent,
 } from '@eagami/ui';
 import { filter, map } from 'rxjs';
@@ -34,6 +35,7 @@ export class HeaderComponent implements OnInit {
   private readonly betsService = inject(BetsService);
   private readonly clerk = inject(ClerkService);
   private readonly router = inject(Router);
+  private readonly toast = inject(ToastService);
   private readonly userService = inject(UserService);
   private readonly currentUrl = toSignal(
     this.router.events.pipe(
@@ -70,6 +72,16 @@ export class HeaderComponent implements OnInit {
 
   readonly pendingCount = this.betsService.pendingCount;
   readonly pendingBets = this.betsService.pendingBets;
+  readonly approvingAll = signal(false);
+
+  readonly pendingPreview = computed(() => this.pendingBets().slice(0, 5));
+  readonly pendingOverflow = computed(() =>
+    Math.max(0, this.pendingBets().length - this.pendingPreview().length),
+  );
+
+  formatOpponent(bet: { opponent?: { firstName: string; lastName: string } }): string {
+    return bet.opponent ? `${bet.opponent.firstName} ${bet.opponent.lastName}` : '';
+  }
 
   async ngOnInit(): Promise<void> {
     if (this.clerk.isLoggedIn()) {
@@ -97,6 +109,37 @@ export class HeaderComponent implements OnInit {
   navigateToBet(betId: string): void {
     this.menuOpen.set(false);
     this.router.navigate(['/bets', betId]);
+  }
+
+  async approveAllPending(): Promise<void> {
+    if (this.approvingAll() || this.pendingBets().length === 0) return;
+    this.approvingAll.set(true);
+
+    const ids = this.pendingBets().map(b => b.id);
+    const results = await Promise.allSettled(
+      ids.map(id => this.betsService.updateBet(id, { action: 'accept' })),
+    );
+
+    const failures = results.filter(r => r.status === 'rejected').length;
+    try {
+      await Promise.all([
+        this.betsService.loadBets(),
+        this.betsService.loadPendingCount(),
+      ]);
+    } catch {
+      // counts will refresh on next page load
+    }
+
+    if (failures === 0) {
+      this.toast.success('All bets approved');
+      this.menuOpen.set(false);
+    } else if (failures < ids.length) {
+      this.toast.error(`${failures} of ${ids.length} bets could not be approved`);
+    } else {
+      this.toast.error('Failed to approve bets');
+    }
+
+    this.approvingAll.set(false);
   }
 
   async onLogOut(): Promise<void> {

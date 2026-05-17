@@ -1,6 +1,7 @@
 import {
   ButtonComponent,
   CardComponent,
+  DialogComponent,
   DropdownComponent,
   InputComponent,
   RadioComponent,
@@ -38,6 +39,7 @@ const STOCK_IMAGES = [
   imports: [
     ButtonComponent,
     CardComponent,
+    DialogComponent,
     DropdownComponent,
     InputComponent,
     RadioComponent,
@@ -58,6 +60,7 @@ export class BetFormPageComponent implements OnInit {
   readonly mode = signal<'create' | 'edit'>('create');
   readonly loading = signal(true);
   readonly saving = signal(false);
+  readonly deleteDialogOpen = signal(false);
 
   readonly title = signal('');
   readonly description = signal('');
@@ -283,6 +286,30 @@ export class BetFormPageComponent implements OnInit {
       await this.router.navigate(['/bets']);
     } catch {
       this.toast.error('Failed to accept bet');
+    } finally {
+      this.saving.set(false);
+    }
+  }
+
+  openDeleteDialog(): void {
+    this.deleteDialogOpen.set(true);
+  }
+
+  cancelDelete(): void {
+    this.deleteDialogOpen.set(false);
+  }
+
+  async confirmDelete(): Promise<void> {
+    if (!this.bet) return;
+    this.saving.set(true);
+
+    try {
+      await this.betsService.deleteBet(this.bet.id);
+      this.deleteDialogOpen.set(false);
+      this.toast.success('Bet deleted');
+      await this.router.navigate(['/bets']);
+    } catch {
+      this.toast.error('Failed to delete bet');
     } finally {
       this.saving.set(false);
     }

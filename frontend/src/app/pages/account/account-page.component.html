@@ -1,6 +1,6 @@
 <div class="account-page">
   <ea-card variant="outlined">
-    <h2 eaCardHeader>Account</h2>
+    <h2 slot="header">Account</h2>
 
     @if (loading()) {
       <div class="avatar-section">
@@ -67,7 +67,7 @@
           [currentSrc]="editorSrc()"
           [cropState]="savedCropState()"
           (fileSelected)="onFileSelected($event)"
-          (cropStateChange)="onCropStateChange($event)"
+          (cropStateChanged)="onCropStateChange($event)"
           (removed)="onRemoveAvatar()" />
       </div>
 
@@ -77,12 +77,12 @@
         <ea-input
           label="First name"
           [required]="true"
-          [error]="firstNameError()"
+          [errorMsg]="firstNameError()"
           [(value)]="firstName" />
         <ea-input
           label="Last name"
           [required]="true"
-          [error]="lastNameError()"
+          [errorMsg]="lastNameError()"
           [(value)]="lastName" />
       </div>
 
