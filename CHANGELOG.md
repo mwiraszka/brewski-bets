@@ -5,12 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.20.0] - 2026-05-09
+## [0.20.0] - 2026-05-17
+
+### Added
+
+- Add a "Delete bet" action on the edit-bet page, guarded by a confirmation dialog
+- Surface bets awaiting your approval directly in the avatar menu, with an "Approve all" shortcut, per-bet quick links, and a count badge next to the avatar so it is visible from any page
 
 ### Changed
 
-- Upgrade `@eagami/ui` to 1.1.1, migrating templates to the new slot-based card content, `errorMsg` form-field input, and past-tense event outputs
-- Bump Angular to 21.2.12, TypeScript to 6.0.3, and refresh remaining frontend and backend dependencies to their latest versions
+- Upgrade `@eagami/ui` to 1.3.0, migrating templates to the new slot-based card content, `errorMsg` form-field input, and past-tense event outputs
+- Bump Angular to 21.2.13, TypeScript to 6.0.3, and refresh remaining frontend and backend dependencies to their latest versions
 
 ### Fixed
 
