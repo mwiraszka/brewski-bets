@@ -15,13 +15,9 @@
 
     &::ng-deep > *:not(router-outlet):not(bb-footer) {
       display: flex;
-      flex: 1;
       flex-direction: column;
       width: 100%;
-    }
-
-    &::ng-deep bb-footer {
-      margin-top: auto;
+      min-height: calc(100vh - var(--bb-height-header));
     }
   }
 }
