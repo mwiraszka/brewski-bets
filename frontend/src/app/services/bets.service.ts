@@ -1,4 +1,4 @@
-import { Injectable, computed, inject, signal } from '@angular/core';
+import { Injectable, inject, signal } from '@angular/core';
 
 import { Bet, BetResult, BetWithOpponent } from '@app/models';
 
@@ -32,21 +32,6 @@ export class BetsService {
 
   readonly bets = this._bets.asReadonly();
   readonly pendingCount = this._pendingCount.asReadonly();
-
-  readonly pendingBets = computed(() =>
-    this._bets().filter(
-      b =>
-        b.pendingAction &&
-        ((b.pendingAction === 'user1' && b.user1Id === this.currentUserId) ||
-          (b.pendingAction === 'user2' && b.user2Id === this.currentUserId)),
-    ),
-  );
-
-  private currentUserId: string | undefined;
-
-  setCurrentUserId(userId: string): void {
-    this.currentUserId = userId;
-  }
 
   async loadBets(): Promise<void> {
     const bets = await this.api.get<BetWithOpponent[]>('/bets');

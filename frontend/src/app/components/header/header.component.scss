@@ -104,9 +104,9 @@
 }
 
 .nav-link {
+  position: relative;
   display: flex;
   align-items: center;
-  gap: 8px;
   padding: 6px 12px;
   font-size: 14px;
   font-weight: 500;
@@ -122,6 +122,12 @@
     background-color: var(--color-bg-muted);
     color: var(--bb-color-textStrong);
   }
+}
+
+.nav-link__badge {
+  position: absolute;
+  top: -2px;
+  right: -6px;
 }
 
 .user-menu {
@@ -174,99 +180,6 @@
   border-radius: 4px;
   background-color: var(--bb-color-white);
   box-shadow: 0 8px 24px var(--bb-color-shadowMedium);
-}
-
-.approvals {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  padding: 8px 12px;
-}
-
-.approvals--mobile {
-  padding: 12px 16px;
-}
-
-.approvals-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  font-size: 13px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  color: var(--bb-color-textMuted);
-}
-
-.approvals-title {
-  white-space: nowrap;
-}
-
-.approvals-empty {
-  margin: 0;
-  font-size: 13px;
-  color: var(--bb-color-textMuted);
-}
-
-.approvals-list {
-  overflow-y: auto;
-  display: flex;
-  flex-direction: column;
-  max-height: 240px;
-  padding: 0;
-  margin: 0;
-  list-style: none;
-}
-
-.approval-item {
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  width: 100%;
-  padding: 8px 8px;
-  font-size: 14px;
-  text-align: left;
-  border: none;
-  border-radius: 4px;
-  background-color: transparent;
-  color: var(--bb-color-textStrong);
-  cursor: pointer;
-
-  &:hover {
-    background-color: var(--bb-color-surfaceHover);
-  }
-}
-
-.approval-item-title {
-  overflow: hidden;
-  font-weight: 500;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-}
-
-.approval-item-opponent {
-  overflow: hidden;
-  font-size: 12px;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-  color: var(--bb-color-textMuted);
-}
-
-.approvals-more {
-  padding: 4px 8px;
-  font-size: 12px;
-  font-weight: 500;
-  text-align: center;
-  text-decoration: none;
-  border-radius: 4px;
-  color: var(--bb-color-textBody);
-
-  &:hover {
-    background-color: var(--bb-color-surfaceHover);
-    color: var(--bb-color-textStrong);
-  }
 }
 
 .menu-item {
@@ -348,6 +261,7 @@
 .mobile-menu-item {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 8px;
   padding: 12px 16px;
   font-size: 15px;
