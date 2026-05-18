@@ -72,7 +72,7 @@
         trackBy="id"
         [hoverable]="true"
         [(sort)]="sort"
-        noDataText="No bets yet. Create your first bet!" />
+        [noDataText]="emptyStateText()" />
     }
   </ea-card>
 </div>

@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.22.0] - 2026-05-19
+
+### Added
+
+- Show a superscript badge on the Friends nav link when there are incoming friend requests, matching the Bets badge
+
+### Changed
+
+- Remember the active tab on the Friends page across refreshes
+- Vary the bets table empty-state message by status filter (All / Pending / Active / Completed) instead of always suggesting to create a first bet
+- Move the Bets notification badge in the header nav to a superscript position rather than inline with the link text
+- Remove the redundant "Bets awaiting your approval" section from the avatar menu, since the nav badge already surfaces pending counts
+- Anchor the footer below the viewport so it is only reachable by scrolling down past the page content
+
+
 ## [0.21.0] - 2026-05-18
 
 ### Fixed
@@ -397,6 +412,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - PWA manifest and service worker configuration
 - GitHub issue templates
 
+[0.22.0]: https://github.com/mwiraszka/brewski-bets/compare/v0.21.0...v0.22.0
 [0.21.0]: https://github.com/mwiraszka/brewski-bets/compare/v0.20.0...v0.21.0
 [0.20.0]: https://github.com/mwiraszka/brewski-bets/compare/v0.19.0...v0.20.0
 [0.19.0]: https://github.com/mwiraszka/brewski-bets/compare/v0.18.0...v0.19.0

@@ -35,7 +35,8 @@
         @if (pendingCount() > 0) {
           <ea-badge
             variant="error"
-            size="sm">
+            size="sm"
+            class="nav-link__badge">
             {{ pendingCount() }}
           </ea-badge>
         }
@@ -44,6 +45,14 @@
         routerLink="/friends"
         class="nav-link">
         Friends
+        @if (friendRequestCount() > 0) {
+          <ea-badge
+            variant="error"
+            size="sm"
+            class="nav-link__badge">
+            {{ friendRequestCount() }}
+          </ea-badge>
+        }
       </a>
     </nav>
 
@@ -57,14 +66,6 @@
           [initials]="initials()"
           alt="Your avatar"
           size="sm" />
-        @if (pendingCount() > 0) {
-          <ea-badge
-            variant="error"
-            size="sm"
-            class="notification-badge">
-            {{ pendingCount() }}
-          </ea-badge>
-        }
       </button>
 
       @if (menuOpen()) {
@@ -73,54 +74,6 @@
           (click)="closeMenu()">
         </div>
         <div class="menu-popover">
-          <div class="approvals">
-            <div class="approvals-header">
-              <span class="approvals-title">Bets awaiting your approval</span>
-              @if (pendingCount() > 0) {
-                <ea-badge
-                  variant="error"
-                  size="sm">
-                  {{ pendingCount() }}
-                </ea-badge>
-              }
-            </div>
-            @if (pendingBets().length === 0) {
-              <p class="approvals-empty">All bets are active</p>
-            } @else {
-              <ea-button
-                variant="secondary"
-                size="sm"
-                [fullWidth]="true"
-                [loading]="approvingAll()"
-                (clicked)="approveAllPending()">
-                Approve all
-              </ea-button>
-              <ul class="approvals-list">
-                @for (bet of pendingPreview(); track bet.id) {
-                  <li>
-                    <button
-                      type="button"
-                      class="approval-item"
-                      (click)="navigateToBet(bet.id)">
-                      <span class="approval-item-title">{{ bet.title }}</span>
-                      <span class="approval-item-opponent">
-                        vs {{ formatOpponent(bet) }}
-                      </span>
-                    </button>
-                  </li>
-                }
-              </ul>
-              @if (pendingOverflow() > 0) {
-                <a
-                  routerLink="/bets"
-                  class="approvals-more"
-                  (click)="closeMenu()">
-                  +{{ pendingOverflow() }} more in Bets
-                </a>
-              }
-            }
-          </div>
-          <div class="menu-divider"></div>
           <a
             class="menu-item"
             routerLink="/account"
@@ -146,12 +99,12 @@
       } @else {
         <ea-icon-menu />
       }
-      @if (!menuOpen() && pendingCount() > 0) {
+      @if (!menuOpen() && mobileBadgeCount() > 0) {
         <ea-badge
           variant="error"
           size="sm"
           class="notification-badge">
-          {{ pendingCount() }}
+          {{ mobileBadgeCount() }}
         </ea-badge>
       }
     </button>
@@ -180,55 +133,14 @@
           class="mobile-menu-item"
           (click)="closeMenu()">
           Friends
-        </a>
-        <div class="menu-divider"></div>
-        <div class="approvals approvals--mobile">
-          <div class="approvals-header">
-            <span class="approvals-title">Bets awaiting your approval</span>
-            @if (pendingCount() > 0) {
-              <ea-badge
-                variant="error"
-                size="sm">
-                {{ pendingCount() }}
-              </ea-badge>
-            }
-          </div>
-          @if (pendingBets().length === 0) {
-            <p class="approvals-empty">All bets are active</p>
-          } @else {
-            <ea-button
-              variant="secondary"
-              size="sm"
-              [fullWidth]="true"
-              [loading]="approvingAll()"
-              (clicked)="approveAllPending()">
-              Approve all
-            </ea-button>
-            <ul class="approvals-list">
-              @for (bet of pendingPreview(); track bet.id) {
-                <li>
-                  <button
-                    type="button"
-                    class="approval-item"
-                    (click)="navigateToBet(bet.id)">
-                    <span class="approval-item-title">{{ bet.title }}</span>
-                    <span class="approval-item-opponent">
-                      vs {{ formatOpponent(bet) }}
-                    </span>
-                  </button>
-                </li>
-              }
-            </ul>
-            @if (pendingOverflow() > 0) {
-              <a
-                routerLink="/bets"
-                class="approvals-more"
-                (click)="closeMenu()">
-                +{{ pendingOverflow() }} more in Bets
-              </a>
-            }
+          @if (friendRequestCount() > 0) {
+            <ea-badge
+              variant="error"
+              size="sm">
+              {{ friendRequestCount() }}
+            </ea-badge>
           }
-        </div>
+        </a>
         <div class="menu-divider"></div>
         <a
           routerLink="/account"

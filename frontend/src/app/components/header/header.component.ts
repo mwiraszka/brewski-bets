@@ -3,7 +3,6 @@ import {
   BadgeComponent,
   ButtonComponent,
   MenuIconComponent,
-  ToastService,
   XIconComponent,
 } from '@eagami/ui';
 import { filter, map } from 'rxjs';
@@ -14,7 +13,7 @@ import { NavigationEnd, Router, RouterLink } from '@angular/router';
 
 import { BetsService } from '@app/services/bets.service';
 import { ClerkService } from '@app/services/clerk.service';
-import { UserService } from '@app/services/user.service';
+import { FriendsService } from '@app/services/friends.service';
 
 import { environment } from '@env';
 
@@ -33,10 +32,9 @@ import { environment } from '@env';
 })
 export class HeaderComponent implements OnInit {
   private readonly betsService = inject(BetsService);
+  private readonly friendsService = inject(FriendsService);
   private readonly clerk = inject(ClerkService);
   private readonly router = inject(Router);
-  private readonly toast = inject(ToastService);
-  private readonly userService = inject(UserService);
   private readonly currentUrl = toSignal(
     this.router.events.pipe(
       filter((e): e is NavigationEnd => e instanceof NavigationEnd),
@@ -71,30 +69,17 @@ export class HeaderComponent implements OnInit {
   });
 
   readonly pendingCount = this.betsService.pendingCount;
-  readonly pendingBets = this.betsService.pendingBets;
-  readonly approvingAll = signal(false);
-
-  readonly pendingPreview = computed(() => this.pendingBets().slice(0, 5));
-  readonly pendingOverflow = computed(() =>
-    Math.max(0, this.pendingBets().length - this.pendingPreview().length),
+  readonly friendRequestCount = this.friendsService.incomingRequestsCount;
+  readonly mobileBadgeCount = computed(
+    () => this.pendingCount() + this.friendRequestCount(),
   );
-
-  formatOpponent(bet: { opponent?: { firstName: string; lastName: string } }): string {
-    return bet.opponent ? `${bet.opponent.firstName} ${bet.opponent.lastName}` : '';
-  }
 
   async ngOnInit(): Promise<void> {
     if (this.clerk.isLoggedIn()) {
-      const user = this.userService.user();
-      if (user) {
-        this.betsService.setCurrentUserId(user.id);
-      }
-      try {
-        await this.betsService.loadPendingCount();
-        await this.betsService.loadBets();
-      } catch {
-        // silently ignore — badge still works without data
-      }
+      await Promise.allSettled([
+        this.betsService.loadPendingCount(),
+        this.friendsService.loadIncomingRequestsCount(),
+      ]);
     }
   }
 
@@ -104,42 +89,6 @@ export class HeaderComponent implements OnInit {
 
   closeMenu(): void {
     this.menuOpen.set(false);
-  }
-
-  navigateToBet(betId: string): void {
-    this.menuOpen.set(false);
-    this.router.navigate(['/bets', betId]);
-  }
-
-  async approveAllPending(): Promise<void> {
-    if (this.approvingAll() || this.pendingBets().length === 0) return;
-    this.approvingAll.set(true);
-
-    const ids = this.pendingBets().map(b => b.id);
-    const results = await Promise.allSettled(
-      ids.map(id => this.betsService.updateBet(id, { action: 'accept' })),
-    );
-
-    const failures = results.filter(r => r.status === 'rejected').length;
-    try {
-      await Promise.all([
-        this.betsService.loadBets(),
-        this.betsService.loadPendingCount(),
-      ]);
-    } catch {
-      // counts will refresh on next page load
-    }
-
-    if (failures === 0) {
-      this.toast.success('All bets approved');
-      this.menuOpen.set(false);
-    } else if (failures < ids.length) {
-      this.toast.error(`${failures} of ${ids.length} bets could not be approved`);
-    } else {
-      this.toast.error('Failed to approve bets');
-    }
-
-    this.approvingAll.set(false);
   }
 
   async onLogOut(): Promise<void> {

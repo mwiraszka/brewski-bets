@@ -10,11 +10,20 @@ import {
   ToastService,
 } from '@eagami/ui';
 
-import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import { Component, OnInit, computed, effect, inject, signal } from '@angular/core';
 
 import { Friend, FriendRequest, SentFriendRequest, UserSearchResult } from '@app/models';
 import { ClerkService } from '@app/services/clerk.service';
 import { FriendsService } from '@app/services/friends.service';
+
+const ACTIVE_TAB_STORAGE_KEY = 'brewskibets.friendsActiveTab';
+const VALID_TABS = ['friends', 'requests', 'find'] as const;
+type FriendsTab = (typeof VALID_TABS)[number];
+
+function readStoredTab(): FriendsTab {
+  const stored = localStorage.getItem(ACTIVE_TAB_STORAGE_KEY);
+  return VALID_TABS.includes(stored as FriendsTab) ? (stored as FriendsTab) : 'friends';
+}
 
 @Component({
   selector: 'bb-friends-page',
@@ -36,9 +45,15 @@ export class FriendsPageComponent implements OnInit {
   private readonly clerk = inject(ClerkService);
   private readonly toast = inject(ToastService);
 
-  readonly activeTab = signal('friends');
+  readonly activeTab = signal<FriendsTab>(readStoredTab());
   readonly loading = signal(true);
   readonly skeletonRows = Array.from({ length: 4 });
+
+  constructor() {
+    effect(() => {
+      localStorage.setItem(ACTIVE_TAB_STORAGE_KEY, this.activeTab());
+    });
+  }
 
   readonly friends = this.friendsService.friends;
   readonly incomingRequests = this.friendsService.incomingRequests;
