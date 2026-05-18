@@ -21,7 +21,7 @@ import {
   signal,
   viewChild,
 } from '@angular/core';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 
 import { BetWithOpponent } from '@app/models';
 import { BetsService } from '@app/services/bets.service';
@@ -32,6 +32,7 @@ import { UserService } from '@app/services/user.service';
   templateUrl: './bets-page.component.html',
   styleUrl: './bets-page.component.scss',
   imports: [
+    RouterLink,
     AvatarComponent,
     BadgeComponent,
     ButtonComponent,
