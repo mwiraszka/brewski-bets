@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.21.0] - 2026-05-18
+
+### Fixed
+
+- Wire up the "Create a bet" button on the bets page so it navigates to the new-bet form
+- Run database migrations automatically as part of the backend production deploy, resolving 500 errors on the bets and friends endpoints caused by an un-applied schema migration
+- Recover the Friends page loading state when a request fails, so the page no longer hangs on a skeleton and surfaces an error toast instead
+
+### Changed
+
+- Return a structured JSON error body from unhandled backend exceptions and log them, so 500 responses are diagnosable instead of opaque
+
+
 ## [0.20.0] - 2026-05-17
 
 ### Added
@@ -384,6 +397,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - PWA manifest and service worker configuration
 - GitHub issue templates
 
+[0.21.0]: https://github.com/mwiraszka/brewski-bets/compare/v0.20.0...v0.21.0
 [0.20.0]: https://github.com/mwiraszka/brewski-bets/compare/v0.19.0...v0.20.0
 [0.19.0]: https://github.com/mwiraszka/brewski-bets/compare/v0.18.0...v0.19.0
 [0.18.0]: https://github.com/mwiraszka/brewski-bets/compare/v0.17.0...v0.18.0

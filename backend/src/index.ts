@@ -18,6 +18,12 @@ let cachedDb: Db | null = null;
 
 export const app = new Hono<AppContext>().basePath('/api');
 
+app.onError((err, c) => {
+  console.error(`[api] ${c.req.method} ${c.req.path} failed:`, err);
+  const message = err instanceof Error ? err.message : 'Internal server error';
+  return c.json({ error: message }, 500);
+});
+
 app.use('*', async (c, next) => {
   Object.assign(c.env, bindings);
   return next();
