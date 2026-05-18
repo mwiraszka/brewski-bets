@@ -78,6 +78,19 @@ export class BetsPageComponent implements OnInit {
     { label: 'Complete', value: 'complete' },
   ];
 
+  readonly emptyStateText = computed(() => {
+    switch (this.filterStatus()) {
+      case 'pending':
+        return 'No pending bets.';
+      case 'active':
+        return 'No active bets.';
+      case 'complete':
+        return 'No completed bets.';
+      default:
+        return 'No bets yet. Create your first bet!';
+    }
+  });
+
   readonly filteredBets = computed(() => {
     let bets = this.betsService.bets();
 
