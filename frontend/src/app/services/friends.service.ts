@@ -13,10 +13,12 @@ export class FriendsService {
   private readonly _friends = signal<Friend[]>([]);
   private readonly _incomingRequests = signal<FriendRequest[]>([]);
   private readonly _sentRequests = signal<SentFriendRequest[]>([]);
+  private readonly _incomingRequestsCount = signal(0);
 
   readonly friends = this._friends.asReadonly();
   readonly incomingRequests = this._incomingRequests.asReadonly();
   readonly sentRequests = this._sentRequests.asReadonly();
+  readonly incomingRequestsCount = this._incomingRequestsCount.asReadonly();
 
   async loadFriends(): Promise<void> {
     const friends = await this.api.get<Friend[]>('/friends');
@@ -26,6 +28,12 @@ export class FriendsService {
   async loadIncomingRequests(): Promise<void> {
     const requests = await this.api.get<FriendRequest[]>('/friends/requests');
     this._incomingRequests.set(requests);
+    this._incomingRequestsCount.set(requests.length);
+  }
+
+  async loadIncomingRequestsCount(): Promise<void> {
+    const result = await this.api.get<{ count: number }>('/friends/requests/count');
+    this._incomingRequestsCount.set(result.count);
   }
 
   async loadSentRequests(): Promise<void> {

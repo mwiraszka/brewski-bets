@@ -1,5 +1,5 @@
 import { zValidator } from '@hono/zod-validator';
-import { and, eq, or } from 'drizzle-orm';
+import { and, eq, or, sql } from 'drizzle-orm';
 import { Hono } from 'hono';
 import { z } from 'zod';
 
@@ -168,6 +168,21 @@ export const friendRoutes = new Hono<AppContext>()
     });
 
     return c.json(friendsWithFriendshipId);
+  })
+
+  .get('/requests/count', async c => {
+    const db = c.get('db');
+    const userId = c.get('userId');
+    if (!userId) {
+      return c.json({ count: 0 });
+    }
+
+    const [result] = await db
+      .select({ count: sql<number>`count(*)::int` })
+      .from(friendships)
+      .where(and(eq(friendships.addresseeId, userId), eq(friendships.status, 'pending')));
+
+    return c.json({ count: result?.count ?? 0 });
   })
 
   .get('/requests', async c => {
