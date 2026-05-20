@@ -5,6 +5,30 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.23.0] - 2026-05-20
+
+### Added
+
+- Replace the 10 stock bet images with a filterable, single-row scrollable picker of 57 object icons backed by the new tag metadata in `@eagami/ui` 1.4.0, with a search-icon prefix on the filter input
+- Introduce a 12-swatch color picker that tints the chosen bet icon
+- Surface inline "required" errors on the Title, Description, Bet against, and outcome name fields as soon as a user blurs them empty, and disable submit buttons until every required field is valid
+- Show a "Find a friend" link to the Friends page (Find tab pre-selected) when the user has no friends yet, and disable the Bet against dropdown in that state
+
+### Changed
+
+- Rename "result" to "outcome" throughout the bet form, start new bets with a single outcome row, and only show the remove icon on rows that are not the last
+- Combine the brewski count and "who loses" controls into a single signed slider (−6 to +6) labelled YOU / THEM with positive-only notches below for every position, and require at least one brewski per outcome
+- Replace the "Remove" outcome button with a red trash icon button, tooltip, and small-viewport layout that vertically centres the icon next to the stacked input and slider
+- Prefix the "Add outcome" button with a plus icon and bump form-field labels to 16px
+- Reorganise the edit-bet action buttons into a clearer hierarchy: a primary Accept, a secondary Send back with edits, and smaller Propose void and Delete bet buttons beneath
+- Honour a `?tab=` query parameter on the Friends page so external links can deep-link into Friends, Requests, or Find
+
+### Fixed
+
+- Show the loading spinner only on the button being actioned instead of on every action button at once
+- Stop tall routed pages from crashing through the footer and have the footer track actual content height again, with the bet form contents no longer overflowing the card on narrow viewports
+
+
 ## [0.22.0] - 2026-05-19
 
 ### Added
@@ -412,6 +436,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - PWA manifest and service worker configuration
 - GitHub issue templates
 
+[0.23.0]: https://github.com/mwiraszka/brewski-bets/compare/v0.22.0...v0.23.0
 [0.22.0]: https://github.com/mwiraszka/brewski-bets/compare/v0.21.0...v0.22.0
 [0.21.0]: https://github.com/mwiraszka/brewski-bets/compare/v0.20.0...v0.21.0
 [0.20.0]: https://github.com/mwiraszka/brewski-bets/compare/v0.19.0...v0.20.0
