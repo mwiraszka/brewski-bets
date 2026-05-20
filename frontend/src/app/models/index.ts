@@ -54,7 +54,8 @@ export interface Bet {
   id: string;
   title: string;
   description: string;
-  imageSlug: string | null;
+  iconSlug: string | null;
+  iconColor: string | null;
   user1Id: string;
   user2Id: string;
   results: BetResult[];
