@@ -66,7 +66,8 @@ export const bets = pgTable('bets', {
   id: uuid('id').primaryKey().defaultRandom(),
   title: text('title').notNull(),
   description: text('description').notNull(),
-  imageSlug: text('image_slug'),
+  iconSlug: text('icon_slug'),
+  iconColor: text('icon_color'),
   user1Id: uuid('user1_id')
     .notNull()
     .references(() => users.id),
