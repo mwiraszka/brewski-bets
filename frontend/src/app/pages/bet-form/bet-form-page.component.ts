@@ -13,6 +13,7 @@ import {
   CameraIconComponent,
   CandleIconComponent,
   CardComponent,
+  CheckIconComponent,
   ClipboardIconComponent,
   ClockIconComponent,
   CoffeeIconComponent,
@@ -21,6 +22,7 @@ import {
   DialogComponent,
   DiscIconComponent,
   DropdownComponent,
+  EditIconComponent,
   FilmIconComponent,
   FlagIconComponent,
   FolderIconComponent,
@@ -146,21 +148,21 @@ const STOCK_ICONS: IconComponentType[] = [
 
 const ICON_COLORS = [
   '#e53935',
-  '#ff7043',
   '#fb8c00',
   '#cba855',
   '#43a047',
-  '#00897b',
   '#29b6f6',
   '#1e88e5',
   '#5e35b1',
   '#e91e63',
-  '#8d6e63',
-  '#607d8b',
 ];
 
 const DEFAULT_ICON_COLOR = '#cba855';
 const MAX_BREWSKI_COUNT = 6;
+const MAX_OUTCOMES = 5;
+const TITLE_MAX_LENGTH = 60;
+const DESCRIPTION_MAX_LENGTH = 500;
+const OUTCOME_MAX_LENGTH = 60;
 const NOTCH_VALUES: ReadonlyArray<number> = [6, 5, 4, 3, 2, 1, 0, 1, 2, 3, 4, 5, 6];
 
 type ActionInFlight = 'submit' | 'accept' | 'void' | 'delete' | null;
@@ -173,8 +175,10 @@ type ActionInFlight = 'submit' | 'accept' | 'void' | 'delete' | null;
     NgComponentOutlet,
     ButtonComponent,
     CardComponent,
+    CheckIconComponent,
     DialogComponent,
     DropdownComponent,
+    EditIconComponent,
     InputComponent,
     PlusIconComponent,
     RadioComponent,
@@ -199,6 +203,10 @@ export class BetFormPageComponent implements OnInit {
   readonly stockIcons = STOCK_ICONS;
   readonly iconColors = ICON_COLORS;
   readonly maxBrewskiCount = MAX_BREWSKI_COUNT;
+  readonly maxOutcomes = MAX_OUTCOMES;
+  readonly titleMaxLength = TITLE_MAX_LENGTH;
+  readonly descriptionMaxLength = DESCRIPTION_MAX_LENGTH;
+  readonly outcomeMaxLength = OUTCOME_MAX_LENGTH;
   readonly sliderTicks = NOTCH_VALUES;
 
   readonly mode = signal<'create' | 'edit'>('create');
@@ -211,16 +219,18 @@ export class BetFormPageComponent implements OnInit {
   readonly iconSlug = signal<string | null>(null);
   readonly iconColor = signal<string>(DEFAULT_ICON_COLOR);
   readonly iconFilter = signal('');
+  readonly iconEditing = signal(true);
   readonly selectedFriendId = signal('');
-  readonly results = signal<BetResult[]>([
+  readonly outcomes = signal<BetResult[]>([
     { name: '', brewskiCount: 0, assignedTo: null },
   ]);
-  readonly selectedResultIndex = signal('');
+  readonly selectedOutcomeIndex = signal('');
 
   readonly titleTouched = signal(false);
   readonly descriptionTouched = signal(false);
   readonly friendTouched = signal(false);
-  readonly outcomeNameTouched = signal<Set<number>>(new Set());
+  readonly iconTouched = signal(false);
+  readonly outcomeDescriptionTouched = signal<Set<number>>(new Set());
   readonly outcomeAmountTouched = signal<Set<number>>(new Set());
   readonly submitAttempted = signal(false);
 
@@ -244,6 +254,12 @@ export class BetFormPageComponent implements OnInit {
     if (this.selectedFriendId()) return '';
     if (this.friendTouched() || this.submitAttempted())
       return 'Select a friend to bet against';
+    return '';
+  });
+
+  readonly iconError = computed(() => {
+    if (this.iconSlug()) return '';
+    if (this.iconTouched() || this.submitAttempted()) return 'Icon is required';
     return '';
   });
 
@@ -304,26 +320,27 @@ export class BetFormPageComponent implements OnInit {
     return this.myPosition() === 'user2' ? 'You' : this.opponentName();
   });
 
-  readonly specialResults = computed(() => {
+  readonly specialOutcomes = computed(() => {
     if (!this.bet) return [];
-    return this.bet.results.filter(r => r.isSpecial);
+    return this.bet.results.filter(outcome => outcome.isSpecial);
   });
 
   readonly isFormValid = computed(() => {
     if (!this.title().trim()) return false;
     if (!this.description().trim()) return false;
     if (this.mode() === 'create' && !this.selectedFriendId()) return false;
-    if (!this.results().length) return false;
-    if (this.results().some(r => !r.name.trim())) return false;
-    if (this.results().some(r => r.brewskiCount <= 0)) return false;
+    if (!this.iconSlug()) return false;
+    if (!this.outcomes().length) return false;
+    if (this.outcomes().some(outcome => !outcome.name.trim())) return false;
+    if (this.outcomes().some(outcome => outcome.brewskiCount <= 0)) return false;
     return true;
   });
 
   readonly absFormat = (value: number): string => `${Math.abs(value)}`;
 
-  signedBrewskiCount(result: BetResult): number {
+  signedBrewskiCount(outcome: BetResult): number {
     const me = this.bet ? this.myPosition() : 'user1';
-    return result.assignedTo === me ? -result.brewskiCount : result.brewskiCount;
+    return outcome.assignedTo === me ? -outcome.brewskiCount : outcome.brewskiCount;
   }
 
   async ngOnInit(): Promise<void> {
@@ -337,8 +354,9 @@ export class BetFormPageComponent implements OnInit {
         this.description.set(this.bet.description);
         this.iconSlug.set(this.bet.iconSlug);
         this.iconColor.set(this.bet.iconColor ?? DEFAULT_ICON_COLOR);
-        this.results.set(this.bet.results.filter(r => !r.isSpecial));
-        this.selectedResultIndex.set(
+        this.iconEditing.set(!this.bet.iconSlug);
+        this.outcomes.set(this.bet.results.filter(outcome => !outcome.isSpecial));
+        this.selectedOutcomeIndex.set(
           this.bet.selectedResultIndex != null
             ? String(this.bet.selectedResultIndex)
             : '',
@@ -356,20 +374,33 @@ export class BetFormPageComponent implements OnInit {
 
   selectIcon(slug: string): void {
     this.iconSlug.set(this.iconSlug() === slug ? null : slug);
+    this.iconTouched.set(true);
   }
 
   selectColor(color: string): void {
     this.iconColor.set(color);
   }
 
-  addResult(): void {
-    if (this.results().length >= 20) return;
-    this.results.update(r => [...r, { name: '', brewskiCount: 1, assignedTo: 'user2' }]);
+  confirmIcon(): void {
+    if (!this.iconSlug()) return;
+    this.iconEditing.set(false);
   }
 
-  removeResult(index: number): void {
-    this.results.update(r => r.filter((_, i) => i !== index));
-    this.outcomeNameTouched.update(s => {
+  editIcon(): void {
+    this.iconEditing.set(true);
+  }
+
+  addOutcome(): void {
+    if (this.outcomes().length >= MAX_OUTCOMES) return;
+    this.outcomes.update(outcomes => [
+      ...outcomes,
+      { name: '', brewskiCount: 1, assignedTo: 'user2' },
+    ]);
+  }
+
+  removeOutcome(index: number): void {
+    this.outcomes.update(outcomes => outcomes.filter((_, i) => i !== index));
+    this.outcomeDescriptionTouched.update(s => {
       const next = new Set<number>();
       for (const i of s) {
         if (i < index) next.add(i);
@@ -387,38 +418,51 @@ export class BetFormPageComponent implements OnInit {
     });
   }
 
-  updateResultName(index: number, name: string): void {
-    this.results.update(r =>
-      r.map((item, i) => (i === index ? { ...item, name } : item)),
+  updateOutcomeDescription(index: number, description: string): void {
+    const trimmed = description.slice(0, OUTCOME_MAX_LENGTH);
+    this.outcomes.update(outcomes =>
+      outcomes.map((outcome, i) =>
+        i === index ? { ...outcome, name: trimmed } : outcome,
+      ),
     );
   }
 
-  updateResultSigned(index: number, signedValue: number): void {
+  setTitle(value: string): void {
+    this.title.set(value.slice(0, TITLE_MAX_LENGTH));
+  }
+
+  updateOutcomeSigned(index: number, signedValue: number): void {
     const me = this.bet ? this.myPosition() : 'user1';
     const other: 'user1' | 'user2' = me === 'user1' ? 'user2' : 'user1';
     const brewskiCount = Math.abs(signedValue);
     const assignedTo: 'user1' | 'user2' = signedValue < 0 ? (me ?? 'user1') : other;
-    this.results.update(r =>
-      r.map((item, i) => (i === index ? { ...item, brewskiCount, assignedTo } : item)),
+    this.outcomes.update(outcomes =>
+      outcomes.map((outcome, i) =>
+        i === index ? { ...outcome, brewskiCount, assignedTo } : outcome,
+      ),
     );
     this.outcomeAmountTouched.update(s => new Set(s).add(index));
   }
 
-  markOutcomeNameTouched(index: number): void {
-    this.outcomeNameTouched.update(s => new Set(s).add(index));
+  markOutcomeDescriptionTouched(index: number): void {
+    this.outcomeDescriptionTouched.update(s => new Set(s).add(index));
   }
 
-  outcomeNameError(index: number, name: string): string {
-    const empty = !name.trim();
+  outcomeDescriptionError(index: number, description: string): string {
+    const empty = !description.trim();
     if (!empty) return '';
-    if (this.outcomeNameTouched().has(index) || this.submitAttempted())
-      return 'Name is required';
+    if (this.outcomeDescriptionTouched().has(index) || this.submitAttempted())
+      return 'Outcome description is required';
     return '';
   }
 
-  outcomeAmountError(result: BetResult, index: number): string {
-    if (result.brewskiCount > 0) return '';
-    if (this.outcomeAmountTouched().has(index) || this.submitAttempted())
+  outcomeAmountError(outcome: BetResult, index: number): string {
+    if (outcome.brewskiCount > 0) return '';
+    if (this.submitAttempted()) return 'At least one brewski must be bet';
+    if (
+      this.outcomeAmountTouched().has(index) &&
+      this.outcomeDescriptionTouched().has(index)
+    )
       return 'At least one brewski must be bet';
     return '';
   }
@@ -429,9 +473,10 @@ export class BetFormPageComponent implements OnInit {
     if (!this.title().trim()) return false;
     if (!this.description().trim()) return false;
     if (this.mode() === 'create' && !this.selectedFriendId()) return false;
-    if (!this.results().length) return false;
-    if (this.results().some(r => !r.name.trim())) return false;
-    if (this.results().some(r => r.brewskiCount <= 0)) return false;
+    if (!this.iconSlug()) return false;
+    if (!this.outcomes().length) return false;
+    if (this.outcomes().some(outcome => !outcome.name.trim())) return false;
+    if (this.outcomes().some(outcome => outcome.brewskiCount <= 0)) return false;
 
     return true;
   }
@@ -448,10 +493,10 @@ export class BetFormPageComponent implements OnInit {
           iconSlug: this.iconSlug(),
           iconColor: this.iconSlug() ? this.iconColor() : null,
           user2Id: this.selectedFriendId(),
-          results: this.results().map(r => ({
-            name: r.name,
-            brewskiCount: r.brewskiCount,
-            assignedTo: r.assignedTo,
+          results: this.outcomes().map(outcome => ({
+            name: outcome.name,
+            brewskiCount: outcome.brewskiCount,
+            assignedTo: outcome.assignedTo,
           })),
         });
         this.toast.success('Bet submitted for review');
@@ -461,13 +506,13 @@ export class BetFormPageComponent implements OnInit {
           description: this.description(),
           iconSlug: this.iconSlug(),
           iconColor: this.iconSlug() ? this.iconColor() : null,
-          results: this.results().map(r => ({
-            name: r.name,
-            brewskiCount: r.brewskiCount,
-            assignedTo: r.assignedTo,
+          results: this.outcomes().map(outcome => ({
+            name: outcome.name,
+            brewskiCount: outcome.brewskiCount,
+            assignedTo: outcome.assignedTo,
           })),
-          selectedResultIndex: this.selectedResultIndex()
-            ? Number(this.selectedResultIndex())
+          selectedResultIndex: this.selectedOutcomeIndex()
+            ? Number(this.selectedOutcomeIndex())
             : undefined,
           action: 'submit',
         });
@@ -487,8 +532,8 @@ export class BetFormPageComponent implements OnInit {
 
     try {
       await this.betsService.updateBet(this.bet.id, {
-        selectedResultIndex: this.selectedResultIndex()
-          ? Number(this.selectedResultIndex())
+        selectedResultIndex: this.selectedOutcomeIndex()
+          ? Number(this.selectedOutcomeIndex())
           : undefined,
         action: 'accept',
       });
@@ -528,7 +573,7 @@ export class BetFormPageComponent implements OnInit {
   async onProposeVoid(): Promise<void> {
     if (!this.bet) return;
 
-    const voidIndex = this.bet.results.findIndex(r => r.isSpecial === 'void');
+    const voidIndex = this.bet.results.findIndex(outcome => outcome.isSpecial === 'void');
     if (voidIndex === -1) return;
 
     this.actionInFlight.set('void');
