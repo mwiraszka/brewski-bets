@@ -11,6 +11,7 @@ import {
 } from '@eagami/ui';
 
 import { Component, OnInit, computed, effect, inject, signal } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 
 import { Friend, FriendRequest, SentFriendRequest, UserSearchResult } from '@app/models';
 import { ClerkService } from '@app/services/clerk.service';
@@ -44,8 +45,17 @@ export class FriendsPageComponent implements OnInit {
   private readonly friendsService = inject(FriendsService);
   private readonly clerk = inject(ClerkService);
   private readonly toast = inject(ToastService);
+  private readonly route = inject(ActivatedRoute);
 
-  readonly activeTab = signal<FriendsTab>(readStoredTab());
+  readonly activeTab = signal<FriendsTab>(
+    (() => {
+      const queryTab = this.route.snapshot.queryParamMap.get('tab');
+      if (queryTab && VALID_TABS.includes(queryTab as FriendsTab)) {
+        return queryTab as FriendsTab;
+      }
+      return readStoredTab();
+    })(),
+  );
   readonly loading = signal(true);
   readonly skeletonRows = Array.from({ length: 4 });
 
