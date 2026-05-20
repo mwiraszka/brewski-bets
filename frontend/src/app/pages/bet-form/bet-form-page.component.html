@@ -39,7 +39,8 @@
             label="Title"
             [required]="true"
             [errorMsg]="titleError()"
-            [(value)]="title"
+            [value]="title()"
+            (valueChange)="setTitle($event)"
             (blurred)="titleTouched.set(true)" />
         </div>
 
@@ -47,50 +48,81 @@
           <ea-textarea
             label="Description"
             [required]="true"
+            [maxlength]="descriptionMaxLength"
             [errorMsg]="descriptionError()"
             [(value)]="description"
             (blurred)="descriptionTouched.set(true)" />
         </div>
 
         <div class="form-field">
-          <label class="field-label">Icon</label>
-          <ea-input
-            placeholder="Filter icons"
-            [value]="iconFilter()"
-            (valueChange)="iconFilter.set($event)">
-            <ea-icon-search slot="prefix" />
-          </ea-input>
-          <div class="icon-grid">
-            @for (icon of filteredIcons(); track icon.slug) {
+          <label class="field-label field-label--required">Icon</label>
+          @if (iconEditing()) {
+            <ea-input
+              placeholder="Filter icons"
+              [value]="iconFilter()"
+              (valueChange)="iconFilter.set($event)">
+              <ea-icon-search slot="prefix" />
+            </ea-input>
+            <div class="icon-grid">
+              @for (icon of filteredIcons(); track icon.slug) {
+                <button
+                  type="button"
+                  class="icon-option"
+                  [class.icon-option--selected]="iconSlug() === icon.slug"
+                  [style.color]="iconSlug() === icon.slug ? iconColor() : null"
+                  [title]="icon.slug"
+                  (click)="selectIcon(icon.slug)">
+                  <ng-container *ngComponentOutlet="icon" />
+                </button>
+              } @empty {
+                <p class="icon-grid__empty">No icons match that filter</p>
+              }
+            </div>
+            @if (iconSlug()) {
+              <div class="color-picker">
+                <span class="color-picker__label">COLOUR</span>
+                <div class="color-picker__swatches">
+                  @for (color of iconColors; track color) {
+                    <button
+                      type="button"
+                      class="color-swatch"
+                      [class.color-swatch--selected]="iconColor() === color"
+                      [style.background-color]="color"
+                      [attr.aria-label]="'Colour ' + color"
+                      (click)="selectColor(color)">
+                    </button>
+                  }
+                </div>
+              </div>
+            }
+            <div class="icon-confirm">
+              <ea-button
+                variant="secondary"
+                size="sm"
+                [disabled]="!iconSlug()"
+                (clicked)="confirmIcon()">
+                {{ mode() === 'create' ? 'Set icon' : 'Update icon' }}
+              </ea-button>
+            </div>
+          } @else if (selectedIcon(); as selected) {
+            <div class="icon-preview">
+              <div
+                class="icon-preview__container"
+                [style.color]="iconColor()">
+                <ng-container *ngComponentOutlet="selected" />
+              </div>
               <button
                 type="button"
-                class="icon-option"
-                [class.icon-option--selected]="iconSlug() === icon.slug"
-                [style.color]="iconSlug() === icon.slug ? iconColor() : null"
-                [title]="icon.slug"
-                (click)="selectIcon(icon.slug)">
-                <ng-container *ngComponentOutlet="icon" />
+                class="icon-preview__edit"
+                aria-label="Edit icon"
+                [eaTooltip]="'Edit icon'"
+                (click)="editIcon()">
+                <ea-icon-edit />
               </button>
-            } @empty {
-              <p class="icon-grid__empty">No icons match that filter</p>
-            }
-          </div>
-          @if (iconSlug()) {
-            <div class="color-picker">
-              <span class="color-picker__label">Color</span>
-              <div class="color-picker__swatches">
-                @for (color of iconColors; track color) {
-                  <button
-                    type="button"
-                    class="color-swatch"
-                    [class.color-swatch--selected]="iconColor() === color"
-                    [style.background-color]="color"
-                    [attr.aria-label]="'Color ' + color"
-                    (click)="selectColor(color)">
-                  </button>
-                }
-              </div>
             </div>
+          }
+          @if (iconError()) {
+            <p class="field-error">{{ iconError() }}</p>
           }
         </div>
 
@@ -108,17 +140,18 @@
                   <span class="results-list__col results-list__col--beers">Brewskis</span>
                   <span></span>
                 </div>
-                @for (result of results(); track $index) {
+                @for (result of results(); track $index; let rowIndex = $index) {
                   <div class="result-row result-row--editable">
                     <ea-radio
                       class="result-row__radio"
-                      [value]="'' + $index" />
+                      [value]="'' + rowIndex" />
                     <div class="result-row__name">
                       <ea-input
+                        placeholder="e.g. Poland wins"
                         [value]="result.name"
-                        [errorMsg]="outcomeNameError($index, result.name)"
-                        (valueChange)="updateResultName($index, $event)"
-                        (blurred)="markOutcomeNameTouched($index)" />
+                        [errorMsg]="outcomeDescriptionError(rowIndex, result.name)"
+                        (valueChange)="updateResultName(rowIndex, $event)"
+                        (blurred)="markOutcomeDescriptionTouched(rowIndex)" />
                     </div>
                     <div class="result-row__beers">
                       <div class="result-row__slider-row">
@@ -132,34 +165,40 @@
                             [showValue]="true"
                             [formatValue]="absFormat"
                             [value]="signedBrewskiCount(result)"
-                            (changed)="updateResultSigned($index, $event)" />
+                            (changed)="updateResultSigned(rowIndex, $event)" />
                           <div
                             class="slider-ticks"
                             aria-hidden="true">
-                            @for (tick of sliderTicks; track $index) {
-                              <span class="slider-ticks__tick">{{ tick }}</span>
+                            @for (
+                              tick of sliderTicks;
+                              track $index;
+                              let tickIndex = $index
+                            ) {
+                              <span
+                                class="slider-ticks__tick"
+                                [style.--tick-index]="tickIndex">
+                                {{ tick }}
+                              </span>
                             }
                           </div>
                         </div>
                         <span class="result-row__user">{{ themLabel() }}</span>
                       </div>
-                      @if (outcomeAmountError(result, $index)) {
+                      @if (outcomeAmountError(result, rowIndex)) {
                         <p class="result-row__error">
-                          {{ outcomeAmountError(result, $index) }}
+                          {{ outcomeAmountError(result, rowIndex) }}
                         </p>
                       }
                     </div>
-                    @if ($index < results().length - 1) {
+                    @if (results().length > 1) {
                       <button
                         type="button"
                         class="remove-icon-btn"
                         aria-label="Remove outcome"
                         [eaTooltip]="'Remove outcome'"
-                        (click)="removeResult($index)">
+                        (click)="removeResult(rowIndex)">
                         <ea-icon-trash />
                       </button>
-                    } @else {
-                      <span></span>
                     }
                   </div>
                 }
@@ -181,14 +220,15 @@
                 <span class="results-list__col results-list__col--beers">Brewskis</span>
                 <span></span>
               </div>
-              @for (result of results(); track $index) {
+              @for (result of results(); track $index; let rowIndex = $index) {
                 <div class="result-row">
                   <div class="result-row__name">
                     <ea-input
+                      placeholder="e.g. Poland wins"
                       [value]="result.name"
-                      [errorMsg]="outcomeNameError($index, result.name)"
-                      (valueChange)="updateResultName($index, $event)"
-                      (blurred)="markOutcomeNameTouched($index)" />
+                      [errorMsg]="outcomeDescriptionError(rowIndex, result.name)"
+                      (valueChange)="updateResultName(rowIndex, $event)"
+                      (blurred)="markOutcomeDescriptionTouched(rowIndex)" />
                   </div>
                   <div class="result-row__beers">
                     <div class="result-row__slider-row">
@@ -202,41 +242,47 @@
                           [showValue]="true"
                           [formatValue]="absFormat"
                           [value]="signedBrewskiCount(result)"
-                          (changed)="updateResultSigned($index, $event)" />
+                          (changed)="updateResultSigned(rowIndex, $event)" />
                         <div
                           class="slider-ticks"
                           aria-hidden="true">
-                          @for (tick of sliderTicks; track $index) {
-                            <span class="slider-ticks__tick">{{ tick }}</span>
+                          @for (
+                            tick of sliderTicks;
+                            track $index;
+                            let tickIndex = $index
+                          ) {
+                            <span
+                              class="slider-ticks__tick"
+                              [style.--tick-index]="tickIndex">
+                              {{ tick }}
+                            </span>
                           }
                         </div>
                       </div>
                       <span class="result-row__user">{{ themLabel() }}</span>
                     </div>
-                    @if (outcomeAmountError(result, $index)) {
+                    @if (outcomeAmountError(result, rowIndex)) {
                       <p class="result-row__error">
-                        {{ outcomeAmountError(result, $index) }}
+                        {{ outcomeAmountError(result, rowIndex) }}
                       </p>
                     }
                   </div>
-                  @if ($index < results().length - 1) {
+                  @if (results().length > 1) {
                     <button
                       type="button"
                       class="remove-icon-btn"
                       aria-label="Remove outcome"
                       [eaTooltip]="'Remove outcome'"
-                      (click)="removeResult($index)">
+                      (click)="removeResult(rowIndex)">
                       <ea-icon-trash />
                     </button>
-                  } @else {
-                    <span></span>
                   }
                 </div>
               }
             </div>
           }
 
-          @if (results().length < 20) {
+          @if (results().length < maxResults) {
             <ea-button
               variant="secondary"
               size="sm"

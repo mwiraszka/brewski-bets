@@ -21,6 +21,7 @@ import {
   DialogComponent,
   DiscIconComponent,
   DropdownComponent,
+  EditIconComponent,
   FilmIconComponent,
   FlagIconComponent,
   FolderIconComponent,
@@ -146,21 +147,21 @@ const STOCK_ICONS: IconComponentType[] = [
 
 const ICON_COLORS = [
   '#e53935',
-  '#ff7043',
   '#fb8c00',
   '#cba855',
   '#43a047',
-  '#00897b',
   '#29b6f6',
   '#1e88e5',
   '#5e35b1',
   '#e91e63',
-  '#8d6e63',
-  '#607d8b',
 ];
 
 const DEFAULT_ICON_COLOR = '#cba855';
 const MAX_BREWSKI_COUNT = 6;
+const MAX_RESULTS = 5;
+const TITLE_MAX_LENGTH = 60;
+const DESCRIPTION_MAX_LENGTH = 500;
+const OUTCOME_MAX_LENGTH = 60;
 const NOTCH_VALUES: ReadonlyArray<number> = [6, 5, 4, 3, 2, 1, 0, 1, 2, 3, 4, 5, 6];
 
 type ActionInFlight = 'submit' | 'accept' | 'void' | 'delete' | null;
@@ -175,6 +176,7 @@ type ActionInFlight = 'submit' | 'accept' | 'void' | 'delete' | null;
     CardComponent,
     DialogComponent,
     DropdownComponent,
+    EditIconComponent,
     InputComponent,
     PlusIconComponent,
     RadioComponent,
@@ -199,6 +201,10 @@ export class BetFormPageComponent implements OnInit {
   readonly stockIcons = STOCK_ICONS;
   readonly iconColors = ICON_COLORS;
   readonly maxBrewskiCount = MAX_BREWSKI_COUNT;
+  readonly maxResults = MAX_RESULTS;
+  readonly titleMaxLength = TITLE_MAX_LENGTH;
+  readonly descriptionMaxLength = DESCRIPTION_MAX_LENGTH;
+  readonly outcomeMaxLength = OUTCOME_MAX_LENGTH;
   readonly sliderTicks = NOTCH_VALUES;
 
   readonly mode = signal<'create' | 'edit'>('create');
@@ -211,6 +217,7 @@ export class BetFormPageComponent implements OnInit {
   readonly iconSlug = signal<string | null>(null);
   readonly iconColor = signal<string>(DEFAULT_ICON_COLOR);
   readonly iconFilter = signal('');
+  readonly iconEditing = signal(true);
   readonly selectedFriendId = signal('');
   readonly results = signal<BetResult[]>([
     { name: '', brewskiCount: 0, assignedTo: null },
@@ -220,7 +227,8 @@ export class BetFormPageComponent implements OnInit {
   readonly titleTouched = signal(false);
   readonly descriptionTouched = signal(false);
   readonly friendTouched = signal(false);
-  readonly outcomeNameTouched = signal<Set<number>>(new Set());
+  readonly iconTouched = signal(false);
+  readonly outcomeDescriptionTouched = signal<Set<number>>(new Set());
   readonly outcomeAmountTouched = signal<Set<number>>(new Set());
   readonly submitAttempted = signal(false);
 
@@ -244,6 +252,12 @@ export class BetFormPageComponent implements OnInit {
     if (this.selectedFriendId()) return '';
     if (this.friendTouched() || this.submitAttempted())
       return 'Select a friend to bet against';
+    return '';
+  });
+
+  readonly iconError = computed(() => {
+    if (this.iconSlug()) return '';
+    if (this.iconTouched() || this.submitAttempted()) return 'Icon is required';
     return '';
   });
 
@@ -313,6 +327,7 @@ export class BetFormPageComponent implements OnInit {
     if (!this.title().trim()) return false;
     if (!this.description().trim()) return false;
     if (this.mode() === 'create' && !this.selectedFriendId()) return false;
+    if (!this.iconSlug()) return false;
     if (!this.results().length) return false;
     if (this.results().some(r => !r.name.trim())) return false;
     if (this.results().some(r => r.brewskiCount <= 0)) return false;
@@ -337,6 +352,7 @@ export class BetFormPageComponent implements OnInit {
         this.description.set(this.bet.description);
         this.iconSlug.set(this.bet.iconSlug);
         this.iconColor.set(this.bet.iconColor ?? DEFAULT_ICON_COLOR);
+        this.iconEditing.set(!this.bet.iconSlug);
         this.results.set(this.bet.results.filter(r => !r.isSpecial));
         this.selectedResultIndex.set(
           this.bet.selectedResultIndex != null
@@ -356,20 +372,30 @@ export class BetFormPageComponent implements OnInit {
 
   selectIcon(slug: string): void {
     this.iconSlug.set(this.iconSlug() === slug ? null : slug);
+    this.iconTouched.set(true);
   }
 
   selectColor(color: string): void {
     this.iconColor.set(color);
   }
 
+  confirmIcon(): void {
+    if (!this.iconSlug()) return;
+    this.iconEditing.set(false);
+  }
+
+  editIcon(): void {
+    this.iconEditing.set(true);
+  }
+
   addResult(): void {
-    if (this.results().length >= 20) return;
+    if (this.results().length >= MAX_RESULTS) return;
     this.results.update(r => [...r, { name: '', brewskiCount: 1, assignedTo: 'user2' }]);
   }
 
   removeResult(index: number): void {
     this.results.update(r => r.filter((_, i) => i !== index));
-    this.outcomeNameTouched.update(s => {
+    this.outcomeDescriptionTouched.update(s => {
       const next = new Set<number>();
       for (const i of s) {
         if (i < index) next.add(i);
@@ -388,9 +414,14 @@ export class BetFormPageComponent implements OnInit {
   }
 
   updateResultName(index: number, name: string): void {
+    const trimmed = name.slice(0, OUTCOME_MAX_LENGTH);
     this.results.update(r =>
-      r.map((item, i) => (i === index ? { ...item, name } : item)),
+      r.map((item, i) => (i === index ? { ...item, name: trimmed } : item)),
     );
+  }
+
+  setTitle(value: string): void {
+    this.title.set(value.slice(0, TITLE_MAX_LENGTH));
   }
 
   updateResultSigned(index: number, signedValue: number): void {
@@ -404,21 +435,25 @@ export class BetFormPageComponent implements OnInit {
     this.outcomeAmountTouched.update(s => new Set(s).add(index));
   }
 
-  markOutcomeNameTouched(index: number): void {
-    this.outcomeNameTouched.update(s => new Set(s).add(index));
+  markOutcomeDescriptionTouched(index: number): void {
+    this.outcomeDescriptionTouched.update(s => new Set(s).add(index));
   }
 
-  outcomeNameError(index: number, name: string): string {
+  outcomeDescriptionError(index: number, name: string): string {
     const empty = !name.trim();
     if (!empty) return '';
-    if (this.outcomeNameTouched().has(index) || this.submitAttempted())
-      return 'Name is required';
+    if (this.outcomeDescriptionTouched().has(index) || this.submitAttempted())
+      return 'Outcome description is required';
     return '';
   }
 
   outcomeAmountError(result: BetResult, index: number): string {
     if (result.brewskiCount > 0) return '';
-    if (this.outcomeAmountTouched().has(index) || this.submitAttempted())
+    if (this.submitAttempted()) return 'At least one brewski must be bet';
+    if (
+      this.outcomeAmountTouched().has(index) &&
+      this.outcomeDescriptionTouched().has(index)
+    )
       return 'At least one brewski must be bet';
     return '';
   }
@@ -429,6 +464,7 @@ export class BetFormPageComponent implements OnInit {
     if (!this.title().trim()) return false;
     if (!this.description().trim()) return false;
     if (this.mode() === 'create' && !this.selectedFriendId()) return false;
+    if (!this.iconSlug()) return false;
     if (!this.results().length) return false;
     if (this.results().some(r => !r.name.trim())) return false;
     if (this.results().some(r => r.brewskiCount <= 0)) return false;
