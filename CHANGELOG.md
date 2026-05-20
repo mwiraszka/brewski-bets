@@ -9,12 +9,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Rework the bet form icon picker: trim the colour palette to 8 swatches with tighter 4px spacing, require explicit confirmation via a Set / Update icon button, and collapse the picker to a 52×52 preview tile with an edit shortcut once the icon is set
+- Rework the bet form icon picker: trim the colour palette to 8 swatches with tighter 4px spacing, require explicit confirmation via a Set / Update icon button (prefixed with a checkmark), and collapse the picker to a 52×52 preview tile with an edit shortcut once the icon is set
 - Make the bet icon a required field and enforce character limits of 60 on the title, 500 on the description, and 60 on each outcome description
 - Cap each bet at 5 outcomes
 - Tighten the icon-picker tiles from 40px to 36px and align the slider, YOU / THEM labels, and tick marks with the outcome description input and the slider's snap positions
 - Add an "e.g. Poland wins" placeholder to outcome inputs and rename the outcome validation message to "Outcome description is required"
 - Show the trash icon on every outcome row except when only one remains
+- Replace the disabled "Bet against" dropdown with an inline 16px "Find a friend" link beside the field label when the user has no friends yet
+- Bump the Set icon, Add outcome, and Submit for review buttons to 16px text, and uppercase the Submit for review label
+- Enlarge the header hamburger and close icons to 24px inside the existing 40px button
 
 ### Fixed
 
