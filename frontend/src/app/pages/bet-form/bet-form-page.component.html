@@ -11,7 +11,7 @@
         <div class="waiting-banner">Waiting for {{ opponentName() }} to respond</div>
       }
 
-      <fieldset [disabled]="mode() === 'edit' && !isMyTurn()">
+      <fieldset [disabled]="(mode() === 'edit' && !isMyTurn()) || isBusy()">
         @if (mode() === 'create') {
           <div class="form-field">
             <ea-dropdown
@@ -19,8 +19,18 @@
               placeholder="Select a friend"
               [options]="friendOptions()"
               [required]="true"
+              [disabled]="!friends().length"
               [errorMsg]="friendError()"
-              [(value)]="selectedFriendId" />
+              [(value)]="selectedFriendId"
+              (changed)="friendTouched.set(true)" />
+            @if (!friends().length) {
+              <a
+                class="find-friend-link"
+                routerLink="/friends"
+                [queryParams]="{ tab: 'find' }">
+                Find a friend
+              </a>
+            }
           </div>
         }
 
@@ -29,7 +39,8 @@
             label="Title"
             [required]="true"
             [errorMsg]="titleError()"
-            [(value)]="title" />
+            [(value)]="title"
+            (blurred)="titleTouched.set(true)" />
         </div>
 
         <div class="form-field">
@@ -37,57 +48,118 @@
             label="Description"
             [required]="true"
             [errorMsg]="descriptionError()"
-            [(value)]="description" />
+            [(value)]="description"
+            (blurred)="descriptionTouched.set(true)" />
         </div>
 
         <div class="form-field">
-          <label class="field-label">Image</label>
-          <div class="image-grid">
-            @for (img of stockImages; track img.slug) {
+          <label class="field-label">Icon</label>
+          <ea-input
+            placeholder="Filter icons"
+            [value]="iconFilter()"
+            (valueChange)="iconFilter.set($event)">
+            <ea-icon-search slot="prefix" />
+          </ea-input>
+          <div class="icon-grid">
+            @for (icon of filteredIcons(); track icon.slug) {
               <button
                 type="button"
-                class="image-option"
-                [class.image-option--selected]="imageSlug() === img.slug"
-                (click)="selectImage(img.slug)">
-                <img
-                  [src]="'assets/bet-images/' + img.slug + '.svg'"
-                  [alt]="img.label" />
+                class="icon-option"
+                [class.icon-option--selected]="iconSlug() === icon.slug"
+                [style.color]="iconSlug() === icon.slug ? iconColor() : null"
+                [title]="icon.slug"
+                (click)="selectIcon(icon.slug)">
+                <ng-container *ngComponentOutlet="icon" />
               </button>
+            } @empty {
+              <p class="icon-grid__empty">No icons match that filter</p>
             }
           </div>
+          @if (iconSlug()) {
+            <div class="color-picker">
+              <span class="color-picker__label">Color</span>
+              <div class="color-picker__swatches">
+                @for (color of iconColors; track color) {
+                  <button
+                    type="button"
+                    class="color-swatch"
+                    [class.color-swatch--selected]="iconColor() === color"
+                    [style.background-color]="color"
+                    [attr.aria-label]="'Color ' + color"
+                    (click)="selectColor(color)">
+                  </button>
+                }
+              </div>
+            </div>
+          }
         </div>
 
         <div class="form-field">
-          <label class="field-label">Results</label>
+          <label class="field-label field-label--required">Outcomes</label>
 
           @if (mode() === 'edit') {
             <ea-radio-group
               name="result-selection"
               [(value)]="selectedResultIndex">
               <div class="results-list">
+                <div class="results-list__header results-list__header--editable">
+                  <span></span>
+                  <span class="results-list__col results-list__col--name">Outcome</span>
+                  <span class="results-list__col results-list__col--beers">Brewskis</span>
+                  <span></span>
+                </div>
                 @for (result of results(); track $index) {
-                  <div class="result-row">
-                    <ea-radio [value]="'' + $index" />
-                    <ea-input
-                      placeholder="Result name"
-                      [value]="result.name"
-                      (valueChange)="updateResultName($index, $event)" />
-                    <ea-input
-                      placeholder="Beers"
-                      [value]="'' + result.brewskiCount"
-                      (valueChange)="updateResultBrewskiCount($index, $event)" />
-                    <ea-dropdown
-                      placeholder="Owes"
-                      [options]="assignedToOptions()"
-                      [value]="result.assignedTo ?? ''"
-                      (valueChange)="updateResultAssignedTo($index, $event)" />
-                    @if (results().length > 1) {
-                      <ea-button
-                        variant="ghost"
-                        size="sm"
-                        (clicked)="removeResult($index)">
-                        Remove
-                      </ea-button>
+                  <div class="result-row result-row--editable">
+                    <ea-radio
+                      class="result-row__radio"
+                      [value]="'' + $index" />
+                    <div class="result-row__name">
+                      <ea-input
+                        [value]="result.name"
+                        [errorMsg]="outcomeNameError($index, result.name)"
+                        (valueChange)="updateResultName($index, $event)"
+                        (blurred)="markOutcomeNameTouched($index)" />
+                    </div>
+                    <div class="result-row__beers">
+                      <div class="result-row__slider-row">
+                        <span class="result-row__user">{{ youLabel() }}</span>
+                        <div class="result-row__slider">
+                          <ea-slider
+                            size="sm"
+                            [min]="-maxBrewskiCount"
+                            [max]="maxBrewskiCount"
+                            [step]="1"
+                            [showValue]="true"
+                            [formatValue]="absFormat"
+                            [value]="signedBrewskiCount(result)"
+                            (changed)="updateResultSigned($index, $event)" />
+                          <div
+                            class="slider-ticks"
+                            aria-hidden="true">
+                            @for (tick of sliderTicks; track $index) {
+                              <span class="slider-ticks__tick">{{ tick }}</span>
+                            }
+                          </div>
+                        </div>
+                        <span class="result-row__user">{{ themLabel() }}</span>
+                      </div>
+                      @if (outcomeAmountError(result, $index)) {
+                        <p class="result-row__error">
+                          {{ outcomeAmountError(result, $index) }}
+                        </p>
+                      }
+                    </div>
+                    @if ($index < results().length - 1) {
+                      <button
+                        type="button"
+                        class="remove-icon-btn"
+                        aria-label="Remove outcome"
+                        [eaTooltip]="'Remove outcome'"
+                        (click)="removeResult($index)">
+                        <ea-icon-trash />
+                      </button>
+                    } @else {
+                      <span></span>
                     }
                   </div>
                 }
@@ -104,28 +176,60 @@
             </ea-radio-group>
           } @else {
             <div class="results-list">
+              <div class="results-list__header">
+                <span class="results-list__col results-list__col--name">Outcome</span>
+                <span class="results-list__col results-list__col--beers">Brewskis</span>
+                <span></span>
+              </div>
               @for (result of results(); track $index) {
                 <div class="result-row">
-                  <ea-input
-                    placeholder="Result name"
-                    [value]="result.name"
-                    (valueChange)="updateResultName($index, $event)" />
-                  <ea-input
-                    placeholder="Beers"
-                    [value]="'' + result.brewskiCount"
-                    (valueChange)="updateResultBrewskiCount($index, $event)" />
-                  <ea-dropdown
-                    placeholder="Owes"
-                    [options]="assignedToOptions()"
-                    [value]="result.assignedTo ?? ''"
-                    (valueChange)="updateResultAssignedTo($index, $event)" />
-                  @if (results().length > 1) {
-                    <ea-button
-                      variant="ghost"
-                      size="sm"
-                      (clicked)="removeResult($index)">
-                      Remove
-                    </ea-button>
+                  <div class="result-row__name">
+                    <ea-input
+                      [value]="result.name"
+                      [errorMsg]="outcomeNameError($index, result.name)"
+                      (valueChange)="updateResultName($index, $event)"
+                      (blurred)="markOutcomeNameTouched($index)" />
+                  </div>
+                  <div class="result-row__beers">
+                    <div class="result-row__slider-row">
+                      <span class="result-row__user">{{ youLabel() }}</span>
+                      <div class="result-row__slider">
+                        <ea-slider
+                          size="sm"
+                          [min]="-maxBrewskiCount"
+                          [max]="maxBrewskiCount"
+                          [step]="1"
+                          [showValue]="true"
+                          [formatValue]="absFormat"
+                          [value]="signedBrewskiCount(result)"
+                          (changed)="updateResultSigned($index, $event)" />
+                        <div
+                          class="slider-ticks"
+                          aria-hidden="true">
+                          @for (tick of sliderTicks; track $index) {
+                            <span class="slider-ticks__tick">{{ tick }}</span>
+                          }
+                        </div>
+                      </div>
+                      <span class="result-row__user">{{ themLabel() }}</span>
+                    </div>
+                    @if (outcomeAmountError(result, $index)) {
+                      <p class="result-row__error">
+                        {{ outcomeAmountError(result, $index) }}
+                      </p>
+                    }
+                  </div>
+                  @if ($index < results().length - 1) {
+                    <button
+                      type="button"
+                      class="remove-icon-btn"
+                      aria-label="Remove outcome"
+                      [eaTooltip]="'Remove outcome'"
+                      (click)="removeResult($index)">
+                      <ea-icon-trash />
+                    </button>
+                  } @else {
+                    <span></span>
                   }
                 </div>
               }
@@ -137,7 +241,10 @@
               variant="secondary"
               size="sm"
               (clicked)="addResult()">
-              Add result
+              <span class="btn-content">
+                <ea-icon-plus />
+                Add outcome
+              </span>
             </ea-button>
           }
         </div>
@@ -147,36 +254,42 @@
         @if (mode() === 'create') {
           <ea-button
             [fullWidth]="true"
-            [loading]="saving()"
+            [loading]="actionInFlight() === 'submit'"
+            [disabled]="isBusy() || !isFormValid()"
             (clicked)="onSubmitForReview()">
             Submit for review
           </ea-button>
         } @else if (isMyTurn()) {
-          <div class="action-row">
+          <div class="action-primary">
             <ea-button
-              [loading]="saving()"
-              (clicked)="onSubmitForReview()">
-              Submit for review
-            </ea-button>
-            <ea-button
-              variant="secondary"
-              [loading]="saving()"
+              [fullWidth]="true"
+              [loading]="actionInFlight() === 'accept'"
+              [disabled]="isBusy() || !isFormValid()"
               (clicked)="onAccept()">
               Accept
             </ea-button>
-          </div>
-          <div class="danger-actions">
             <ea-button
-              variant="danger"
+              variant="secondary"
+              [fullWidth]="true"
+              [loading]="actionInFlight() === 'submit'"
+              [disabled]="isBusy() || !isFormValid()"
+              (clicked)="onSubmitForReview()">
+              Send back with edits
+            </ea-button>
+          </div>
+          <div class="action-danger">
+            <ea-button
+              variant="ghost"
               size="sm"
-              [loading]="saving()"
+              [loading]="actionInFlight() === 'void'"
+              [disabled]="isBusy()"
               (clicked)="onProposeVoid()">
               Propose void
             </ea-button>
             <ea-button
               variant="danger"
               size="sm"
-              [loading]="saving()"
+              [disabled]="isBusy()"
               (clicked)="openDeleteDialog()">
               Delete bet
             </ea-button>
@@ -200,13 +313,13 @@
       class="dialog-actions">
       <ea-button
         variant="secondary"
-        [disabled]="saving()"
+        [disabled]="actionInFlight() === 'delete'"
         (clicked)="cancelDelete()">
         Cancel
       </ea-button>
       <ea-button
         variant="danger"
-        [loading]="saving()"
+        [loading]="actionInFlight() === 'delete'"
         (clicked)="confirmDelete()">
         Delete
       </ea-button>

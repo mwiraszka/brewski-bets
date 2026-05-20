@@ -1,51 +1,191 @@
 import {
+  AnchorIconComponent,
+  AwardIconComponent,
+  BatteryIconComponent,
+  BellIconComponent,
+  BookIconComponent,
+  BookmarkIconComponent,
+  BottleIconComponent,
+  BoxIconComponent,
+  BriefcaseIconComponent,
   ButtonComponent,
+  CalendarIconComponent,
+  CameraIconComponent,
+  CandleIconComponent,
   CardComponent,
+  ClipboardIconComponent,
+  ClockIconComponent,
+  CoffeeIconComponent,
+  CompassIconComponent,
+  CreditCardIconComponent,
   DialogComponent,
+  DiscIconComponent,
   DropdownComponent,
+  FilmIconComponent,
+  FlagIconComponent,
+  FolderIconComponent,
+  GiftIconComponent,
+  GlobeIconComponent,
+  HeadphonesIconComponent,
+  HeartIconComponent,
+  HomeIconComponent,
+  type IconComponentType,
+  InboxIconComponent,
   InputComponent,
+  KeyIconComponent,
+  LampIconComponent,
+  LockIconComponent,
+  MailIconComponent,
+  MapIconComponent,
+  MonitorIconComponent,
+  MoonIconComponent,
+  MusicIconComponent,
+  PackageIconComponent,
+  PaperclipIconComponent,
+  PenToolIconComponent,
+  PencilIconComponent,
+  PhoneIconComponent,
+  PlusIconComponent,
+  PrinterIconComponent,
   RadioComponent,
   RadioGroupComponent,
+  RadioIconComponent,
+  ScissorsIconComponent,
+  SearchIconComponent,
+  ServerIconComponent,
+  ShieldIconComponent,
+  ShoppingCartIconComponent,
+  SliderComponent,
+  SmartphoneIconComponent,
+  SoccerBallIconComponent,
+  StarIconComponent,
+  SunIconComponent,
+  TableIconComponent,
   TagComponent,
+  TagIconComponent,
+  TargetIconComponent,
   TextareaComponent,
+  ThermometerIconComponent,
   ToastService,
+  ToolIconComponent,
+  TooltipDirective,
+  TrashIconComponent,
+  TrophyIconComponent,
+  UmbrellaIconComponent,
 } from '@eagami/ui';
 
+import { NgComponentOutlet } from '@angular/common';
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 
 import { BetResult, BetWithOpponent } from '@app/models';
 import { BetsService } from '@app/services/bets.service';
 import { FriendsService } from '@app/services/friends.service';
 import { UserService } from '@app/services/user.service';
 
-const STOCK_IMAGES = [
-  { slug: 'beer-cheers', label: 'Beer Cheers' },
-  { slug: 'pub-night', label: 'Pub Night' },
-  { slug: 'beer-garden', label: 'Beer Garden' },
-  { slug: 'trophy', label: 'Trophy' },
-  { slug: 'dice', label: 'Dice' },
-  { slug: 'handshake', label: 'Handshake' },
-  { slug: 'sports', label: 'Sports' },
-  { slug: 'poker', label: 'Poker' },
-  { slug: 'darts', label: 'Darts' },
-  { slug: 'pint', label: 'Pint' },
+const STOCK_ICONS: IconComponentType[] = [
+  AnchorIconComponent,
+  AwardIconComponent,
+  BatteryIconComponent,
+  BellIconComponent,
+  BookIconComponent,
+  BookmarkIconComponent,
+  BottleIconComponent,
+  BoxIconComponent,
+  BriefcaseIconComponent,
+  CalendarIconComponent,
+  CameraIconComponent,
+  CandleIconComponent,
+  ClipboardIconComponent,
+  ClockIconComponent,
+  CoffeeIconComponent,
+  CompassIconComponent,
+  CreditCardIconComponent,
+  DiscIconComponent,
+  FilmIconComponent,
+  FlagIconComponent,
+  FolderIconComponent,
+  GiftIconComponent,
+  GlobeIconComponent,
+  HeadphonesIconComponent,
+  HeartIconComponent,
+  HomeIconComponent,
+  InboxIconComponent,
+  KeyIconComponent,
+  LampIconComponent,
+  LockIconComponent,
+  MailIconComponent,
+  MapIconComponent,
+  MonitorIconComponent,
+  MoonIconComponent,
+  MusicIconComponent,
+  PackageIconComponent,
+  PaperclipIconComponent,
+  PenToolIconComponent,
+  PencilIconComponent,
+  PhoneIconComponent,
+  PrinterIconComponent,
+  RadioIconComponent,
+  ScissorsIconComponent,
+  ServerIconComponent,
+  ShieldIconComponent,
+  ShoppingCartIconComponent,
+  SmartphoneIconComponent,
+  SoccerBallIconComponent,
+  StarIconComponent,
+  SunIconComponent,
+  TableIconComponent,
+  TagIconComponent,
+  TargetIconComponent,
+  ThermometerIconComponent,
+  ToolIconComponent,
+  TrashIconComponent,
+  TrophyIconComponent,
+  UmbrellaIconComponent,
 ];
+
+const ICON_COLORS = [
+  '#e53935',
+  '#ff7043',
+  '#fb8c00',
+  '#cba855',
+  '#43a047',
+  '#00897b',
+  '#29b6f6',
+  '#1e88e5',
+  '#5e35b1',
+  '#e91e63',
+  '#8d6e63',
+  '#607d8b',
+];
+
+const DEFAULT_ICON_COLOR = '#cba855';
+const MAX_BREWSKI_COUNT = 6;
+const NOTCH_VALUES: ReadonlyArray<number> = [6, 5, 4, 3, 2, 1, 0, 1, 2, 3, 4, 5, 6];
+
+type ActionInFlight = 'submit' | 'accept' | 'void' | 'delete' | null;
 
 @Component({
   selector: 'bb-bet-form-page',
   templateUrl: './bet-form-page.component.html',
   styleUrl: './bet-form-page.component.scss',
   imports: [
+    NgComponentOutlet,
     ButtonComponent,
     CardComponent,
     DialogComponent,
     DropdownComponent,
     InputComponent,
+    PlusIconComponent,
     RadioComponent,
     RadioGroupComponent,
+    RouterLink,
+    SearchIconComponent,
+    SliderComponent,
     TagComponent,
     TextareaComponent,
+    TooltipDirective,
+    TrashIconComponent,
   ],
 })
 export class BetFormPageComponent implements OnInit {
@@ -56,25 +196,56 @@ export class BetFormPageComponent implements OnInit {
   private readonly userService = inject(UserService);
   private readonly toast = inject(ToastService);
 
-  readonly stockImages = STOCK_IMAGES;
+  readonly stockIcons = STOCK_ICONS;
+  readonly iconColors = ICON_COLORS;
+  readonly maxBrewskiCount = MAX_BREWSKI_COUNT;
+  readonly sliderTicks = NOTCH_VALUES;
+
   readonly mode = signal<'create' | 'edit'>('create');
   readonly loading = signal(true);
-  readonly saving = signal(false);
+  readonly actionInFlight = signal<ActionInFlight>(null);
   readonly deleteDialogOpen = signal(false);
 
   readonly title = signal('');
   readonly description = signal('');
-  readonly imageSlug = signal<string | null>(null);
+  readonly iconSlug = signal<string | null>(null);
+  readonly iconColor = signal<string>(DEFAULT_ICON_COLOR);
+  readonly iconFilter = signal('');
   readonly selectedFriendId = signal('');
   readonly results = signal<BetResult[]>([
-    { name: '', brewskiCount: 1, assignedTo: 'user1' },
-    { name: '', brewskiCount: 1, assignedTo: 'user2' },
+    { name: '', brewskiCount: 0, assignedTo: null },
   ]);
   readonly selectedResultIndex = signal('');
 
-  readonly titleError = signal('');
-  readonly descriptionError = signal('');
-  readonly friendError = signal('');
+  readonly titleTouched = signal(false);
+  readonly descriptionTouched = signal(false);
+  readonly friendTouched = signal(false);
+  readonly outcomeNameTouched = signal<Set<number>>(new Set());
+  readonly outcomeAmountTouched = signal<Set<number>>(new Set());
+  readonly submitAttempted = signal(false);
+
+  readonly titleError = computed(() => {
+    const empty = !this.title().trim();
+    if (!empty) return '';
+    if (this.titleTouched() || this.submitAttempted()) return 'Title is required';
+    return '';
+  });
+
+  readonly descriptionError = computed(() => {
+    const empty = !this.description().trim();
+    if (!empty) return '';
+    if (this.descriptionTouched() || this.submitAttempted())
+      return 'Description is required';
+    return '';
+  });
+
+  readonly friendError = computed(() => {
+    if (this.mode() !== 'create') return '';
+    if (this.selectedFriendId()) return '';
+    if (this.friendTouched() || this.submitAttempted())
+      return 'Select a friend to bet against';
+    return '';
+  });
 
   private bet: BetWithOpponent | null = null;
 
@@ -87,6 +258,21 @@ export class BetFormPageComponent implements OnInit {
   );
 
   readonly currentUserId = computed(() => this.userService.user()?.id);
+
+  readonly isBusy = computed(() => this.actionInFlight() !== null);
+
+  readonly filteredIcons = computed(() => {
+    const filter = this.iconFilter().trim().toLowerCase();
+    if (!filter) return this.stockIcons;
+    const tokens = filter.split(/\s+/).filter(Boolean);
+    return this.stockIcons.filter(icon =>
+      tokens.every(token => icon.tags.some(tag => tag.toLowerCase().includes(token))),
+    );
+  });
+
+  readonly selectedIcon = computed(() =>
+    this.stockIcons.find(icon => icon.slug === this.iconSlug()),
+  );
 
   readonly myPosition = computed((): 'user1' | 'user2' | null => {
     if (!this.bet) return null;
@@ -105,36 +291,40 @@ export class BetFormPageComponent implements OnInit {
     return '';
   });
 
-  readonly user1Label = computed(() => {
-    if (!this.bet) {
-      return 'You';
-    }
-    if (this.myPosition() === 'user1') {
-      return 'You';
-    }
-    return this.opponentName();
+  readonly youLabel = computed(() => {
+    if (!this.bet) return 'You';
+    return this.myPosition() === 'user1' ? 'You' : this.opponentName();
   });
 
-  readonly user2Label = computed(() => {
+  readonly themLabel = computed(() => {
     if (!this.bet) {
       const friend = this.friends().find(f => f.id === this.selectedFriendId());
-      return friend ? `${friend.firstName} ${friend.lastName}` : 'Opponent';
+      return friend ? `${friend.firstName} ${friend.lastName}` : 'Them';
     }
-    if (this.myPosition() === 'user2') {
-      return 'You';
-    }
-    return this.opponentName();
+    return this.myPosition() === 'user2' ? 'You' : this.opponentName();
   });
-
-  readonly assignedToOptions = computed(() => [
-    { value: 'user1', label: this.user1Label() },
-    { value: 'user2', label: this.user2Label() },
-  ]);
 
   readonly specialResults = computed(() => {
     if (!this.bet) return [];
     return this.bet.results.filter(r => r.isSpecial);
   });
+
+  readonly isFormValid = computed(() => {
+    if (!this.title().trim()) return false;
+    if (!this.description().trim()) return false;
+    if (this.mode() === 'create' && !this.selectedFriendId()) return false;
+    if (!this.results().length) return false;
+    if (this.results().some(r => !r.name.trim())) return false;
+    if (this.results().some(r => r.brewskiCount <= 0)) return false;
+    return true;
+  });
+
+  readonly absFormat = (value: number): string => `${Math.abs(value)}`;
+
+  signedBrewskiCount(result: BetResult): number {
+    const me = this.bet ? this.myPosition() : 'user1';
+    return result.assignedTo === me ? -result.brewskiCount : result.brewskiCount;
+  }
 
   async ngOnInit(): Promise<void> {
     const id = this.route.snapshot.paramMap.get('id');
@@ -145,7 +335,8 @@ export class BetFormPageComponent implements OnInit {
         this.bet = await this.betsService.getBet(id);
         this.title.set(this.bet.title);
         this.description.set(this.bet.description);
-        this.imageSlug.set(this.bet.imageSlug);
+        this.iconSlug.set(this.bet.iconSlug);
+        this.iconColor.set(this.bet.iconColor ?? DEFAULT_ICON_COLOR);
         this.results.set(this.bet.results.filter(r => !r.isSpecial));
         this.selectedResultIndex.set(
           this.bet.selectedResultIndex != null
@@ -163,18 +354,37 @@ export class BetFormPageComponent implements OnInit {
     this.loading.set(false);
   }
 
-  selectImage(slug: string): void {
-    this.imageSlug.set(this.imageSlug() === slug ? null : slug);
+  selectIcon(slug: string): void {
+    this.iconSlug.set(this.iconSlug() === slug ? null : slug);
+  }
+
+  selectColor(color: string): void {
+    this.iconColor.set(color);
   }
 
   addResult(): void {
     if (this.results().length >= 20) return;
-    this.results.update(r => [...r, { name: '', brewskiCount: 1, assignedTo: null }]);
+    this.results.update(r => [...r, { name: '', brewskiCount: 1, assignedTo: 'user2' }]);
   }
 
   removeResult(index: number): void {
-    if (this.results().length <= 1) return;
     this.results.update(r => r.filter((_, i) => i !== index));
+    this.outcomeNameTouched.update(s => {
+      const next = new Set<number>();
+      for (const i of s) {
+        if (i < index) next.add(i);
+        else if (i > index) next.add(i - 1);
+      }
+      return next;
+    });
+    this.outcomeAmountTouched.update(s => {
+      const next = new Set<number>();
+      for (const i of s) {
+        if (i < index) next.add(i);
+        else if (i > index) next.add(i - 1);
+      }
+      return next;
+    });
   }
 
   updateResultName(index: number, name: string): void {
@@ -183,61 +393,60 @@ export class BetFormPageComponent implements OnInit {
     );
   }
 
-  updateResultBrewskiCount(index: number, value: string): void {
-    const brewskiCount = Math.max(0, parseInt(value, 10) || 0);
+  updateResultSigned(index: number, signedValue: number): void {
+    const me = this.bet ? this.myPosition() : 'user1';
+    const other: 'user1' | 'user2' = me === 'user1' ? 'user2' : 'user1';
+    const brewskiCount = Math.abs(signedValue);
+    const assignedTo: 'user1' | 'user2' = signedValue < 0 ? (me ?? 'user1') : other;
     this.results.update(r =>
-      r.map((item, i) => (i === index ? { ...item, brewskiCount } : item)),
+      r.map((item, i) => (i === index ? { ...item, brewskiCount, assignedTo } : item)),
     );
+    this.outcomeAmountTouched.update(s => new Set(s).add(index));
   }
 
-  updateResultAssignedTo(index: number, value: string): void {
-    const assignedTo = value === 'user1' || value === 'user2' ? value : null;
-    this.results.update(r =>
-      r.map((item, i) => (i === index ? { ...item, assignedTo } : item)),
-    );
+  markOutcomeNameTouched(index: number): void {
+    this.outcomeNameTouched.update(s => new Set(s).add(index));
+  }
+
+  outcomeNameError(index: number, name: string): string {
+    const empty = !name.trim();
+    if (!empty) return '';
+    if (this.outcomeNameTouched().has(index) || this.submitAttempted())
+      return 'Name is required';
+    return '';
+  }
+
+  outcomeAmountError(result: BetResult, index: number): string {
+    if (result.brewskiCount > 0) return '';
+    if (this.outcomeAmountTouched().has(index) || this.submitAttempted())
+      return 'At least one brewski must be bet';
+    return '';
   }
 
   private validate(): boolean {
-    this.titleError.set('');
-    this.descriptionError.set('');
-    this.friendError.set('');
+    this.submitAttempted.set(true);
 
-    let valid = true;
+    if (!this.title().trim()) return false;
+    if (!this.description().trim()) return false;
+    if (this.mode() === 'create' && !this.selectedFriendId()) return false;
+    if (!this.results().length) return false;
+    if (this.results().some(r => !r.name.trim())) return false;
+    if (this.results().some(r => r.brewskiCount <= 0)) return false;
 
-    if (!this.title().trim()) {
-      this.titleError.set('Title is required');
-      valid = false;
-    }
-
-    if (!this.description().trim()) {
-      this.descriptionError.set('Description is required');
-      valid = false;
-    }
-
-    if (this.mode() === 'create' && !this.selectedFriendId()) {
-      this.friendError.set('Select a friend to bet against');
-      valid = false;
-    }
-
-    const hasEmptyResult = this.results().some(r => !r.name.trim());
-    if (hasEmptyResult) {
-      this.toast.error('All results must have a name');
-      valid = false;
-    }
-
-    return valid;
+    return true;
   }
 
   async onSubmitForReview(): Promise<void> {
     if (!this.validate()) return;
-    this.saving.set(true);
+    this.actionInFlight.set('submit');
 
     try {
       if (this.mode() === 'create') {
         await this.betsService.createBet({
           title: this.title(),
           description: this.description(),
-          imageSlug: this.imageSlug(),
+          iconSlug: this.iconSlug(),
+          iconColor: this.iconSlug() ? this.iconColor() : null,
           user2Id: this.selectedFriendId(),
           results: this.results().map(r => ({
             name: r.name,
@@ -250,7 +459,8 @@ export class BetFormPageComponent implements OnInit {
         await this.betsService.updateBet(this.bet.id, {
           title: this.title(),
           description: this.description(),
-          imageSlug: this.imageSlug(),
+          iconSlug: this.iconSlug(),
+          iconColor: this.iconSlug() ? this.iconColor() : null,
           results: this.results().map(r => ({
             name: r.name,
             brewskiCount: r.brewskiCount,
@@ -267,13 +477,13 @@ export class BetFormPageComponent implements OnInit {
     } catch {
       this.toast.error('Failed to submit bet');
     } finally {
-      this.saving.set(false);
+      this.actionInFlight.set(null);
     }
   }
 
   async onAccept(): Promise<void> {
     if (!this.bet) return;
-    this.saving.set(true);
+    this.actionInFlight.set('accept');
 
     try {
       await this.betsService.updateBet(this.bet.id, {
@@ -287,7 +497,7 @@ export class BetFormPageComponent implements OnInit {
     } catch {
       this.toast.error('Failed to accept bet');
     } finally {
-      this.saving.set(false);
+      this.actionInFlight.set(null);
     }
   }
 
@@ -301,7 +511,7 @@ export class BetFormPageComponent implements OnInit {
 
   async confirmDelete(): Promise<void> {
     if (!this.bet) return;
-    this.saving.set(true);
+    this.actionInFlight.set('delete');
 
     try {
       await this.betsService.deleteBet(this.bet.id);
@@ -311,7 +521,7 @@ export class BetFormPageComponent implements OnInit {
     } catch {
       this.toast.error('Failed to delete bet');
     } finally {
-      this.saving.set(false);
+      this.actionInFlight.set(null);
     }
   }
 
@@ -321,7 +531,7 @@ export class BetFormPageComponent implements OnInit {
     const voidIndex = this.bet.results.findIndex(r => r.isSpecial === 'void');
     if (voidIndex === -1) return;
 
-    this.saving.set(true);
+    this.actionInFlight.set('void');
     try {
       await this.betsService.updateBet(this.bet.id, {
         selectedResultIndex: voidIndex,
@@ -332,7 +542,7 @@ export class BetFormPageComponent implements OnInit {
     } catch {
       this.toast.error('Failed to propose void');
     } finally {
-      this.saving.set(false);
+      this.actionInFlight.set(null);
     }
   }
 }

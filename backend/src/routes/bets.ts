@@ -15,7 +15,8 @@ const betResultSchema = z.object({
 const createBetSchema = z.object({
   title: z.string().min(1),
   description: z.string().min(1),
-  imageSlug: z.string().nullable().optional(),
+  iconSlug: z.string().nullable().optional(),
+  iconColor: z.string().nullable().optional(),
   user2Id: z.string().uuid(),
   results: z.array(betResultSchema).min(1).max(20),
 });
@@ -23,7 +24,8 @@ const createBetSchema = z.object({
 const updateBetSchema = z.object({
   title: z.string().min(1).optional(),
   description: z.string().min(1).optional(),
-  imageSlug: z.string().nullable().optional(),
+  iconSlug: z.string().nullable().optional(),
+  iconColor: z.string().nullable().optional(),
   results: z.array(betResultSchema).min(1).max(20).optional(),
   selectedResultIndex: z.number().int().min(0).optional(),
   action: z.enum(['submit', 'accept']),
@@ -87,7 +89,8 @@ export const betRoutes = new Hono<AppContext>()
       .values({
         title: body.title,
         description: body.description,
-        imageSlug: body.imageSlug ?? null,
+        iconSlug: body.iconSlug ?? null,
+        iconColor: body.iconColor ?? null,
         user1Id: userId,
         user2Id: body.user2Id,
         results: resultsWithSpecial,
@@ -228,7 +231,8 @@ export const betRoutes = new Hono<AppContext>()
 
     if (body.title !== undefined) updates.title = body.title;
     if (body.description !== undefined) updates.description = body.description;
-    if (body.imageSlug !== undefined) updates.imageSlug = body.imageSlug;
+    if (body.iconSlug !== undefined) updates.iconSlug = body.iconSlug;
+    if (body.iconColor !== undefined) updates.iconColor = body.iconColor;
 
     if (body.results !== undefined) {
       updates.results = appendSpecialResults(body.results);
