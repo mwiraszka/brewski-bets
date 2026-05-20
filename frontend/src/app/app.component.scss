@@ -14,10 +14,15 @@
     overscroll-behavior: none;
 
     &::ng-deep > *:not(router-outlet):not(bb-footer) {
+      flex: 1 0 auto;
       display: flex;
       flex-direction: column;
       width: 100%;
-      min-height: calc(100vh - var(--bb-height-header));
+      min-width: 0;
+    }
+
+    &::ng-deep > bb-footer {
+      flex-shrink: 0;
     }
   }
 }
