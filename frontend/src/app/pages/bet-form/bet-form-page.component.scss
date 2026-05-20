@@ -136,10 +136,18 @@ fieldset[disabled] {
   gap: 6px;
 }
 
+.find-friend-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.find-friend-row .field-label {
+  margin-bottom: 0;
+}
+
 .find-friend-link {
-  display: inline-block;
-  margin-top: 8px;
-  font-size: 13px;
+  font-size: 16px;
   text-decoration: underline;
   color: var(--bb-color-primaryLink);
 }
@@ -193,6 +201,12 @@ fieldset[disabled] {
   margin-top: 16px;
 }
 
+.icon-confirm ea-button,
+.form-field > ea-button,
+.submit-for-review {
+  --ea-button-font-size: 16px;
+}
+
 .icon-preview {
   display: flex;
   align-items: center;
@@ -239,14 +253,14 @@ fieldset[disabled] {
   color: var(--bb-color-textDanger);
 }
 
-.results-list {
+.outcomes-list {
   display: flex;
   flex-direction: column;
   gap: 12px;
   margin-bottom: 12px;
 }
 
-.results-list__header {
+.outcomes-list__header {
   display: grid;
   grid-template-columns: 1fr 360px 40px;
   gap: 12px;
@@ -258,54 +272,54 @@ fieldset[disabled] {
   color: var(--bb-color-textSecondary);
 }
 
-.results-list__header--editable {
+.outcomes-list__header--editable {
   grid-template-columns: 28px 1fr 360px 40px;
 }
 
-.results-list__col--name {
+.outcomes-list__col--description {
   text-align: left;
 }
 
-.results-list__col--beers {
+.outcomes-list__col--brewskis {
   text-align: left;
 }
 
-.result-row {
+.outcome-row {
   display: grid;
   grid-template-columns: 1fr 360px 40px;
   align-items: start;
   gap: 12px;
 }
 
-.result-row--editable {
+.outcome-row--editable {
   grid-template-columns: 28px 1fr 360px 40px;
 }
 
-.result-row__radio {
+.outcome-row__radio {
   display: flex;
   justify-content: center;
   padding-top: 8px;
 }
 
-.result-row__name {
+.outcome-row__description {
   min-width: 0;
 }
 
-.result-row__beers {
+.outcome-row__brewskis {
   display: flex;
   flex-direction: column;
   gap: 4px;
   min-width: 0;
 }
 
-.result-row__slider-row {
+.outcome-row__slider-row {
   display: flex;
   align-items: center;
   gap: 16px;
   padding-top: 8px;
 }
 
-.result-row__slider {
+.outcome-row__slider {
   flex: 1;
   min-width: 0;
   display: flex;
@@ -313,7 +327,7 @@ fieldset[disabled] {
   gap: 6px;
 }
 
-.result-row__slider ea-slider {
+.outcome-row__slider ea-slider {
   display: block;
   width: 100%;
 }
@@ -334,7 +348,7 @@ fieldset[disabled] {
   font-variant-numeric: tabular-nums;
 }
 
-.result-row__user {
+.outcome-row__user {
   flex-shrink: 0;
   font-size: 13px;
   font-weight: 600;
@@ -343,7 +357,7 @@ fieldset[disabled] {
   color: var(--bb-color-textBody);
 }
 
-.result-row__error {
+.outcome-row__error {
   margin: 0;
   font-size: 13px;
   color: var(--bb-color-textDanger);
@@ -371,7 +385,7 @@ fieldset[disabled] {
   background-color: var(--bb-color-surfaceHover);
 }
 
-.result-row--special {
+.outcome-row--special {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -382,11 +396,11 @@ fieldset[disabled] {
 }
 
 @include respond-to('lt-md') {
-  .results-list__header {
+  .outcomes-list__header {
     display: none;
   }
 
-  .result-row {
+  .outcome-row {
     grid-template-columns: 1fr 40px;
     grid-template-areas:
       'name remove'
@@ -398,28 +412,28 @@ fieldset[disabled] {
     border-radius: 8px;
   }
 
-  .result-row--editable {
+  .outcome-row--editable {
     grid-template-columns: 28px 1fr 40px;
     grid-template-areas:
       'radio name remove'
       'radio beers remove';
   }
 
-  .result-row__radio {
+  .outcome-row__radio {
     grid-area: radio;
     padding-top: 12px;
   }
 
-  .result-row__name {
+  .outcome-row__description {
     grid-area: name;
   }
 
-  .result-row__beers {
+  .outcome-row__brewskis {
     grid-area: beers;
   }
 
-  .result-row > .remove-icon-btn,
-  .result-row > span:last-child {
+  .outcome-row > .remove-icon-btn,
+  .outcome-row > span:last-child {
     grid-area: remove;
     align-self: center;
   }

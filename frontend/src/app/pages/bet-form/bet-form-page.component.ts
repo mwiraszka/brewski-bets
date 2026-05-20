@@ -13,6 +13,7 @@ import {
   CameraIconComponent,
   CandleIconComponent,
   CardComponent,
+  CheckIconComponent,
   ClipboardIconComponent,
   ClockIconComponent,
   CoffeeIconComponent,
@@ -158,7 +159,7 @@ const ICON_COLORS = [
 
 const DEFAULT_ICON_COLOR = '#cba855';
 const MAX_BREWSKI_COUNT = 6;
-const MAX_RESULTS = 5;
+const MAX_OUTCOMES = 5;
 const TITLE_MAX_LENGTH = 60;
 const DESCRIPTION_MAX_LENGTH = 500;
 const OUTCOME_MAX_LENGTH = 60;
@@ -174,6 +175,7 @@ type ActionInFlight = 'submit' | 'accept' | 'void' | 'delete' | null;
     NgComponentOutlet,
     ButtonComponent,
     CardComponent,
+    CheckIconComponent,
     DialogComponent,
     DropdownComponent,
     EditIconComponent,
@@ -201,7 +203,7 @@ export class BetFormPageComponent implements OnInit {
   readonly stockIcons = STOCK_ICONS;
   readonly iconColors = ICON_COLORS;
   readonly maxBrewskiCount = MAX_BREWSKI_COUNT;
-  readonly maxResults = MAX_RESULTS;
+  readonly maxOutcomes = MAX_OUTCOMES;
   readonly titleMaxLength = TITLE_MAX_LENGTH;
   readonly descriptionMaxLength = DESCRIPTION_MAX_LENGTH;
   readonly outcomeMaxLength = OUTCOME_MAX_LENGTH;
@@ -219,10 +221,10 @@ export class BetFormPageComponent implements OnInit {
   readonly iconFilter = signal('');
   readonly iconEditing = signal(true);
   readonly selectedFriendId = signal('');
-  readonly results = signal<BetResult[]>([
+  readonly outcomes = signal<BetResult[]>([
     { name: '', brewskiCount: 0, assignedTo: null },
   ]);
-  readonly selectedResultIndex = signal('');
+  readonly selectedOutcomeIndex = signal('');
 
   readonly titleTouched = signal(false);
   readonly descriptionTouched = signal(false);
@@ -318,9 +320,9 @@ export class BetFormPageComponent implements OnInit {
     return this.myPosition() === 'user2' ? 'You' : this.opponentName();
   });
 
-  readonly specialResults = computed(() => {
+  readonly specialOutcomes = computed(() => {
     if (!this.bet) return [];
-    return this.bet.results.filter(r => r.isSpecial);
+    return this.bet.results.filter(outcome => outcome.isSpecial);
   });
 
   readonly isFormValid = computed(() => {
@@ -328,17 +330,17 @@ export class BetFormPageComponent implements OnInit {
     if (!this.description().trim()) return false;
     if (this.mode() === 'create' && !this.selectedFriendId()) return false;
     if (!this.iconSlug()) return false;
-    if (!this.results().length) return false;
-    if (this.results().some(r => !r.name.trim())) return false;
-    if (this.results().some(r => r.brewskiCount <= 0)) return false;
+    if (!this.outcomes().length) return false;
+    if (this.outcomes().some(outcome => !outcome.name.trim())) return false;
+    if (this.outcomes().some(outcome => outcome.brewskiCount <= 0)) return false;
     return true;
   });
 
   readonly absFormat = (value: number): string => `${Math.abs(value)}`;
 
-  signedBrewskiCount(result: BetResult): number {
+  signedBrewskiCount(outcome: BetResult): number {
     const me = this.bet ? this.myPosition() : 'user1';
-    return result.assignedTo === me ? -result.brewskiCount : result.brewskiCount;
+    return outcome.assignedTo === me ? -outcome.brewskiCount : outcome.brewskiCount;
   }
 
   async ngOnInit(): Promise<void> {
@@ -353,8 +355,8 @@ export class BetFormPageComponent implements OnInit {
         this.iconSlug.set(this.bet.iconSlug);
         this.iconColor.set(this.bet.iconColor ?? DEFAULT_ICON_COLOR);
         this.iconEditing.set(!this.bet.iconSlug);
-        this.results.set(this.bet.results.filter(r => !r.isSpecial));
-        this.selectedResultIndex.set(
+        this.outcomes.set(this.bet.results.filter(outcome => !outcome.isSpecial));
+        this.selectedOutcomeIndex.set(
           this.bet.selectedResultIndex != null
             ? String(this.bet.selectedResultIndex)
             : '',
@@ -388,13 +390,16 @@ export class BetFormPageComponent implements OnInit {
     this.iconEditing.set(true);
   }
 
-  addResult(): void {
-    if (this.results().length >= MAX_RESULTS) return;
-    this.results.update(r => [...r, { name: '', brewskiCount: 1, assignedTo: 'user2' }]);
+  addOutcome(): void {
+    if (this.outcomes().length >= MAX_OUTCOMES) return;
+    this.outcomes.update(outcomes => [
+      ...outcomes,
+      { name: '', brewskiCount: 1, assignedTo: 'user2' },
+    ]);
   }
 
-  removeResult(index: number): void {
-    this.results.update(r => r.filter((_, i) => i !== index));
+  removeOutcome(index: number): void {
+    this.outcomes.update(outcomes => outcomes.filter((_, i) => i !== index));
     this.outcomeDescriptionTouched.update(s => {
       const next = new Set<number>();
       for (const i of s) {
@@ -413,10 +418,12 @@ export class BetFormPageComponent implements OnInit {
     });
   }
 
-  updateResultName(index: number, name: string): void {
-    const trimmed = name.slice(0, OUTCOME_MAX_LENGTH);
-    this.results.update(r =>
-      r.map((item, i) => (i === index ? { ...item, name: trimmed } : item)),
+  updateOutcomeDescription(index: number, description: string): void {
+    const trimmed = description.slice(0, OUTCOME_MAX_LENGTH);
+    this.outcomes.update(outcomes =>
+      outcomes.map((outcome, i) =>
+        i === index ? { ...outcome, name: trimmed } : outcome,
+      ),
     );
   }
 
@@ -424,13 +431,15 @@ export class BetFormPageComponent implements OnInit {
     this.title.set(value.slice(0, TITLE_MAX_LENGTH));
   }
 
-  updateResultSigned(index: number, signedValue: number): void {
+  updateOutcomeSigned(index: number, signedValue: number): void {
     const me = this.bet ? this.myPosition() : 'user1';
     const other: 'user1' | 'user2' = me === 'user1' ? 'user2' : 'user1';
     const brewskiCount = Math.abs(signedValue);
     const assignedTo: 'user1' | 'user2' = signedValue < 0 ? (me ?? 'user1') : other;
-    this.results.update(r =>
-      r.map((item, i) => (i === index ? { ...item, brewskiCount, assignedTo } : item)),
+    this.outcomes.update(outcomes =>
+      outcomes.map((outcome, i) =>
+        i === index ? { ...outcome, brewskiCount, assignedTo } : outcome,
+      ),
     );
     this.outcomeAmountTouched.update(s => new Set(s).add(index));
   }
@@ -439,16 +448,16 @@ export class BetFormPageComponent implements OnInit {
     this.outcomeDescriptionTouched.update(s => new Set(s).add(index));
   }
 
-  outcomeDescriptionError(index: number, name: string): string {
-    const empty = !name.trim();
+  outcomeDescriptionError(index: number, description: string): string {
+    const empty = !description.trim();
     if (!empty) return '';
     if (this.outcomeDescriptionTouched().has(index) || this.submitAttempted())
       return 'Outcome description is required';
     return '';
   }
 
-  outcomeAmountError(result: BetResult, index: number): string {
-    if (result.brewskiCount > 0) return '';
+  outcomeAmountError(outcome: BetResult, index: number): string {
+    if (outcome.brewskiCount > 0) return '';
     if (this.submitAttempted()) return 'At least one brewski must be bet';
     if (
       this.outcomeAmountTouched().has(index) &&
@@ -465,9 +474,9 @@ export class BetFormPageComponent implements OnInit {
     if (!this.description().trim()) return false;
     if (this.mode() === 'create' && !this.selectedFriendId()) return false;
     if (!this.iconSlug()) return false;
-    if (!this.results().length) return false;
-    if (this.results().some(r => !r.name.trim())) return false;
-    if (this.results().some(r => r.brewskiCount <= 0)) return false;
+    if (!this.outcomes().length) return false;
+    if (this.outcomes().some(outcome => !outcome.name.trim())) return false;
+    if (this.outcomes().some(outcome => outcome.brewskiCount <= 0)) return false;
 
     return true;
   }
@@ -484,10 +493,10 @@ export class BetFormPageComponent implements OnInit {
           iconSlug: this.iconSlug(),
           iconColor: this.iconSlug() ? this.iconColor() : null,
           user2Id: this.selectedFriendId(),
-          results: this.results().map(r => ({
-            name: r.name,
-            brewskiCount: r.brewskiCount,
-            assignedTo: r.assignedTo,
+          results: this.outcomes().map(outcome => ({
+            name: outcome.name,
+            brewskiCount: outcome.brewskiCount,
+            assignedTo: outcome.assignedTo,
           })),
         });
         this.toast.success('Bet submitted for review');
@@ -497,13 +506,13 @@ export class BetFormPageComponent implements OnInit {
           description: this.description(),
           iconSlug: this.iconSlug(),
           iconColor: this.iconSlug() ? this.iconColor() : null,
-          results: this.results().map(r => ({
-            name: r.name,
-            brewskiCount: r.brewskiCount,
-            assignedTo: r.assignedTo,
+          results: this.outcomes().map(outcome => ({
+            name: outcome.name,
+            brewskiCount: outcome.brewskiCount,
+            assignedTo: outcome.assignedTo,
           })),
-          selectedResultIndex: this.selectedResultIndex()
-            ? Number(this.selectedResultIndex())
+          selectedResultIndex: this.selectedOutcomeIndex()
+            ? Number(this.selectedOutcomeIndex())
             : undefined,
           action: 'submit',
         });
@@ -523,8 +532,8 @@ export class BetFormPageComponent implements OnInit {
 
     try {
       await this.betsService.updateBet(this.bet.id, {
-        selectedResultIndex: this.selectedResultIndex()
-          ? Number(this.selectedResultIndex())
+        selectedResultIndex: this.selectedOutcomeIndex()
+          ? Number(this.selectedOutcomeIndex())
           : undefined,
         action: 'accept',
       });
@@ -564,7 +573,7 @@ export class BetFormPageComponent implements OnInit {
   async onProposeVoid(): Promise<void> {
     if (!this.bet) return;
 
-    const voidIndex = this.bet.results.findIndex(r => r.isSpecial === 'void');
+    const voidIndex = this.bet.results.findIndex(outcome => outcome.isSpecial === 'void');
     if (voidIndex === -1) return;
 
     this.actionInFlight.set('void');
