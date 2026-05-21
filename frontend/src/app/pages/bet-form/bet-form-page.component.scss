@@ -35,6 +35,11 @@ ea-card {
   max-width: 100%;
 }
 
+:host ::ng-deep ea-textarea .ea-textarea {
+  min-height: 40px;
+  max-height: 200px;
+}
+
 fieldset {
   min-width: 0;
   padding: 0;
@@ -93,8 +98,8 @@ fieldset[disabled] {
 
 .icon-grid__empty {
   width: 100%;
+  padding: 0;
   margin: 0;
-  padding: 16px 0;
   font-size: 16px;
   text-align: center;
   font-style: italic;
@@ -234,6 +239,7 @@ fieldset[disabled] {
   width: 32px;
   height: 32px;
   padding: 0;
+  margin-left: auto;
   font-size: 18px;
   border: none;
   border-radius: 6px;
@@ -295,6 +301,10 @@ fieldset[disabled] {
   grid-template-columns: 28px 1fr 360px 40px;
 }
 
+.outcome-row__main {
+  display: contents;
+}
+
 .outcome-row__radio {
   display: flex;
   justify-content: center;
@@ -321,7 +331,7 @@ fieldset[disabled] {
 
 .outcome-row__slider {
   flex: 1;
-  min-width: 0;
+  min-width: 100px;
   display: flex;
   flex-direction: column;
   gap: 6px;
@@ -330,6 +340,14 @@ fieldset[disabled] {
 .outcome-row__slider ea-slider {
   display: block;
   width: 100%;
+}
+
+:host ::ng-deep ea-slider.has-error .ea-slider__fill {
+  background-color: var(--bb-color-textDanger);
+}
+
+:host ::ng-deep ea-slider.has-error .ea-slider__thumb {
+  border-color: var(--bb-color-textDanger);
 }
 
 .slider-ticks {
@@ -358,12 +376,22 @@ fieldset[disabled] {
 }
 
 .outcome-row__error {
+  display: flex;
+  align-items: center;
+  gap: 4px;
   margin: 0;
   font-size: 13px;
   color: var(--bb-color-textDanger);
 }
 
+.outcome-row__error-icon {
+  flex-shrink: 0;
+  width: 0.875em;
+  height: 0.875em;
+}
+
 .remove-icon-btn {
+  justify-self: end;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -401,10 +429,23 @@ fieldset[disabled] {
   }
 
   .outcome-row {
-    grid-template-columns: 1fr 40px;
+    display: flex;
+    align-items: stretch;
+    gap: 0;
+  }
+
+  .outcome-row--editable {
+    grid-template-columns: none;
+  }
+
+  .outcome-row__main {
+    flex: 1;
+    min-width: 0;
+    display: grid;
+    grid-template-columns: 1fr;
     grid-template-areas:
-      'name remove'
-      'beers remove';
+      'name'
+      'beers';
     align-items: start;
     gap: 8px;
     padding: 12px;
@@ -412,11 +453,11 @@ fieldset[disabled] {
     border-radius: 8px;
   }
 
-  .outcome-row--editable {
-    grid-template-columns: 28px 1fr 40px;
+  .outcome-row--editable .outcome-row__main {
+    grid-template-columns: 28px 1fr;
     grid-template-areas:
-      'radio name remove'
-      'radio beers remove';
+      'radio name'
+      'radio beers';
   }
 
   .outcome-row__radio {
@@ -432,9 +473,7 @@ fieldset[disabled] {
     grid-area: beers;
   }
 
-  .outcome-row > .remove-icon-btn,
-  .outcome-row > span:last-child {
-    grid-area: remove;
+  .outcome-row > .remove-icon-btn {
     align-self: center;
   }
 }

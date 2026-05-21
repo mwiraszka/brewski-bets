@@ -3,11 +3,15 @@ import {
   ButtonComponent,
   CardComponent,
   DialogComponent,
+  EmptyStateComponent,
+  InboxIconComponent,
   InputComponent,
+  SearchIconComponent,
   SkeletonComponent,
   TabComponent,
   TabsComponent,
   ToastService,
+  UsersIconComponent,
 } from '@eagami/ui';
 
 import { Component, OnInit, computed, effect, inject, signal } from '@angular/core';
@@ -35,10 +39,14 @@ function readStoredTab(): FriendsTab {
     ButtonComponent,
     CardComponent,
     DialogComponent,
+    EmptyStateComponent,
+    InboxIconComponent,
     InputComponent,
+    SearchIconComponent,
     SkeletonComponent,
     TabComponent,
     TabsComponent,
+    UsersIconComponent,
   ],
 })
 export class FriendsPageComponent implements OnInit {

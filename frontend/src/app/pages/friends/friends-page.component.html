@@ -28,7 +28,13 @@
             }
           </ul>
         } @else if (friends().length === 0) {
-          <p class="empty-state">No friends yet. Find someone to add!</p>
+          <ea-empty-state
+            size="sm"
+            headingLevel="h3"
+            title="No friends yet"
+            description="Find someone to add!">
+            <ea-icon-users slot="media" />
+          </ea-empty-state>
         } @else {
           <ul class="friend-list">
             @for (friend of friends(); track friend.id) {
@@ -153,7 +159,12 @@
           }
 
           @if (incomingRequests().length === 0 && sentRequests().length === 0) {
-            <p class="empty-state">No pending requests</p>
+            <ea-empty-state
+              size="sm"
+              headingLevel="h3"
+              title="No pending requests">
+              <ea-icon-inbox slot="media" />
+            </ea-empty-state>
           }
         }
       </ea-tab>
@@ -171,7 +182,13 @@
         @if (searching()) {
           <p class="empty-state">Searching...</p>
         } @else if (searchQuery().length >= 2 && searchResults().length === 0) {
-          <p class="empty-state">No users found</p>
+          <ea-empty-state
+            size="sm"
+            headingLevel="h3"
+            title="No users found"
+            description="Try a different name or email.">
+            <ea-icon-search slot="media" />
+          </ea-empty-state>
         } @else if (searchResults().length > 0) {
           <ul class="friend-list">
             @for (user of searchResults(); track user.id) {

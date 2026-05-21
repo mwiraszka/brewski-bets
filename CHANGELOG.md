@@ -5,6 +5,30 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.25.0] - 2026-05-21
+
+### Added
+
+- Adopt the shared `ea-empty-state` block for the bets list and the Friends, Requests, and Find tabs so empty screens share consistent typography, iconography, and call-to-action buttons across the app
+
+### Changed
+
+- Tighten the bet form character limits to 50 on the title, 300 on the description, 50 on each outcome, and 30 on the icon filter
+- Constrain the description field between a 40px minimum and 200px maximum height so the form stays compact while still matching a regular input as the floor
+- Enforce a 100px minimum width on each outcome's brewski slider so it stays usable as the card narrows
+- Hide the COLOUR section in the icon picker when no icons match the active filter
+- Drop the 0 tick under the brewski slider so only the 1-6 marks on either side remain
+- Turn the brewski slider bar and thumb red when the row has a validation error
+- Show the icon's title-case name in an `ea-tooltip` on hover instead of the raw slug in a native browser title
+- Pull the trash icon outside the bordered outcome card on narrow screens so it sits flush against the wrapped description and slider
+- Right-justify the icon preview's edit button and the outcome row trash buttons so they line up vertically at the form's right edge
+- Dim the empty-state title to secondary text, drop its bold weight, and lighten the description and icon further so they read as supporting content
+- Show an alert icon before every form error message (including the brewski slider) and align the message font size across input fields
+
+### Fixed
+
+- Remove extra vertical padding from the "No icons match that filter" message
+
 ## [0.24.0] - 2026-05-21
 
 ### Changed
@@ -456,6 +480,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - PWA manifest and service worker configuration
 - GitHub issue templates
 
+[0.25.0]: https://github.com/mwiraszka/brewski-bets/compare/v0.24.0...v0.25.0
 [0.24.0]: https://github.com/mwiraszka/brewski-bets/compare/v0.23.0...v0.24.0
 [0.23.0]: https://github.com/mwiraszka/brewski-bets/compare/v0.22.0...v0.23.0
 [0.22.0]: https://github.com/mwiraszka/brewski-bets/compare/v0.21.0...v0.22.0

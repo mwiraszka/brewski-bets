@@ -7,9 +7,12 @@ import {
   DataTableComponent,
   DataTableSortState,
   DropdownComponent,
+  EmptyStateComponent,
   InputComponent,
   SkeletonComponent,
+  TargetIconComponent,
   ToastService,
+  TrophyIconComponent,
 } from '@eagami/ui';
 
 import {
@@ -39,8 +42,11 @@ import { UserService } from '@app/services/user.service';
     CardComponent,
     DataTableComponent,
     DropdownComponent,
+    EmptyStateComponent,
     InputComponent,
     SkeletonComponent,
+    TargetIconComponent,
+    TrophyIconComponent,
   ],
 })
 export class BetsPageComponent implements OnInit {
@@ -78,16 +84,20 @@ export class BetsPageComponent implements OnInit {
     { label: 'Complete', value: 'complete' },
   ];
 
-  readonly emptyStateText = computed(() => {
+  readonly emptyState = computed(() => {
     switch (this.filterStatus()) {
       case 'pending':
-        return 'No pending bets.';
+        return { title: 'No pending bets', description: '', isInitial: false };
       case 'active':
-        return 'No active bets.';
+        return { title: 'No active bets', description: '', isInitial: false };
       case 'complete':
-        return 'No completed bets.';
+        return { title: 'No completed bets', description: '', isInitial: false };
       default:
-        return 'No bets yet. Create your first bet!';
+        return {
+          title: 'No bets yet',
+          description: 'Kick things off with your first wager.',
+          isInitial: true,
+        };
     }
   });
 

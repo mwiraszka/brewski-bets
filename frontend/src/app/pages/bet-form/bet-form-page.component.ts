@@ -1,4 +1,5 @@
 import {
+  AlertCircleIconComponent,
   AnchorIconComponent,
   AwardIconComponent,
   BatteryIconComponent,
@@ -77,7 +78,17 @@ import {
 } from '@eagami/ui';
 
 import { NgComponentOutlet } from '@angular/common';
-import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import {
+  Component,
+  ElementRef,
+  OnInit,
+  QueryList,
+  ViewChild,
+  ViewChildren,
+  computed,
+  inject,
+  signal,
+} from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 
 import { BetResult, BetWithOpponent } from '@app/models';
@@ -160,9 +171,10 @@ const ICON_COLORS = [
 const DEFAULT_ICON_COLOR = '#cba855';
 const MAX_BREWSKI_COUNT = 6;
 const MAX_OUTCOMES = 5;
-const TITLE_MAX_LENGTH = 60;
-const DESCRIPTION_MAX_LENGTH = 500;
-const OUTCOME_MAX_LENGTH = 60;
+const TITLE_MAX_LENGTH = 50;
+const DESCRIPTION_MAX_LENGTH = 300;
+const OUTCOME_MAX_LENGTH = 50;
+const ICON_FILTER_MAX_LENGTH = 30;
 const NOTCH_VALUES: ReadonlyArray<number> = [6, 5, 4, 3, 2, 1, 0, 1, 2, 3, 4, 5, 6];
 
 type ActionInFlight = 'submit' | 'accept' | 'void' | 'delete' | null;
@@ -173,6 +185,7 @@ type ActionInFlight = 'submit' | 'accept' | 'void' | 'delete' | null;
   styleUrl: './bet-form-page.component.scss',
   imports: [
     NgComponentOutlet,
+    AlertCircleIconComponent,
     ButtonComponent,
     CardComponent,
     CheckIconComponent,
@@ -199,6 +212,13 @@ export class BetFormPageComponent implements OnInit {
   private readonly friendsService = inject(FriendsService);
   private readonly userService = inject(UserService);
   private readonly toast = inject(ToastService);
+
+  @ViewChild('titleInputRef', { read: ElementRef })
+  private titleInputRef?: ElementRef<HTMLElement>;
+  @ViewChild('iconFilterInputRef', { read: ElementRef })
+  private iconFilterInputRef?: ElementRef<HTMLElement>;
+  @ViewChildren('outcomeInputRef', { read: ElementRef })
+  private outcomeInputRefs?: QueryList<ElementRef<HTMLElement>>;
 
   readonly stockIcons = STOCK_ICONS;
   readonly iconColors = ICON_COLORS;
@@ -338,6 +358,13 @@ export class BetFormPageComponent implements OnInit {
 
   readonly absFormat = (value: number): string => `${Math.abs(value)}`;
 
+  iconName(slug: string): string {
+    return slug
+      .split('-')
+      .map(part => part.charAt(0).toUpperCase() + part.slice(1))
+      .join(' ');
+  }
+
   signedBrewskiCount(outcome: BetResult): number {
     const me = this.bet ? this.myPosition() : 'user1';
     return outcome.assignedTo === me ? -outcome.brewskiCount : outcome.brewskiCount;
@@ -425,10 +452,35 @@ export class BetFormPageComponent implements OnInit {
         i === index ? { ...outcome, name: trimmed } : outcome,
       ),
     );
+    if (description !== trimmed) {
+      this.syncNativeInput(this.outcomeInputRefs?.toArray()[index], trimmed);
+    }
   }
 
   setTitle(value: string): void {
-    this.title.set(value.slice(0, TITLE_MAX_LENGTH));
+    const trimmed = value.slice(0, TITLE_MAX_LENGTH);
+    this.title.set(trimmed);
+    if (value !== trimmed) {
+      this.syncNativeInput(this.titleInputRef, trimmed);
+    }
+  }
+
+  setIconFilter(value: string): void {
+    const trimmed = value.slice(0, ICON_FILTER_MAX_LENGTH);
+    this.iconFilter.set(trimmed);
+    if (value !== trimmed) {
+      this.syncNativeInput(this.iconFilterInputRef, trimmed);
+    }
+  }
+
+  private syncNativeInput(
+    host: ElementRef<HTMLElement> | undefined,
+    value: string,
+  ): void {
+    const input = host?.nativeElement.querySelector('input');
+    if (input && input.value !== value) {
+      input.value = value;
+    }
   }
 
   updateOutcomeSigned(index: number, signedValue: number): void {
