@@ -62,9 +62,10 @@
           <label class="field-label field-label--required">Icon</label>
           @if (iconEditing()) {
             <ea-input
+              #iconFilterInputRef
               placeholder="Filter icons"
               [value]="iconFilter()"
-              (valueChange)="iconFilter.set($event)">
+              (valueChange)="setIconFilter($event)">
               <ea-icon-search slot="prefix" />
             </ea-input>
             <div class="icon-grid">

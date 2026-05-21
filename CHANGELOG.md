@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Tighten the bet form character limits to 50 on the title, 300 on the description, and 50 on each outcome
+- Tighten the bet form character limits to 50 on the title, 300 on the description, 50 on each outcome, and 30 on the icon filter
 - Constrain the description field between a 40px minimum and 200px maximum height so the form stays compact while still matching a regular input as the floor
 - Enforce a 100px minimum width on each outcome's brewski slider so it stays usable as the card narrows
 - Hide the COLOUR section in the icon picker when no icons match the active filter

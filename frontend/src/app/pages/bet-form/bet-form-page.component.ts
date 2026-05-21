@@ -173,6 +173,7 @@ const MAX_OUTCOMES = 5;
 const TITLE_MAX_LENGTH = 50;
 const DESCRIPTION_MAX_LENGTH = 300;
 const OUTCOME_MAX_LENGTH = 50;
+const ICON_FILTER_MAX_LENGTH = 30;
 const NOTCH_VALUES: ReadonlyArray<number> = [6, 5, 4, 3, 2, 1, 0, 1, 2, 3, 4, 5, 6];
 
 type ActionInFlight = 'submit' | 'accept' | 'void' | 'delete' | null;
@@ -212,6 +213,8 @@ export class BetFormPageComponent implements OnInit {
 
   @ViewChild('titleInputRef', { read: ElementRef })
   private titleInputRef?: ElementRef<HTMLElement>;
+  @ViewChild('iconFilterInputRef', { read: ElementRef })
+  private iconFilterInputRef?: ElementRef<HTMLElement>;
   @ViewChildren('outcomeInputRef', { read: ElementRef })
   private outcomeInputRefs?: QueryList<ElementRef<HTMLElement>>;
 
@@ -457,6 +460,14 @@ export class BetFormPageComponent implements OnInit {
     this.title.set(trimmed);
     if (value !== trimmed) {
       this.syncNativeInput(this.titleInputRef, trimmed);
+    }
+  }
+
+  setIconFilter(value: string): void {
+    const trimmed = value.slice(0, ICON_FILTER_MAX_LENGTH);
+    this.iconFilter.set(trimmed);
+    if (value !== trimmed) {
+      this.syncNativeInput(this.iconFilterInputRef, trimmed);
     }
   }
 
