@@ -160,9 +160,9 @@ const ICON_COLORS = [
 const DEFAULT_ICON_COLOR = '#cba855';
 const MAX_BREWSKI_COUNT = 6;
 const MAX_OUTCOMES = 5;
-const TITLE_MAX_LENGTH = 60;
-const DESCRIPTION_MAX_LENGTH = 500;
-const OUTCOME_MAX_LENGTH = 60;
+const TITLE_MAX_LENGTH = 50;
+const DESCRIPTION_MAX_LENGTH = 300;
+const OUTCOME_MAX_LENGTH = 50;
 const NOTCH_VALUES: ReadonlyArray<number> = [6, 5, 4, 3, 2, 1, 0, 1, 2, 3, 4, 5, 6];
 
 type ActionInFlight = 'submit' | 'accept' | 'void' | 'delete' | null;
@@ -337,6 +337,13 @@ export class BetFormPageComponent implements OnInit {
   });
 
   readonly absFormat = (value: number): string => `${Math.abs(value)}`;
+
+  iconName(slug: string): string {
+    return slug
+      .split('-')
+      .map(part => part.charAt(0).toUpperCase() + part.slice(1))
+      .join(' ');
+  }
 
   signedBrewskiCount(outcome: BetResult): number {
     const me = this.bet ? this.myPosition() : 'user1';
