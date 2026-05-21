@@ -71,8 +71,28 @@
         [data]="filteredBets()"
         trackBy="id"
         [hoverable]="true"
-        [(sort)]="sort"
-        [noDataText]="emptyStateText()" />
+        [(sort)]="sort">
+        <ng-template #noData>
+          <ea-empty-state
+            size="sm"
+            headingLevel="h3"
+            [title]="emptyState().title"
+            [description]="emptyState().description">
+            @if (emptyState().isInitial) {
+              <ea-icon-trophy slot="media" />
+            } @else {
+              <ea-icon-target slot="media" />
+            }
+            @if (emptyState().isInitial) {
+              <ea-button
+                slot="actions"
+                routerLink="/bets/new">
+                Create a bet
+              </ea-button>
+            }
+          </ea-empty-state>
+        </ng-template>
+      </ea-data-table>
     }
   </ea-card>
 </div>
