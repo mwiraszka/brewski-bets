@@ -376,9 +376,18 @@ fieldset[disabled] {
 }
 
 .outcome-row__error {
+  display: flex;
+  align-items: center;
+  gap: 4px;
   margin: 0;
   font-size: 13px;
   color: var(--bb-color-textDanger);
+}
+
+.outcome-row__error-icon {
+  flex-shrink: 0;
+  width: 0.875em;
+  height: 0.875em;
 }
 
 .remove-icon-btn {

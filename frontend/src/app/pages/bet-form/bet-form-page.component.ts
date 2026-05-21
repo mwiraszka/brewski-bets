@@ -1,4 +1,5 @@
 import {
+  AlertCircleIconComponent,
   AnchorIconComponent,
   AwardIconComponent,
   BatteryIconComponent,
@@ -184,6 +185,7 @@ type ActionInFlight = 'submit' | 'accept' | 'void' | 'delete' | null;
   styleUrl: './bet-form-page.component.scss',
   imports: [
     NgComponentOutlet,
+    AlertCircleIconComponent,
     ButtonComponent,
     CardComponent,
     CheckIconComponent,

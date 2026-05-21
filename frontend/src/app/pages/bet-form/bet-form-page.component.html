@@ -202,6 +202,7 @@
                         </div>
                         @if (outcomeAmountError(outcome, rowIndex)) {
                           <p class="outcome-row__error">
+                            <ea-icon-alert-circle class="outcome-row__error-icon" />
                             {{ outcomeAmountError(outcome, rowIndex) }}
                           </p>
                         }
@@ -289,6 +290,7 @@
                       </div>
                       @if (outcomeAmountError(outcome, rowIndex)) {
                         <p class="outcome-row__error">
+                          <ea-icon-alert-circle class="outcome-row__error-icon" />
                           {{ outcomeAmountError(outcome, rowIndex) }}
                         </p>
                       }
