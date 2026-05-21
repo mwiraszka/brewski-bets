@@ -77,7 +77,17 @@ import {
 } from '@eagami/ui';
 
 import { NgComponentOutlet } from '@angular/common';
-import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import {
+  Component,
+  ElementRef,
+  OnInit,
+  QueryList,
+  ViewChild,
+  ViewChildren,
+  computed,
+  inject,
+  signal,
+} from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 
 import { BetResult, BetWithOpponent } from '@app/models';
@@ -199,6 +209,11 @@ export class BetFormPageComponent implements OnInit {
   private readonly friendsService = inject(FriendsService);
   private readonly userService = inject(UserService);
   private readonly toast = inject(ToastService);
+
+  @ViewChild('titleInputRef', { read: ElementRef })
+  private titleInputRef?: ElementRef<HTMLElement>;
+  @ViewChildren('outcomeInputRef', { read: ElementRef })
+  private outcomeInputRefs?: QueryList<ElementRef<HTMLElement>>;
 
   readonly stockIcons = STOCK_ICONS;
   readonly iconColors = ICON_COLORS;
@@ -432,10 +447,27 @@ export class BetFormPageComponent implements OnInit {
         i === index ? { ...outcome, name: trimmed } : outcome,
       ),
     );
+    if (description !== trimmed) {
+      this.syncNativeInput(this.outcomeInputRefs?.toArray()[index], trimmed);
+    }
   }
 
   setTitle(value: string): void {
-    this.title.set(value.slice(0, TITLE_MAX_LENGTH));
+    const trimmed = value.slice(0, TITLE_MAX_LENGTH);
+    this.title.set(trimmed);
+    if (value !== trimmed) {
+      this.syncNativeInput(this.titleInputRef, trimmed);
+    }
+  }
+
+  private syncNativeInput(
+    host: ElementRef<HTMLElement> | undefined,
+    value: string,
+  ): void {
+    const input = host?.nativeElement.querySelector('input');
+    if (input && input.value !== value) {
+      input.value = value;
+    }
   }
 
   updateOutcomeSigned(index: number, signedValue: number): void {
