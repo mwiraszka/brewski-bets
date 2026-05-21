@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.25.0] - 2026-05-21
 
+### Added
+
+- Adopt the shared `ea-empty-state` block for the bets list and the Friends, Requests, and Find tabs so empty screens share consistent typography, iconography, and call-to-action buttons across the app
+
 ### Changed
 
 - Tighten the bet form character limits to 50 on the title, 300 on the description, 50 on each outcome, and 30 on the icon filter
