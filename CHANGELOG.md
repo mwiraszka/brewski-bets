@@ -22,6 +22,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Show the icon's title-case name in an `ea-tooltip` on hover instead of the raw slug in a native browser title
 - Pull the trash icon outside the bordered outcome card on narrow screens so it sits flush against the wrapped description and slider
 - Right-justify the icon preview's edit button and the outcome row trash buttons so they line up vertically at the form's right edge
+- Dim the empty-state title to secondary text, drop its bold weight, and lighten the description and icon further so they read as supporting content
+- Show an alert icon before every form error message (including the brewski slider) and align the message font size across input fields
 
 ### Fixed
 
