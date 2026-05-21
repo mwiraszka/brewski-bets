@@ -42,3 +42,16 @@ sup {
   vertical-align: super;
   line-height: 0;
 }
+
+ea-empty-state .ea-empty-state .ea-empty-state__title {
+  font-weight: 400;
+  color: var(--bb-color-textSecondary);
+}
+
+ea-empty-state .ea-empty-state .ea-empty-state__description {
+  color: var(--bb-color-textFaint);
+}
+
+ea-empty-state .ea-empty-state .ea-empty-state__media {
+  color: var(--bb-color-iconFaint);
+}
