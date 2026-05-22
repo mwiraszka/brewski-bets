@@ -7,7 +7,16 @@ import {
 } from '@eagami/ui';
 import { filter, map } from 'rxjs';
 
-import { Component, OnInit, computed, inject, input, signal } from '@angular/core';
+import {
+  Component,
+  DestroyRef,
+  OnInit,
+  computed,
+  effect,
+  inject,
+  input,
+  signal,
+} from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router, RouterLink } from '@angular/router';
 
@@ -35,6 +44,7 @@ export class HeaderComponent implements OnInit {
   private readonly friendsService = inject(FriendsService);
   private readonly clerk = inject(ClerkService);
   private readonly router = inject(Router);
+  private readonly destroyRef = inject(DestroyRef);
   private readonly currentUrl = toSignal(
     this.router.events.pipe(
       filter((e): e is NavigationEnd => e instanceof NavigationEnd),
@@ -73,6 +83,18 @@ export class HeaderComponent implements OnInit {
   readonly mobileBadgeCount = computed(
     () => this.pendingCount() + this.friendRequestCount(),
   );
+
+  constructor() {
+    effect(() => {
+      if (this.clerk.isLoggedIn()) {
+        this.friendsService.startPolling();
+      } else {
+        this.friendsService.stopPolling();
+      }
+    });
+
+    this.destroyRef.onDestroy(() => this.friendsService.stopPolling());
+  }
 
   async ngOnInit(): Promise<void> {
     if (this.clerk.isLoggedIn()) {

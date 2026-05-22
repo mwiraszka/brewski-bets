@@ -1,8 +1,16 @@
 import { Injectable, inject, signal } from '@angular/core';
 
-import { Friend, FriendRequest, SentFriendRequest, UserSearchResult } from '@app/models';
+import {
+  Friend,
+  FriendRequest,
+  FriendsOverview,
+  SentFriendRequest,
+  UserSearchResult,
+} from '@app/models';
 
 import { ApiService } from './api.service';
+
+const POLL_INTERVAL_MS = 30_000;
 
 @Injectable({
   providedIn: 'root',
@@ -19,6 +27,9 @@ export class FriendsService {
   readonly incomingRequests = this._incomingRequests.asReadonly();
   readonly sentRequests = this._sentRequests.asReadonly();
   readonly incomingRequestsCount = this._incomingRequestsCount.asReadonly();
+
+  private pollIntervalId: ReturnType<typeof setInterval> | null = null;
+  private visibilityHandler: (() => void) | null = null;
 
   async loadFriends(): Promise<void> {
     const friends = await this.api.get<Friend[]>('/friends');
@@ -39,6 +50,42 @@ export class FriendsService {
   async loadSentRequests(): Promise<void> {
     const requests = await this.api.get<SentFriendRequest[]>('/friends/sent');
     this._sentRequests.set(requests);
+  }
+
+  async loadOverview(): Promise<void> {
+    const overview = await this.api.get<FriendsOverview>('/friends/overview');
+    this._friends.set(overview.friends);
+    this._incomingRequests.set(overview.incomingRequests);
+    this._sentRequests.set(overview.sentRequests);
+    this._incomingRequestsCount.set(overview.incomingRequests.length);
+  }
+
+  startPolling(): void {
+    if (this.pollIntervalId !== null || typeof document === 'undefined') return;
+
+    this.pollIntervalId = setInterval(() => {
+      if (document.visibilityState === 'visible') {
+        void this.loadIncomingRequestsCount();
+      }
+    }, POLL_INTERVAL_MS);
+
+    this.visibilityHandler = () => {
+      if (document.visibilityState === 'visible') {
+        void this.loadIncomingRequestsCount();
+      }
+    };
+    document.addEventListener('visibilitychange', this.visibilityHandler);
+  }
+
+  stopPolling(): void {
+    if (this.pollIntervalId !== null) {
+      clearInterval(this.pollIntervalId);
+      this.pollIntervalId = null;
+    }
+    if (this.visibilityHandler) {
+      document.removeEventListener('visibilitychange', this.visibilityHandler);
+      this.visibilityHandler = null;
+    }
   }
 
   async sendRequest(addresseeId: string): Promise<void> {

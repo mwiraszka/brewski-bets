@@ -43,6 +43,12 @@ export interface UserSearchResult {
   clerkImageUrl: string | null;
 }
 
+export interface FriendsOverview {
+  friends: Friend[];
+  incomingRequests: FriendRequest[];
+  sentRequests: SentFriendRequest[];
+}
+
 export interface BetResult {
   name: string;
   brewskiCount: number;
