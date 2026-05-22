@@ -1,3 +1,11 @@
+@font-face {
+  font-family: 'Righteous';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/assets/fonts/righteous-v18-latin.woff2') format('woff2');
+}
+
 * {
   font-family: 'arial', sans-serif;
 }
@@ -12,7 +20,7 @@ li {
 h1 {
   font-family: 'Righteous', sans-serif;
   font-size: 44px;
-  font-weight: 100;
+  font-weight: 400;
   line-height: 36px;
   color: var(--bb-color-primary);
 }

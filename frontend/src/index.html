@@ -67,19 +67,23 @@
     <link
       rel="manifest"
       href="manifest.webmanifest" />
-    <!-- Preload critical fonts -->
+    <!-- Preload self-hosted brand font (Righteous) -->
     <link
-      rel="preconnect"
-      href="https://fonts.googleapis.com" />
-    <link
-      rel="preconnect"
-      href="https://fonts.gstatic.com"
+      rel="preload"
+      as="font"
+      type="font/woff2"
+      href="assets/fonts/righteous-v18-latin.woff2"
       crossorigin />
-    <link
-      rel="stylesheet"
-      href="https://fonts.googleapis.com/css2?family=Righteous&display=swap" />
     <!-- Critical CSS -->
     <style>
+      @font-face {
+        font-family: 'Righteous';
+        font-style: normal;
+        font-weight: 400;
+        font-display: swap;
+        src: url('assets/fonts/righteous-v18-latin.woff2') format('woff2');
+      }
+
       body {
         margin: 0;
         overflow: hidden;
@@ -92,7 +96,11 @@
         height: auto;
       }
 
-      h1,
+      h1 {
+        font-family: 'Righteous', sans-serif;
+        font-weight: 400;
+      }
+
       h2,
       h3,
       h4 {
