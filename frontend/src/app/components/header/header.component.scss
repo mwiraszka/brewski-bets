@@ -131,10 +131,12 @@
 
   ::ng-deep .ea-badge {
     justify-content: center;
-    min-width: 14px;
-    height: 14px;
-    padding: 0 3px;
+    box-sizing: border-box;
+    min-width: 20px;
+    height: 20px;
+    padding: 0 4px;
     font-size: 10px;
+    font-variant-numeric: tabular-nums;
     border: 2px solid var(--bb-color-white);
     background-color: var(--bb-color-secondary);
     color: var(--bb-color-white);
@@ -170,10 +172,12 @@
 
   ::ng-deep .ea-badge {
     justify-content: center;
-    min-width: 14px;
-    height: 14px;
-    padding: 0 3px;
+    box-sizing: border-box;
+    min-width: 20px;
+    height: 20px;
+    padding: 0 4px;
     font-size: 10px;
+    font-variant-numeric: tabular-nums;
     border: 2px solid var(--bb-color-white);
     background-color: var(--bb-color-secondary);
     color: var(--bb-color-white);
