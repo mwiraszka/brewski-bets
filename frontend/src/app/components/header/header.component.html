@@ -34,8 +34,8 @@
         Bets
         @if (pendingCount() > 0) {
           <ea-badge
-            variant="error"
-            size="sm"
+            shape="pin"
+            size="md"
             class="nav-link__badge">
             {{ pendingCount() }}
           </ea-badge>
@@ -47,8 +47,8 @@
         Friends
         @if (friendRequestCount() > 0) {
           <ea-badge
-            variant="error"
-            size="sm"
+            shape="pin"
+            size="md"
             class="nav-link__badge">
             {{ friendRequestCount() }}
           </ea-badge>
@@ -101,8 +101,8 @@
       }
       @if (!menuOpen() && mobileBadgeCount() > 0) {
         <ea-badge
-          variant="error"
-          size="sm"
+          shape="pin"
+          size="md"
           class="notification-badge">
           {{ mobileBadgeCount() }}
         </ea-badge>

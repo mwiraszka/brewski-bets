@@ -93,17 +93,13 @@ export class FriendsPageComponent implements OnInit {
   private searchTimeout: ReturnType<typeof setTimeout> | null = null;
 
   async ngOnInit(): Promise<void> {
-    const results = await Promise.allSettled([
-      this.friendsService.loadFriends(),
-      this.friendsService.loadIncomingRequests(),
-      this.friendsService.loadSentRequests(),
-    ]);
-
-    if (results.some(r => r.status === 'rejected')) {
+    try {
+      await this.friendsService.loadOverview();
+    } catch {
       this.toast.error('Failed to load friends');
+    } finally {
+      this.loading.set(false);
     }
-
-    this.loading.set(false);
   }
 
   onSearchInput(query: string): void {

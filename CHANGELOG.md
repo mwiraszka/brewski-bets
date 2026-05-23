@@ -5,6 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.26.0] - 2026-05-23
+
+### Added
+
+- Surface incoming friend requests without a manual refresh by polling the count every 30s while the tab is visible and refreshing immediately when the tab regains focus
+- Preload every lazy route once the app boots so navigating to Friends, Bets, or Account no longer waits on a fresh chunk download
+
+### Changed
+
+- Restyle the header notification badges as circular pins in the secondary brand colour with a white border so they read as distinct dots against the link rather than wide red pills, widening only when the count reaches double digits
+- Collapse the three separate Friends-tab fetches into a single `/friends/overview` request so the page renders after one round trip instead of three
+
+### Fixed
+
+- Self-host the Righteous brand font so the "brewski bets" header text renders consistently in Firefox (where the Google Fonts dependency could be blocked or weight-matched away)
+
 ## [0.25.0] - 2026-05-21
 
 ### Added
@@ -480,6 +496,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - PWA manifest and service worker configuration
 - GitHub issue templates
 
+[0.26.0]: https://github.com/mwiraszka/brewski-bets/compare/v0.25.0...v0.26.0
 [0.25.0]: https://github.com/mwiraszka/brewski-bets/compare/v0.24.0...v0.25.0
 [0.24.0]: https://github.com/mwiraszka/brewski-bets/compare/v0.23.0...v0.24.0
 [0.23.0]: https://github.com/mwiraszka/brewski-bets/compare/v0.22.0...v0.23.0
