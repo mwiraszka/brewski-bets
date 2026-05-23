@@ -128,19 +128,10 @@
   position: absolute;
   top: -2px;
   right: -6px;
-
-  ::ng-deep .ea-badge {
-    justify-content: center;
-    box-sizing: border-box;
-    min-width: 18px;
-    height: 18px;
-    padding: 0 4px;
-    font-size: 10px;
-    font-variant-numeric: tabular-nums;
-    border: 2px solid var(--bb-color-white);
-    background-color: var(--bb-color-secondary);
-    color: var(--bb-color-white);
-  }
+  --ea-badge-background-color: var(--bb-color-secondary);
+  --ea-badge-color: var(--bb-color-white);
+  --ea-badge-border-color: var(--bb-color-white);
+  --ea-badge-border-width: 2px;
 }
 
 .user-menu {
@@ -169,19 +160,10 @@
   position: absolute;
   top: -4px;
   right: -4px;
-
-  ::ng-deep .ea-badge {
-    justify-content: center;
-    box-sizing: border-box;
-    min-width: 18px;
-    height: 18px;
-    padding: 0 4px;
-    font-size: 10px;
-    font-variant-numeric: tabular-nums;
-    border: 2px solid var(--bb-color-white);
-    background-color: var(--bb-color-secondary);
-    color: var(--bb-color-white);
-  }
+  --ea-badge-background-color: var(--bb-color-secondary);
+  --ea-badge-color: var(--bb-color-white);
+  --ea-badge-border-color: var(--bb-color-white);
+  --ea-badge-border-width: 2px;
 }
 
 .menu-backdrop {

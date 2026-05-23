@@ -14,7 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Restyle the header notification badges as 14x14 circular pins in the secondary brand colour with a white border so they read as distinct dots against the link rather than wide red pills, widening only when the count reaches double digits
+- Restyle the header notification badges as circular pins in the secondary brand colour with a white border so they read as distinct dots against the link rather than wide red pills, widening only when the count reaches double digits
 - Collapse the three separate Friends-tab fetches into a single `/friends/overview` request so the page renders after one round trip instead of three
 
 ### Fixed
