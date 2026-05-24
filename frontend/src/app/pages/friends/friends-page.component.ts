@@ -11,6 +11,8 @@ import {
   TabComponent,
   TabsComponent,
   ToastService,
+  TooltipDirective,
+  TrashIconComponent,
   UsersIconComponent,
 } from '@eagami/ui';
 
@@ -46,6 +48,8 @@ function readStoredTab(): FriendsTab {
     SkeletonComponent,
     TabComponent,
     TabsComponent,
+    TooltipDirective,
+    TrashIconComponent,
     UsersIconComponent,
   ],
 })

@@ -49,10 +49,13 @@
                   </span>
                 </div>
                 <ea-button
-                  variant="danger"
+                  class="remove-friend-button"
+                  variant="ghost"
                   size="sm"
+                  eaTooltip="Remove friend"
+                  aria-label="Remove friend"
                   (clicked)="confirmRemoveFriend(friend)">
-                  Remove
+                  <ea-icon-trash />
                 </ea-button>
               </li>
             }

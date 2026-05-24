@@ -75,3 +75,11 @@
   padding: 32px 0;
   color: var(--bb-color-textMuted);
 }
+
+// Override the eagami ghost-button's text colour (which reads
+// `--color-text-primary` internally) so the projected trash icon picks up
+// the canonical danger red via the cascade — same shade as the "Log out"
+// row in the user menu and every other danger surface in the app.
+.remove-friend-button {
+  --color-text-primary: var(--bb-color-danger);
+}
