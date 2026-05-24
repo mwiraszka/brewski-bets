@@ -16,7 +16,7 @@
   justify-content: space-between;
   height: var(--bb-height-header);
   padding: 0 24px;
-  background-color: var(--bb-color-white);
+  background-color: var(--bb-color-surfaceRaised);
   box-shadow: var(--bb-boxShadow);
   transition:
     background-color 0.2s,
@@ -88,7 +88,7 @@
   letter-spacing: 0;
   border-radius: 4px;
   background-color: var(--bb-color-textStrong);
-  color: var(--bb-color-white);
+  color: var(--bb-color-textInverse);
   transition: opacity 0.15s;
 }
 
@@ -124,14 +124,22 @@
   }
 }
 
+// Shared notification-badge palette: secondary-navy fill with a white outline
+// that matches the surrounding raised surface (header, popover, drawer), so
+// every count badge in the chrome looks the same regardless of where it lives.
+.nav-link__badge,
+.notification-badge,
+.menu-badge {
+  --ea-badge-background-color: var(--bb-color-secondary);
+  --ea-badge-color: var(--bb-color-white);
+  --ea-badge-border-color: var(--bb-color-surfaceRaised);
+  --ea-badge-border-width: 2px;
+}
+
 .nav-link__badge {
   position: absolute;
   top: -2px;
   right: -6px;
-  --ea-badge-background-color: var(--bb-color-secondary);
-  --ea-badge-color: var(--bb-color-white);
-  --ea-badge-border-color: var(--bb-color-white);
-  --ea-badge-border-width: 2px;
 }
 
 .user-menu {
@@ -160,10 +168,32 @@
   position: absolute;
   top: -4px;
   right: -4px;
-  --ea-badge-background-color: var(--bb-color-secondary);
-  --ea-badge-color: var(--bb-color-white);
-  --ea-badge-border-color: var(--bb-color-white);
-  --ea-badge-border-width: 2px;
+}
+
+// Row inside menu-popover / mobile-menu hosting the dark-mode <ea-switch>.
+// Mirrors the surrounding link rows' padding / font-size so the row's height
+// matches its neighbours, with the switch right-aligned via space-between.
+.menu-switch-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  color: var(--bb-color-textStrong);
+
+  .menu-popover & {
+    padding: 8px 12px;
+    font-size: 14px;
+  }
+
+  .mobile-menu & {
+    padding: 12px 16px;
+    font-size: 15px;
+    font-weight: 500;
+  }
+}
+
+.menu-switch-row__label {
+  line-height: 1.2;
 }
 
 .menu-backdrop {
@@ -186,7 +216,7 @@
   padding: 4px;
   border: 1px solid var(--bb-color-borderDefault);
   border-radius: 4px;
-  background-color: var(--bb-color-white);
+  background-color: var(--bb-color-surfaceRaised);
   box-shadow: 0 8px 24px var(--bb-color-shadowMedium);
 }
 
@@ -263,7 +293,7 @@
   display: flex;
   flex-direction: column;
   padding: 8px;
-  background-color: var(--bb-color-white);
+  background-color: var(--bb-color-surfaceRaised);
   box-shadow: 0 8px 24px var(--bb-color-shadowMedium);
 }
 

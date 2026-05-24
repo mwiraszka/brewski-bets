@@ -80,6 +80,16 @@
             (click)="closeMenu()">
             Account
           </a>
+          <div class="menu-divider"></div>
+          <div class="menu-switch-row">
+            <span class="menu-switch-row__label">Dark mode</span>
+            <ea-switch
+              size="sm"
+              aria-label="Dark mode"
+              [checked]="isDarkMode()"
+              (changed)="onDarkModeToggle($event)" />
+          </div>
+          <div class="menu-divider"></div>
           <a
             class="menu-item menu-item--danger"
             routerLink="/login"
@@ -122,8 +132,9 @@
           Bets
           @if (pendingCount() > 0) {
             <ea-badge
-              variant="error"
-              size="sm">
+              shape="pin"
+              size="md"
+              class="menu-badge">
               {{ pendingCount() }}
             </ea-badge>
           }
@@ -135,8 +146,9 @@
           Friends
           @if (friendRequestCount() > 0) {
             <ea-badge
-              variant="error"
-              size="sm">
+              shape="pin"
+              size="md"
+              class="menu-badge">
               {{ friendRequestCount() }}
             </ea-badge>
           }
@@ -148,6 +160,16 @@
           (click)="closeMenu()">
           Account
         </a>
+        <div class="menu-divider"></div>
+        <div class="menu-switch-row">
+          <span class="menu-switch-row__label">Dark mode</span>
+          <ea-switch
+            size="sm"
+            aria-label="Dark mode"
+            [checked]="isDarkMode()"
+            (changed)="onDarkModeToggle($event)" />
+        </div>
+        <div class="menu-divider"></div>
         <a
           routerLink="/login"
           class="mobile-menu-item mobile-menu-item--danger"

@@ -1,14 +1,15 @@
 @use '../../../styles/mixins' as *;
 
+:host {
+  display: block;
+  @include eagami-theme;
+}
+
 .friends-page {
   width: 100%;
   max-width: 560px;
   padding: 24px;
   margin: 0 auto;
-}
-
-ea-card {
-  @include eagami-light-theme;
 }
 
 .friend-list {

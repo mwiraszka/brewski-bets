@@ -5,6 +5,7 @@
   width: 100%;
   min-width: 0;
   overflow-x: hidden;
+  @include eagami-theme;
 }
 
 .bet-form-page {
@@ -18,25 +19,12 @@
 }
 
 ea-card {
-  @include eagami-light-theme;
   --text-label-md-size: 16px;
   display: block;
   width: 100%;
-  min-width: 0;
-  max-width: 100%;
-}
-
-:host ::ng-deep ea-card,
-:host ::ng-deep ea-card > .ea-card,
-:host ::ng-deep ea-card .ea-card__header,
-:host ::ng-deep ea-card .ea-card__body,
-:host ::ng-deep ea-card .ea-card__footer {
-  min-width: 0;
-  max-width: 100%;
 }
 
 :host ::ng-deep ea-textarea .ea-textarea {
-  min-height: 40px;
   max-height: 200px;
 }
 

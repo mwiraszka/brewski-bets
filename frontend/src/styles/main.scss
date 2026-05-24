@@ -1,7 +1,16 @@
 @charset 'utf-8';
+@use 'mixins' as *;
 
 @forward 'reset';
 @forward 'mixins';
 @forward 'variables';
 @forward 'typography';
 @forward 'link';
+
+// Apply the brewski → @eagami/ui token bridge globally so every embedded
+// library component (buttons outside cards, dropdowns in dialogs, etc.) picks
+// up the active theme. Per-page `@include eagami-theme;` scopes still apply
+// where they exist, but they're no longer load-bearing.
+:root {
+  @include eagami-theme;
+}

@@ -78,18 +78,7 @@
             headingLevel="h3"
             [title]="emptyState().title"
             [description]="emptyState().description">
-            @if (emptyState().isInitial) {
-              <ea-icon-trophy slot="media" />
-            } @else {
-              <ea-icon-target slot="media" />
-            }
-            @if (emptyState().isInitial) {
-              <ea-button
-                slot="actions"
-                routerLink="/bets/new">
-                Create a bet
-              </ea-button>
-            }
+            <ea-icon-bottle slot="media" />
           </ea-empty-state>
         </ng-template>
       </ea-data-table>

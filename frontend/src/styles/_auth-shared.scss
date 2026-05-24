@@ -2,11 +2,11 @@
 
 :host {
   width: 100%;
+  @include eagami-theme;
 }
 
 ea-card {
   width: 100%;
-  @include eagami-light-theme;
 
   ::ng-deep .ea-card {
     box-shadow: 0 8px 24px var(--bb-color-shadowMedium);
