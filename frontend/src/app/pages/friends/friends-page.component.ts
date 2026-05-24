@@ -23,6 +23,7 @@ import { FriendsService } from '@app/services/friends.service';
 const ACTIVE_TAB_STORAGE_KEY = 'brewskibets.friendsActiveTab';
 const VALID_TABS = ['friends', 'requests', 'find'] as const;
 type FriendsTab = (typeof VALID_TABS)[number];
+type RequestAction = 'accept' | 'decline' | 'cancel';
 
 function readStoredTab(): FriendsTab {
   const stored = localStorage.getItem(ACTIVE_TAB_STORAGE_KEY);
@@ -88,12 +89,14 @@ export class FriendsPageComponent implements OnInit {
   private friendToRemove: Friend | null = null;
   readonly removingId = signal<string | null>(null);
 
-  // Per-row in-flight tracking so each button shows its own spinner and stays
-  // clickable independently of its neighbours. Keyed by user id for the
-  // "Add friend" action (no request yet exists) and by friendship/request id
-  // for accept / decline / cancel.
+  // Per-row in-flight tracking. `sendingUserIds` covers "Add friend" (keyed
+  // by user id since no request exists yet). `processingRequests` maps a
+  // request id to the specific action in flight (accept / decline / cancel)
+  // so siblings on the same row — e.g. Accept and Decline — can show
+  // different states: only the clicked button spins, the other just
+  // disables.
   readonly sendingUserIds = signal<ReadonlySet<string>>(new Set());
-  readonly processingRequestIds = signal<ReadonlySet<string>>(new Set());
+  readonly processingRequests = signal<ReadonlyMap<string, RequestAction>>(new Map());
 
   private searchTimeout: ReturnType<typeof setTimeout> | null = null;
 
@@ -139,7 +142,11 @@ export class FriendsPageComponent implements OnInit {
   }
 
   isProcessing(requestId: string): boolean {
-    return this.processingRequestIds().has(requestId);
+    return this.processingRequests().has(requestId);
+  }
+
+  isProcessingAction(requestId: string, action: RequestAction): boolean {
+    return this.processingRequests().get(requestId) === action;
   }
 
   private markSending(userId: string, sending: boolean): void {
@@ -154,13 +161,13 @@ export class FriendsPageComponent implements OnInit {
     });
   }
 
-  private markProcessing(requestId: string, processing: boolean): void {
-    this.processingRequestIds.update(set => {
-      const next = new Set(set);
-      if (processing) {
-        next.add(requestId);
-      } else {
+  private markProcessing(requestId: string, action: RequestAction | null): void {
+    this.processingRequests.update(map => {
+      const next = new Map(map);
+      if (action === null) {
         next.delete(requestId);
+      } else {
+        next.set(requestId, action);
       }
       return next;
     });
@@ -185,7 +192,7 @@ export class FriendsPageComponent implements OnInit {
   }
 
   async onAcceptRequest(request: FriendRequest): Promise<void> {
-    this.markProcessing(request.id, true);
+    this.markProcessing(request.id, 'accept');
     try {
       await this.friendsService.acceptRequest(request.id);
       this.friendsService.acceptOptimistic(request);
@@ -197,12 +204,12 @@ export class FriendsPageComponent implements OnInit {
     } catch {
       this.toast.error('Failed to accept friend request');
     } finally {
-      this.markProcessing(request.id, false);
+      this.markProcessing(request.id, null);
     }
   }
 
   async onDeclineRequest(request: FriendRequest): Promise<void> {
-    this.markProcessing(request.id, true);
+    this.markProcessing(request.id, 'decline');
     try {
       await this.friendsService.declineOrRemove(request.id);
       this.friendsService.removeOptimisticIncomingRequest(request.id);
@@ -210,12 +217,12 @@ export class FriendsPageComponent implements OnInit {
     } catch {
       this.toast.error('Failed to decline friend request');
     } finally {
-      this.markProcessing(request.id, false);
+      this.markProcessing(request.id, null);
     }
   }
 
   async onCancelSentRequest(request: SentFriendRequest): Promise<void> {
-    this.markProcessing(request.id, true);
+    this.markProcessing(request.id, 'cancel');
     try {
       await this.friendsService.declineOrRemove(request.id);
       this.friendsService.removeOptimisticSentRequest(request.id);
@@ -223,7 +230,7 @@ export class FriendsPageComponent implements OnInit {
     } catch {
       this.toast.error('Failed to cancel friend request');
     } finally {
-      this.markProcessing(request.id, false);
+      this.markProcessing(request.id, null);
     }
   }
 

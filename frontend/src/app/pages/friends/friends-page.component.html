@@ -113,7 +113,7 @@
                   <div class="action-buttons">
                     <ea-button
                       size="sm"
-                      [loading]="isProcessing(request.id)"
+                      [loading]="isProcessingAction(request.id, 'accept')"
                       [disabled]="isProcessing(request.id)"
                       (clicked)="onAcceptRequest(request)">
                       Accept
@@ -121,7 +121,7 @@
                     <ea-button
                       variant="secondary"
                       size="sm"
-                      [loading]="isProcessing(request.id)"
+                      [loading]="isProcessingAction(request.id, 'decline')"
                       [disabled]="isProcessing(request.id)"
                       (clicked)="onDeclineRequest(request)">
                       Decline
@@ -154,7 +154,7 @@
                   <ea-button
                     variant="secondary"
                     size="sm"
-                    [loading]="isProcessing(request.id)"
+                    [loading]="isProcessingAction(request.id, 'cancel')"
                     [disabled]="isProcessing(request.id)"
                     (clicked)="onCancelSentRequest(request)">
                     Cancel
