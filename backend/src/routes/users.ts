@@ -40,7 +40,17 @@ export const userRoutes = new Hono<AppContext>()
       return c.json([]);
     }
 
-    const pattern = `%${q}%`;
+    // Tokenize on whitespace so multi-word queries like "Bob Van" match
+    // "Bob Vance" — each token must appear (case-insensitive substring) in
+    // either the first or last name. AND across tokens, OR across name
+    // columns. Order-independent: "Van Bob" matches "Bob Vance" too.
+    // Email stays excluded — it's private and shouldn't surface in search.
+    const tokens = q.split(/\s+/).filter(t => t.length > 0);
+    const tokenConditions = tokens.map(token => {
+      const pattern = `%${token}%`;
+      return or(ilike(users.firstName, pattern), ilike(users.lastName, pattern));
+    });
+
     const results = await db
       .select({
         id: users.id,
@@ -49,14 +59,7 @@ export const userRoutes = new Hono<AppContext>()
         clerkImageUrl: users.clerkImageUrl,
       })
       .from(users)
-      .where(
-        and(
-          ne(users.id, userId),
-          // Match only against firstName/lastName — email is private user data
-          // and shouldn't be searchable from the Find Friends flow.
-          or(ilike(users.firstName, pattern), ilike(users.lastName, pattern)),
-        ),
-      )
+      .where(and(ne(users.id, userId), ...tokenConditions))
       .limit(20);
 
     return c.json(results);
