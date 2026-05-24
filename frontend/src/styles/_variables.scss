@@ -25,12 +25,14 @@
   --bb-color-secondary: #2e3440;
   --bb-color-secondarySemiTransparent: #2e34404e;
 
-  /* Primary button palette — drives `--color-brand-*` via _mixins.scss. Decoupled
-     from `--bb-color-primary` because the dark-mode button reads as a darker
-     well (not the gold brand mark), and its text contrast flips with theme. */
-  --bb-color-buttonPrimary: var(--bb-color-primary);
-  --bb-color-buttonPrimaryHover: #b89647;
-  --bb-color-buttonPrimaryActive: #a48439;
+  /* Primary button palette — drives `--color-brand-*` via _mixins.scss. A
+     soft blue in light mode (dark text reads cleanly), a deeper version of
+     the same blue in dark mode (light text reads cleanly). Decoupled from
+     the gold `--bb-color-primary` brand mark on purpose so buttons stand on
+     their own across themes. */
+  --bb-color-buttonPrimary: #abcbe3;
+  --bb-color-buttonPrimaryHover: #95bcd9;
+  --bb-color-buttonPrimaryActive: #7fadce;
   --bb-color-onButtonPrimary: #1a1a1a;
 
   /* Neutral surfaces */
@@ -110,7 +112,10 @@
   --bb-color-onButtonPrimary: #f0f0f0;
 
   --bb-color-surfaceRaised: #1a1c20;
-  --bb-color-surfaceSubtle: #0c1019;
+  // Data-table headers and similar subdued bands. Stays grayscale (no hue
+  // tint) and sits a notch darker than `surfaceRaised` so the band reads as
+  // recessed against the row surface without competing on saturation.
+  --bb-color-surfaceSubtle: #101216;
   --bb-color-surfaceMuted: #15161a;
   --bb-color-surfaceHover: #24272d;
   --bb-color-surfaceDisabled: #1c1e22;
