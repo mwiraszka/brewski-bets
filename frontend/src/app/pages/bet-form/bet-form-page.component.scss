@@ -55,7 +55,7 @@ fieldset[disabled] {
 
 .field-label--required::after {
   content: ' *';
-  color: var(--bb-color-textDanger);
+  color: var(--bb-color-danger);
 }
 
 .icon-grid {
@@ -244,7 +244,7 @@ fieldset[disabled] {
 .field-error {
   margin: 8px 0 0;
   font-size: 13px;
-  color: var(--bb-color-textDanger);
+  color: var(--bb-color-danger);
 }
 
 .outcomes-list {
@@ -331,11 +331,11 @@ fieldset[disabled] {
 }
 
 :host ::ng-deep ea-slider.has-error .ea-slider__fill {
-  background-color: var(--bb-color-textDanger);
+  background-color: var(--bb-color-danger);
 }
 
 :host ::ng-deep ea-slider.has-error .ea-slider__thumb {
-  border-color: var(--bb-color-textDanger);
+  border-color: var(--bb-color-danger);
 }
 
 .slider-ticks {
@@ -369,7 +369,7 @@ fieldset[disabled] {
   gap: 4px;
   margin: 0;
   font-size: 13px;
-  color: var(--bb-color-textDanger);
+  color: var(--bb-color-danger);
 }
 
 .outcome-row__error-icon {
@@ -390,7 +390,7 @@ fieldset[disabled] {
   border: none;
   border-radius: 6px;
   background-color: transparent;
-  color: var(--bb-color-textDanger);
+  color: var(--bb-color-danger);
   cursor: pointer;
   transition:
     background-color 0.15s,
