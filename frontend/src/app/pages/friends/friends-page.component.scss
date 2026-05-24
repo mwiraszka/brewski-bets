@@ -79,7 +79,10 @@
 // Override the eagami ghost-button's text colour (which reads
 // `--color-text-primary` internally) so the projected trash icon picks up
 // the canonical danger red via the cascade — same shade as the "Log out"
-// row in the user menu and every other danger surface in the app.
+// row in the user menu and every other danger surface in the app. Also
+// retints the ghost hover bg (which reads `--color-bg-muted`) so it
+// contrasts the surfaceMuted friend-item row instead of blending in.
 .remove-friend-button {
   --color-text-primary: var(--bb-color-danger);
+  --color-bg-muted: var(--bb-color-dangerSubtle);
 }
