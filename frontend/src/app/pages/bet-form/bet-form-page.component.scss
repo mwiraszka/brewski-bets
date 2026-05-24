@@ -22,17 +22,6 @@ ea-card {
   --text-label-md-size: 16px;
   display: block;
   width: 100%;
-  min-width: 0;
-  max-width: 100%;
-}
-
-:host ::ng-deep ea-card,
-:host ::ng-deep ea-card > .ea-card,
-:host ::ng-deep ea-card .ea-card__header,
-:host ::ng-deep ea-card .ea-card__body,
-:host ::ng-deep ea-card .ea-card__footer {
-  min-width: 0;
-  max-width: 100%;
 }
 
 :host ::ng-deep ea-textarea .ea-textarea {
