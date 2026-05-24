@@ -5,6 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.27.0] - 2026-05-24
+
+### Added
+
+- Ship a light/dark theme with a "Dark mode" toggle in the user menu (both the desktop popover and the mobile drawer). The first visit follows the OS preference; the user's explicit choice then persists across reloads, and an inline pre-paint script applies the active palette before Angular boots so neither the boot spinner nor the page background flashes the wrong colour on refresh.
+
+### Changed
+
+- Use the bottle icon for the four empty-state placeholders on the Bets page
+- Drop the redundant "Create a bet" button from the empty Bets table; the top-bar button is the single call to action
+- Restrict Find Friends search to first / last name only — email is no longer searchable from the user-facing flow
+- Lighten and desaturate the light-mode app background so it reads closer to the white of the surrounding header and cards
+
+### Fixed
+
+- Stop the "Failed to load …" toasts from appearing for users who just created their account, by ensuring the local user record exists on first authenticated request regardless of webhook timing
+
 ## [0.26.0] - 2026-05-23
 
 ### Added
