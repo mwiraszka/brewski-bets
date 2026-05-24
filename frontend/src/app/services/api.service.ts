@@ -90,6 +90,14 @@ export class ApiService {
       );
     }
 
-    return response.json();
+    // Endpoints that return `204 No Content` (DELETE on a friendship, etc.)
+    // have an empty body — calling `response.json()` on it would throw a
+    // SyntaxError that callers would mistake for a failed request. Same goes
+    // for any 2xx response that legitimately ships no body.
+    if (response.status === 204) {
+      return undefined as T;
+    }
+    const text = await response.text();
+    return (text ? JSON.parse(text) : undefined) as T;
   }
 }

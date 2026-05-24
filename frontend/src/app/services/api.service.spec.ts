@@ -46,10 +46,12 @@ describe('ApiService', () => {
   // ---------------------------------------------------------------------------
 
   function mockFetchResponse(body: unknown, status = 200): void {
+    const isEmpty = status === 204 || body === undefined;
     (globalThis.fetch as jest.Mock).mockResolvedValue({
       ok: status >= 200 && status < 300,
       status,
       json: jest.fn().mockResolvedValue(body),
+      text: jest.fn().mockResolvedValue(isEmpty ? '' : JSON.stringify(body)),
     });
   }
 
