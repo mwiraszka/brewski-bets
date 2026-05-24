@@ -174,7 +174,7 @@
         label="Find Friends">
         <div class="search-section">
           <ea-input
-            label="Search by name or email"
+            label="Search by name"
             [value]="searchQuery()"
             (valueChange)="onSearchInput($event)" />
         </div>
@@ -186,7 +186,7 @@
             size="sm"
             headingLevel="h3"
             title="No users found"
-            description="Try a different name or email.">
+            description="Try a different name.">
             <ea-icon-search slot="media" />
           </ea-empty-state>
         } @else if (searchResults().length > 0) {

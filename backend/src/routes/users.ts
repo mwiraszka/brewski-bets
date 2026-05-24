@@ -52,11 +52,9 @@ export const userRoutes = new Hono<AppContext>()
       .where(
         and(
           ne(users.id, userId),
-          or(
-            ilike(users.firstName, pattern),
-            ilike(users.lastName, pattern),
-            ilike(users.email, pattern),
-          ),
+          // Match only against firstName/lastName — email is private user data
+          // and shouldn't be searchable from the Find Friends flow.
+          or(ilike(users.firstName, pattern), ilike(users.lastName, pattern)),
         ),
       )
       .limit(20);
