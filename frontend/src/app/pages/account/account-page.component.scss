@@ -1,14 +1,15 @@
 @use '../../../styles/mixins' as *;
 
+:host {
+  display: block;
+  @include eagami-theme;
+}
+
 .account-page {
   margin: auto;
   width: 100%;
   max-width: 460px;
   padding: 24px;
-}
-
-ea-card {
-  @include eagami-light-theme;
 }
 
 .avatar-section {

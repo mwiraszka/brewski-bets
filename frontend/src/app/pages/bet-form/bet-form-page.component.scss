@@ -5,6 +5,7 @@
   width: 100%;
   min-width: 0;
   overflow-x: hidden;
+  @include eagami-theme;
 }
 
 .bet-form-page {
@@ -18,7 +19,6 @@
 }
 
 ea-card {
-  @include eagami-light-theme;
   --text-label-md-size: 16px;
   display: block;
   width: 100%;
@@ -36,7 +36,6 @@ ea-card {
 }
 
 :host ::ng-deep ea-textarea .ea-textarea {
-  min-height: 40px;
   max-height: 200px;
 }
 

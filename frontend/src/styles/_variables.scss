@@ -1,6 +1,22 @@
+// =============================================================================
+// COLOUR TOKENS
+// =============================================================================
+//
+// Light is the default. Dark variants are applied via `@mixin dark-tokens`,
+// triggered either by the OS (`prefers-color-scheme: dark`, unless the user
+// has explicitly opted into light) or by an explicit `<html data-theme="dark">`
+// override. Mirrors the @eagami/ui token pattern so theme switching is a
+// single-attribute flip handled by `ThemeService`.
+//
+// Token naming is semantic (role-based, e.g. `surfaceRaised`, `textStrong`),
+// not value-based — value names like `white` would be a lie in dark mode. The
+// one exception is `--bb-color-white`, kept as a stable `#ffffff` for cases
+// where pure white is the literal contrast colour (e.g. white text on the
+// navy badge background, regardless of theme).
+
 :root {
   /* App surfaces */
-  --bb-color-appBackground: #faf7f2;
+  --bb-color-appBackground: #fcfbfa;
 
   /* Brand palette */
   --bb-color-primary: #cba855;
@@ -9,8 +25,18 @@
   --bb-color-secondary: #2e3440;
   --bb-color-secondarySemiTransparent: #2e34404e;
 
+  /* Primary button palette — drives `--color-brand-*` via _mixins.scss. Decoupled
+     from `--bb-color-primary` because the dark-mode button reads as a darker
+     well (not the gold brand mark), and its text contrast flips with theme. */
+  --bb-color-buttonPrimary: var(--bb-color-primary);
+  --bb-color-buttonPrimaryHover: #b89647;
+  --bb-color-buttonPrimaryActive: #a48439;
+  --bb-color-onButtonPrimary: #1a1a1a;
+
   /* Neutral surfaces */
   --bb-color-white: #ffffff;
+  --bb-color-surfaceRaised: #ffffff;
+  --bb-color-surfaceSubtle: #f3f4f6;
   --bb-color-surfaceMuted: #f7f7f8;
   --bb-color-surfaceHover: #f5f5f5;
   --bb-color-surfaceDisabled: #f0f0f0;
@@ -29,7 +55,7 @@
   --bb-color-primaryText: #1a1a1a;
   --bb-color-textStrong: #1a1a1a;
   --bb-color-textPrimaryDark: #444444;
-  --bb-color-textPrimaryLight: #eeeeee;
+  --bb-color-textInverse: #ffffff;
   --bb-color-textBody: #555555;
   --bb-color-textSecondary: #777777;
   --bb-color-textMuted: #888888;
@@ -54,4 +80,84 @@
   /* Shadows */
   --bb-boxShadow: 0 4px 8px #0000001a;
   --bb-boxShadowRaised: 0 6px 12px #0000001f;
+}
+
+// -----------------------------------------------------------------------------
+// Dark theme overrides — applied when the OS prefers dark (unless the user
+// has explicitly opted into light) or when `<html data-theme="dark">` is set.
+// Matches the pattern documented at @eagami/ui's design-tokens page.
+// -----------------------------------------------------------------------------
+@mixin dark-tokens {
+  // Tokens NOT redeclared below are intentional: they hold the same value in
+  // both modes because they represent a stable contrast role rather than a
+  // theme-aware surface — e.g. `--bb-color-white` (literal white for badge
+  // text on the navy bg), `--bb-color-secondary` and `surfaceAuth` (kept navy
+  // regardless of theme so the badge / auth backdrop stay recognisable).
+
+  --bb-color-appBackground: #0f1014;
+
+  --bb-color-primary: #d4b96a;
+  --bb-color-primarySemiTransparent: rgba(212, 185, 106, 0.32);
+  --bb-color-primaryLink: #e0c89a;
+
+  // Slightly darker than the library default blue (eagami `--color-primary-400`
+  // = #4b91c3) with light text, so the button still reads as the brand-blue
+  // call to action in dark mode but stops blending with light surfaces behind
+  // it the way the lighter default does.
+  --bb-color-buttonPrimary: #1f4866;
+  --bb-color-buttonPrimaryHover: #295576;
+  --bb-color-buttonPrimaryActive: #173a55;
+  --bb-color-onButtonPrimary: #f0f0f0;
+
+  --bb-color-surfaceRaised: #1a1c20;
+  --bb-color-surfaceSubtle: #0c1019;
+  --bb-color-surfaceMuted: #15161a;
+  --bb-color-surfaceHover: #24272d;
+  --bb-color-surfaceDisabled: #1c1e22;
+  --bb-color-surfacePrimaryTint: rgba(203, 168, 85, 0.12);
+  --bb-color-surfaceCreamWarm: rgba(203, 168, 85, 0.2);
+  --bb-color-surfaceWarningTint: rgba(245, 158, 11, 0.15);
+
+  --bb-color-borderDefault: #2c2f36;
+  --bb-color-borderSubtle: #232529;
+  --bb-color-borderDivider: #383b42;
+
+  --bb-color-primaryText: #f0f0f0;
+  --bb-color-textStrong: #f0f0f0;
+  --bb-color-textPrimaryDark: #d0d0d0;
+  --bb-color-textInverse: #1a1a1a;
+  --bb-color-textBody: #b8b8b8;
+  --bb-color-textSecondary: #9a9a9a;
+  --bb-color-textMuted: #7f7f7f;
+  --bb-color-textFaint: #5c5c5c;
+  --bb-color-iconFaint: #4a4a4a;
+  --bb-color-textWarning: #d4b06b;
+  --bb-color-textDanger: #f87171;
+  --bb-color-textPreview: #ff9544;
+
+  --bb-color-glassBackground: rgba(20, 22, 26, 0.55);
+  --bb-color-glassBorder: rgba(255, 255, 255, 0.06);
+  --bb-color-shadowSoft: rgba(0, 0, 0, 0.2);
+  --bb-color-shadowMedium: rgba(0, 0, 0, 0.45);
+  --bb-color-shadowDeep: #000000ee;
+  --bb-color-backdropOverlay: rgba(0, 0, 0, 0.6);
+
+  --bb-boxShadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+  --bb-boxShadowRaised: 0 6px 12px rgba(0, 0, 0, 0.5);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    @include dark-tokens;
+    color-scheme: dark;
+  }
+}
+
+:root[data-theme='dark'] {
+  @include dark-tokens;
+  color-scheme: dark;
+}
+
+:root[data-theme='light'] {
+  color-scheme: light;
 }

@@ -3,6 +3,7 @@ import {
   BadgeComponent,
   ButtonComponent,
   MenuIconComponent,
+  SwitchComponent,
   XIconComponent,
 } from '@eagami/ui';
 import { filter, map } from 'rxjs';
@@ -23,6 +24,7 @@ import { NavigationEnd, Router, RouterLink } from '@angular/router';
 import { BetsService } from '@app/services/bets.service';
 import { ClerkService } from '@app/services/clerk.service';
 import { FriendsService } from '@app/services/friends.service';
+import { ThemeService } from '@app/services/theme.service';
 
 import { environment } from '@env';
 
@@ -36,6 +38,7 @@ import { environment } from '@env';
     BadgeComponent,
     ButtonComponent,
     MenuIconComponent,
+    SwitchComponent,
     XIconComponent,
   ],
 })
@@ -43,8 +46,15 @@ export class HeaderComponent implements OnInit {
   private readonly betsService = inject(BetsService);
   private readonly friendsService = inject(FriendsService);
   private readonly clerk = inject(ClerkService);
+  private readonly theme = inject(ThemeService);
   private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
+
+  readonly isDarkMode = computed(() => this.theme.mode() === 'dark');
+
+  onDarkModeToggle(checked: boolean): void {
+    this.theme.set(checked ? 'dark' : 'light');
+  }
   private readonly currentUrl = toSignal(
     this.router.events.pipe(
       filter((e): e is NavigationEnd => e instanceof NavigationEnd),
