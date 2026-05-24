@@ -18,7 +18,6 @@ import { Component, OnInit, computed, effect, inject, signal } from '@angular/co
 import { ActivatedRoute } from '@angular/router';
 
 import { Friend, FriendRequest, SentFriendRequest, UserSearchResult } from '@app/models';
-import { ClerkService } from '@app/services/clerk.service';
 import { FriendsService } from '@app/services/friends.service';
 
 const ACTIVE_TAB_STORAGE_KEY = 'brewskibets.friendsActiveTab';
@@ -51,7 +50,6 @@ function readStoredTab(): FriendsTab {
 })
 export class FriendsPageComponent implements OnInit {
   private readonly friendsService = inject(FriendsService);
-  private readonly clerk = inject(ClerkService);
   private readonly toast = inject(ToastService);
   private readonly route = inject(ActivatedRoute);
 
@@ -89,6 +87,13 @@ export class FriendsPageComponent implements OnInit {
   readonly removeDialogOpen = signal(false);
   private friendToRemove: Friend | null = null;
   readonly removingId = signal<string | null>(null);
+
+  // Per-row in-flight tracking so each button shows its own spinner and stays
+  // clickable independently of its neighbours. Keyed by user id for the
+  // "Add friend" action (no request yet exists) and by friendship/request id
+  // for accept / decline / cancel.
+  readonly sendingUserIds = signal<ReadonlySet<string>>(new Set());
+  readonly processingRequestIds = signal<ReadonlySet<string>>(new Set());
 
   private searchTimeout: ReturnType<typeof setTimeout> | null = null;
 
@@ -129,50 +134,96 @@ export class FriendsPageComponent implements OnInit {
     }
   }
 
-  async onSendRequest(userId: string): Promise<void> {
-    try {
-      await this.friendsService.sendRequest(userId);
-      this.toast.success('Friend request sent');
-      await this.friendsService.loadSentRequests();
+  isSending(userId: string): boolean {
+    return this.sendingUserIds().has(userId);
+  }
 
-      if (this.searchQuery().trim().length >= 2) {
-        await this.performSearch(this.searchQuery());
+  isProcessing(requestId: string): boolean {
+    return this.processingRequestIds().has(requestId);
+  }
+
+  private markSending(userId: string, sending: boolean): void {
+    this.sendingUserIds.update(set => {
+      const next = new Set(set);
+      if (sending) {
+        next.add(userId);
+      } else {
+        next.delete(userId);
       }
+      return next;
+    });
+  }
+
+  private markProcessing(requestId: string, processing: boolean): void {
+    this.processingRequestIds.update(set => {
+      const next = new Set(set);
+      if (processing) {
+        next.add(requestId);
+      } else {
+        next.delete(requestId);
+      }
+      return next;
+    });
+  }
+
+  async onSendRequest(user: UserSearchResult): Promise<void> {
+    this.markSending(user.id, true);
+    try {
+      await this.friendsService.sendRequest(user.id);
+      // Swap the button to "Pending" right away, then reconcile in the
+      // background so the server's real request id replaces the optimistic
+      // placeholder without re-running the search (which would flicker the
+      // list out behind a "Searching…" state).
+      this.friendsService.addOptimisticSentRequest(user);
+      this.toast.success('Friend request sent');
+      void this.friendsService.loadSentRequests();
     } catch {
       this.toast.error('Failed to send friend request');
+    } finally {
+      this.markSending(user.id, false);
     }
   }
 
   async onAcceptRequest(request: FriendRequest): Promise<void> {
+    this.markProcessing(request.id, true);
     try {
       await this.friendsService.acceptRequest(request.id);
+      this.friendsService.acceptOptimistic(request);
       this.toast.success(
         `${request.requester.firstName} ${request.requester.lastName} added as a friend`,
       );
-      await Promise.all([
-        this.friendsService.loadFriends(),
-        this.friendsService.loadIncomingRequests(),
-      ]);
+      void this.friendsService.loadFriends();
+      void this.friendsService.loadIncomingRequests();
     } catch {
       this.toast.error('Failed to accept friend request');
+    } finally {
+      this.markProcessing(request.id, false);
     }
   }
 
   async onDeclineRequest(request: FriendRequest): Promise<void> {
+    this.markProcessing(request.id, true);
     try {
       await this.friendsService.declineOrRemove(request.id);
-      await this.friendsService.loadIncomingRequests();
+      this.friendsService.removeOptimisticIncomingRequest(request.id);
+      void this.friendsService.loadIncomingRequests();
     } catch {
       this.toast.error('Failed to decline friend request');
+    } finally {
+      this.markProcessing(request.id, false);
     }
   }
 
   async onCancelSentRequest(request: SentFriendRequest): Promise<void> {
+    this.markProcessing(request.id, true);
     try {
       await this.friendsService.declineOrRemove(request.id);
-      await this.friendsService.loadSentRequests();
+      this.friendsService.removeOptimisticSentRequest(request.id);
+      void this.friendsService.loadSentRequests();
     } catch {
       this.toast.error('Failed to cancel friend request');
+    } finally {
+      this.markProcessing(request.id, false);
     }
   }
 
