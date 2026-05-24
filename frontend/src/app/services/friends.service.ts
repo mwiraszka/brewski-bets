@@ -63,15 +63,20 @@ export class FriendsService {
   startPolling(): void {
     if (this.pollIntervalId !== null || typeof document === 'undefined') return;
 
+    // Poll the full incoming-requests list (not just the count) so the
+    // Friends page's `requestsTabLabel` — which reads `incomingRequests()` —
+    // updates the same tick the header badge does. The list payload is a
+    // handful of objects max; the savings of the `/count` endpoint over 30s
+    // intervals don't justify having two signals drift out of sync.
     this.pollIntervalId = setInterval(() => {
       if (document.visibilityState === 'visible') {
-        void this.loadIncomingRequestsCount();
+        void this.loadIncomingRequests();
       }
     }, POLL_INTERVAL_MS);
 
     this.visibilityHandler = () => {
       if (document.visibilityState === 'visible') {
-        void this.loadIncomingRequestsCount();
+        void this.loadIncomingRequests();
       }
     };
     document.addEventListener('visibilitychange', this.visibilityHandler);
