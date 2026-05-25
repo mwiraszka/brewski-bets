@@ -51,10 +51,6 @@ sup {
   line-height: 0;
 }
 
-// `<ea-empty-state>` typography knobs (shipped in @eagami/ui v2.2.0). Title
-// colour still comes from a direct selector since the library doesn't expose
-// it as a custom property; the weight, description colour, and media-icon
-// colour all route through tokens now.
 ea-empty-state {
   --ea-empty-state-title-font-weight: 400;
   --ea-empty-state-description-color: var(--bb-color-textFaint);

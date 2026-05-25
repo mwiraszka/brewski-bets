@@ -63,11 +63,6 @@ export class FriendsService {
   startPolling(): void {
     if (this.pollIntervalId !== null || typeof document === 'undefined') return;
 
-    // Poll the full incoming-requests list (not just the count) so the
-    // Friends page's `requestsTabLabel` — which reads `incomingRequests()` —
-    // updates the same tick the header badge does. The list payload is a
-    // handful of objects max; the savings of the `/count` endpoint over 30s
-    // intervals don't justify having two signals drift out of sync.
     this.pollIntervalId = setInterval(() => {
       if (document.visibilityState === 'visible') {
         void this.loadIncomingRequests();
@@ -92,14 +87,6 @@ export class FriendsService {
       this.visibilityHandler = null;
     }
   }
-
-  // ---------------------------------------------------------------------------
-  // Optimistic helpers — the friends page applies these immediately after the
-  // mutation API resolves (or in some cases, before) so the UI swaps instantly
-  // instead of waiting on the follow-up `loadX()` reconciliation. A subsequent
-  // background `loadOverview` / `loadX` overwrites the optimistic state with
-  // the server-authoritative one without flicker, since the shape matches.
-  // ---------------------------------------------------------------------------
 
   addOptimisticSentRequest(addressee: UserSearchResult): void {
     this._sentRequests.update(list => {

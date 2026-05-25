@@ -4,8 +4,7 @@ import { environment } from '@env';
 
 import { ClerkService } from './clerk.service';
 
-// Dev-only: artificial latency on every API request to preview loading states.
-// Set to 0 to disable. Has no effect in production builds.
+// Dev-only latency to preview loading states. Set to 0 to disable.
 const DEV_ARTIFICIAL_DELAY_MS = 2000;
 
 export class ApiError extends Error {
@@ -90,10 +89,6 @@ export class ApiService {
       );
     }
 
-    // Endpoints that return `204 No Content` (DELETE on a friendship, etc.)
-    // have an empty body — calling `response.json()` on it would throw a
-    // SyntaxError that callers would mistake for a failed request. Same goes
-    // for any 2xx response that legitimately ships no body.
     if (response.status === 204) {
       return undefined as T;
     }

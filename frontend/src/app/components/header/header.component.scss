@@ -124,9 +124,6 @@
   }
 }
 
-// Shared notification-badge palette: secondary-navy fill with a white outline
-// that matches the surrounding raised surface (header, popover, drawer), so
-// every count badge in the chrome looks the same regardless of where it lives.
 .nav-link__badge,
 .notification-badge,
 .menu-badge {
@@ -170,9 +167,6 @@
   right: -4px;
 }
 
-// Row inside menu-popover / mobile-menu hosting the dark-mode <ea-switch>.
-// Mirrors the surrounding link rows' padding / font-size so the row's height
-// matches its neighbours, with the switch right-aligned via space-between.
 .menu-switch-row {
   display: flex;
   align-items: center;

@@ -79,12 +79,7 @@
       type="font/woff2"
       href="assets/fonts/righteous-v18-latin.woff2"
       crossorigin />
-    <!-- Resolve the user's theme before Angular bootstraps so the very first
-         paint (boot spinner, page background) already uses the right palette.
-         Order of precedence — must stay in sync with ThemeService:
-           1. Explicit choice in localStorage ('bb-theme' = 'light' | 'dark')
-           2. System preference via prefers-color-scheme
-           3. Light default -->
+    <!-- Pre-paint theme resolution; must stay in sync with ThemeService. -->
     <script>
       (function () {
         function resolveTheme() {
