@@ -63,15 +63,20 @@ export class FriendsService {
   startPolling(): void {
     if (this.pollIntervalId !== null || typeof document === 'undefined') return;
 
+    // Poll the full incoming-requests list (not just the count) so the
+    // Friends page's `requestsTabLabel` — which reads `incomingRequests()` —
+    // updates the same tick the header badge does. The list payload is a
+    // handful of objects max; the savings of the `/count` endpoint over 30s
+    // intervals don't justify having two signals drift out of sync.
     this.pollIntervalId = setInterval(() => {
       if (document.visibilityState === 'visible') {
-        void this.loadIncomingRequestsCount();
+        void this.loadIncomingRequests();
       }
     }, POLL_INTERVAL_MS);
 
     this.visibilityHandler = () => {
       if (document.visibilityState === 'visible') {
-        void this.loadIncomingRequestsCount();
+        void this.loadIncomingRequests();
       }
     };
     document.addEventListener('visibilitychange', this.visibilityHandler);
@@ -86,6 +91,56 @@ export class FriendsService {
       document.removeEventListener('visibilitychange', this.visibilityHandler);
       this.visibilityHandler = null;
     }
+  }
+
+  // ---------------------------------------------------------------------------
+  // Optimistic helpers — the friends page applies these immediately after the
+  // mutation API resolves (or in some cases, before) so the UI swaps instantly
+  // instead of waiting on the follow-up `loadX()` reconciliation. A subsequent
+  // background `loadOverview` / `loadX` overwrites the optimistic state with
+  // the server-authoritative one without flicker, since the shape matches.
+  // ---------------------------------------------------------------------------
+
+  addOptimisticSentRequest(addressee: UserSearchResult): void {
+    this._sentRequests.update(list => {
+      if (list.some(r => r.addressee.id === addressee.id)) return list;
+      return [
+        ...list,
+        {
+          id: `optimistic-${addressee.id}`,
+          status: 'pending',
+          createdDate: new Date().toISOString(),
+          addressee: { ...addressee },
+        },
+      ];
+    });
+  }
+
+  removeOptimisticSentRequest(id: string): void {
+    this._sentRequests.update(list => list.filter(r => r.id !== id));
+  }
+
+  acceptOptimistic(request: FriendRequest): void {
+    this._incomingRequests.update(list => list.filter(r => r.id !== request.id));
+    this._incomingRequestsCount.update(c => Math.max(0, c - 1));
+    this._friends.update(list => {
+      if (list.some(f => f.id === request.requester.id)) return list;
+      return [
+        ...list,
+        {
+          id: request.requester.id,
+          firstName: request.requester.firstName,
+          lastName: request.requester.lastName,
+          clerkImageUrl: request.requester.clerkImageUrl,
+          friendshipId: request.id,
+        },
+      ];
+    });
+  }
+
+  removeOptimisticIncomingRequest(id: string): void {
+    this._incomingRequests.update(list => list.filter(r => r.id !== id));
+    this._incomingRequestsCount.update(c => Math.max(0, c - 1));
   }
 
   async sendRequest(addresseeId: string): Promise<void> {

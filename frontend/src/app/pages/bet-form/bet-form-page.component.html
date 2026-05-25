@@ -172,7 +172,7 @@
                           <div class="outcome-row__slider">
                             <ea-slider
                               size="sm"
-                              [class.has-error]="!!outcomeAmountError(outcome, rowIndex)"
+                              [hasError]="!!outcomeAmountError(outcome, rowIndex)"
                               [min]="-maxBrewskiCount"
                               [max]="maxBrewskiCount"
                               [step]="1"
@@ -260,7 +260,7 @@
                         <div class="outcome-row__slider">
                           <ea-slider
                             size="sm"
-                            [class.has-error]="!!outcomeAmountError(outcome, rowIndex)"
+                            [hasError]="!!outcomeAmountError(outcome, rowIndex)"
                             [min]="-maxBrewskiCount"
                             [max]="maxBrewskiCount"
                             [step]="1"

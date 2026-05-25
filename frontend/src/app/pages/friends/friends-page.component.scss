@@ -75,3 +75,13 @@
   padding: 32px 0;
   color: var(--bb-color-textMuted);
 }
+
+// Per-button tokens (shipped in @eagami/ui v2.2.0) recolour just this
+// button without touching the foundational `--color-*` tokens. The
+// projected trash icon picks up the danger red via `currentColor`, and
+// the ghost hover bg switches to the danger tint so it contrasts the
+// surfaceMuted friend-item row instead of blending in.
+.remove-friend-button {
+  --ea-button-color: var(--bb-color-danger);
+  --ea-button-background-color-hover: var(--bb-color-dangerSubtle);
+}

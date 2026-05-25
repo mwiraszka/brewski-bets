@@ -49,10 +49,13 @@
                   </span>
                 </div>
                 <ea-button
-                  variant="danger"
+                  class="remove-friend-button"
+                  variant="ghost"
                   size="sm"
+                  eaTooltip="Remove friend"
+                  aria-label="Remove friend"
                   (clicked)="confirmRemoveFriend(friend)">
-                  Remove
+                  <ea-icon-trash />
                 </ea-button>
               </li>
             }
@@ -113,12 +116,16 @@
                   <div class="action-buttons">
                     <ea-button
                       size="sm"
+                      [loading]="isProcessingAction(request.id, 'accept')"
+                      [disabled]="isProcessing(request.id)"
                       (clicked)="onAcceptRequest(request)">
                       Accept
                     </ea-button>
                     <ea-button
                       variant="secondary"
                       size="sm"
+                      [loading]="isProcessingAction(request.id, 'decline')"
+                      [disabled]="isProcessing(request.id)"
                       (clicked)="onDeclineRequest(request)">
                       Decline
                     </ea-button>
@@ -150,6 +157,8 @@
                   <ea-button
                     variant="secondary"
                     size="sm"
+                    [loading]="isProcessingAction(request.id, 'cancel')"
+                    [disabled]="isProcessing(request.id)"
                     (clicked)="onCancelSentRequest(request)">
                     Cancel
                   </ea-button>
@@ -208,7 +217,9 @@
                 } @else {
                   <ea-button
                     size="sm"
-                    (clicked)="onSendRequest(user.id)">
+                    [loading]="isSending(user.id)"
+                    [disabled]="isSending(user.id)"
+                    (clicked)="onSendRequest(user)">
                     Add friend
                   </ea-button>
                 }
