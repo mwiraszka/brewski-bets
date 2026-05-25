@@ -330,14 +330,6 @@ fieldset[disabled] {
   width: 100%;
 }
 
-:host ::ng-deep ea-slider.has-error .ea-slider__fill {
-  background-color: var(--bb-color-danger);
-}
-
-:host ::ng-deep ea-slider.has-error .ea-slider__thumb {
-  border-color: var(--bb-color-danger);
-}
-
 .slider-ticks {
   position: relative;
   width: 100%;
