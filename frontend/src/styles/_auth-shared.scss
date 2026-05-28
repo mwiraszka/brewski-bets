@@ -7,10 +7,7 @@
 
 ea-card {
   width: 100%;
-
-  ::ng-deep .ea-card {
-    box-shadow: 0 8px 24px var(--bb-color-shadowMedium);
-  }
+  --ea-card-shadow: 0 8px 24px var(--bb-color-shadowMedium);
 }
 
 .auth-footer {
@@ -27,11 +24,8 @@ ea-card {
 
   ea-button {
     margin-top: 16px;
-
-    ::ng-deep .ea-button {
-      font-size: 16px;
-      font-weight: 400;
-    }
+    --ea-button-font-size: 16px;
+    --ea-button-font-weight: 400;
   }
 }
 

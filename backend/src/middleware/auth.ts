@@ -28,11 +28,7 @@ export async function authMiddleware(c: Context<AppContext>, next: Next) {
   const db = c.get('db');
   let [user] = await db.select().from(users).where(eq(users.clerkId, clerkId)).limit(1);
 
-  // Lazy-create the local user record if the Clerk webhook hasn't synced it yet
-  // (or never did). Without this, brand-new accounts hit a 404 on every authed
-  // endpoint until the webhook fires, surfacing as "Failed to load …" toasts
-  // throughout the app. Insert + onConflictDoNothing makes the path idempotent
-  // and race-safe against concurrent first-requests.
+  // Webhook race: lazy-create if not yet synced.
   if (!user) {
     try {
       const clerk = createClerkClient({ secretKey: c.env.CLERK_SECRET_KEY });
@@ -57,8 +53,7 @@ export async function authMiddleware(c: Context<AppContext>, next: Next) {
         [user] = await db.select().from(users).where(eq(users.clerkId, clerkId)).limit(1);
       }
     } catch {
-      // Clerk fetch or insert failed — let the request continue with userId
-      // unset; downstream routes still return their existing 404.
+      // Lazy-create failed; continue without userId.
     }
   }
 

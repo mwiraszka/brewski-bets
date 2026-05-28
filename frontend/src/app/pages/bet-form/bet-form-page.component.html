@@ -53,6 +53,7 @@
             label="Description"
             [required]="true"
             [maxlength]="descriptionMaxLength"
+            [maxHeight]="200"
             [errorMsg]="descriptionError()"
             [(value)]="description"
             (blurred)="descriptionTouched.set(true)" />

@@ -93,12 +93,6 @@ export class FriendsPageComponent implements OnInit {
   private friendToRemove: Friend | null = null;
   readonly removingId = signal<string | null>(null);
 
-  // Per-row in-flight tracking. `sendingUserIds` covers "Add friend" (keyed
-  // by user id since no request exists yet). `processingRequests` maps a
-  // request id to the specific action in flight (accept / decline / cancel)
-  // so siblings on the same row — e.g. Accept and Decline — can show
-  // different states: only the clicked button spins, the other just
-  // disables.
   readonly sendingUserIds = signal<ReadonlySet<string>>(new Set());
   readonly processingRequests = signal<ReadonlyMap<string, RequestAction>>(new Map());
 
@@ -181,10 +175,6 @@ export class FriendsPageComponent implements OnInit {
     this.markSending(user.id, true);
     try {
       await this.friendsService.sendRequest(user.id);
-      // Swap the button to "Pending" right away, then reconcile in the
-      // background so the server's real request id replaces the optimistic
-      // placeholder without re-running the search (which would flicker the
-      // list out behind a "Searching…" state).
       this.friendsService.addOptimisticSentRequest(user);
       this.toast.success('Friend request sent');
       void this.friendsService.loadSentRequests();

@@ -36,30 +36,14 @@ $breakpoints: (
   ),
 );
 
-/// Maps @eagami/ui design tokens onto the app's centralized colour palette so
-/// embedded library components (e.g. ea-card, ea-button) follow the active
-/// brewski-bets theme without further wiring. The mapped tokens themselves
-/// are theme-aware (`--bb-color-surfaceRaised`, `--bb-color-textStrong`, …),
-/// so this single declaration covers both light and dark — switching themes
-/// flips the underlying values and the mappings cascade automatically.
+/// Maps @eagami/ui design tokens onto the app's themed palette.
 @mixin eagami-theme {
   --color-bg-base: var(--bb-color-surfaceRaised);
   --color-bg-subtle: var(--bb-color-surfaceSubtle);
   --color-text-primary: var(--bb-color-textStrong);
   --color-text-secondary: var(--bb-color-textBody);
-  // Drives the text colour on solid-brand surfaces (primary buttons, etc.).
-  // Routed through `--bb-color-onButtonPrimary` so it flips per theme: dark
-  // text on the gold light-mode button, light text on the dark dark-mode well.
-  --color-text-inverse: var(--bb-color-onButtonPrimary);
   --color-border-default: var(--bb-color-borderDefault);
   --color-neutral-400: var(--bb-color-textBody);
-
-  // Map the eagami brand tokens to brewski's themed primary-button palette so
-  // <ea-button> picks up the correct background per theme without needing
-  // per-button overrides.
-  --color-brand-default: var(--bb-color-buttonPrimary);
-  --color-brand-hover: var(--bb-color-buttonPrimaryHover);
-  --color-brand-active: var(--bb-color-buttonPrimaryActive);
 }
 
 /// Responsive breakpoint manager

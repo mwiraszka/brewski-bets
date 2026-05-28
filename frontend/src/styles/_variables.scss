@@ -1,19 +1,3 @@
-// =============================================================================
-// COLOUR TOKENS
-// =============================================================================
-//
-// Light is the default. Dark variants are applied via `@mixin dark-tokens`,
-// triggered either by the OS (`prefers-color-scheme: dark`, unless the user
-// has explicitly opted into light) or by an explicit `<html data-theme="dark">`
-// override. Mirrors the @eagami/ui token pattern so theme switching is a
-// single-attribute flip handled by `ThemeService`.
-//
-// Token naming is semantic (role-based, e.g. `surfaceRaised`, `textStrong`),
-// not value-based — value names like `white` would be a lie in dark mode. The
-// one exception is `--bb-color-white`, kept as a stable `#ffffff` for cases
-// where pure white is the literal contrast colour (e.g. white text on the
-// navy badge background, regardless of theme).
-
 :root {
   /* App surfaces */
   --bb-color-appBackground: #fcfbfa;
@@ -24,16 +8,6 @@
   --bb-color-primaryLink: #d4be82;
   --bb-color-secondary: #2e3440;
   --bb-color-secondarySemiTransparent: #2e34404e;
-
-  /* Primary button palette — drives `--color-brand-*` via _mixins.scss. A
-     soft blue in light mode (dark text reads cleanly), a deeper version of
-     the same blue in dark mode (light text reads cleanly). Decoupled from
-     the gold `--bb-color-primary` brand mark on purpose so buttons stand on
-     their own across themes. */
-  --bb-color-buttonPrimary: #abcbe3;
-  --bb-color-buttonPrimaryHover: #95bcd9;
-  --bb-color-buttonPrimaryActive: #7fadce;
-  --bb-color-onButtonPrimary: #1a1a1a;
 
   /* Neutral surfaces */
   --bb-color-white: #ffffff;
@@ -85,17 +59,9 @@
   --bb-boxShadowRaised: 0 6px 12px #0000001f;
 }
 
-// -----------------------------------------------------------------------------
-// Dark theme overrides — applied when the OS prefers dark (unless the user
-// has explicitly opted into light) or when `<html data-theme="dark">` is set.
-// Matches the pattern documented at @eagami/ui's design-tokens page.
-// -----------------------------------------------------------------------------
 @mixin dark-tokens {
-  // Tokens NOT redeclared below are intentional: they hold the same value in
-  // both modes because they represent a stable contrast role rather than a
-  // theme-aware surface — e.g. `--bb-color-white` (literal white for badge
-  // text on the navy bg), `--bb-color-secondary` and `surfaceAuth` (kept navy
-  // regardless of theme so the badge / auth backdrop stay recognisable).
+  // Tokens not redeclared are stable across themes (e.g. `--bb-color-white`,
+  // `--bb-color-secondary`, `surfaceAuth`).
 
   --bb-color-appBackground: #0f1014;
 
@@ -103,19 +69,7 @@
   --bb-color-primarySemiTransparent: rgba(212, 185, 106, 0.32);
   --bb-color-primaryLink: #e0c89a;
 
-  // Slightly darker than the library default blue (eagami `--color-primary-400`
-  // = #4b91c3) with light text, so the button still reads as the brand-blue
-  // call to action in dark mode but stops blending with light surfaces behind
-  // it the way the lighter default does.
-  --bb-color-buttonPrimary: #1f4866;
-  --bb-color-buttonPrimaryHover: #295576;
-  --bb-color-buttonPrimaryActive: #173a55;
-  --bb-color-onButtonPrimary: #f0f0f0;
-
   --bb-color-surfaceRaised: #1a1c20;
-  // Data-table headers and similar subdued bands. Stays grayscale (no hue
-  // tint) and sits a notch darker than `surfaceRaised` so the band reads as
-  // recessed against the row surface without competing on saturation.
   --bb-color-surfaceSubtle: #101216;
   --bb-color-surfaceMuted: #15161a;
   --bb-color-surfaceHover: #24272d;

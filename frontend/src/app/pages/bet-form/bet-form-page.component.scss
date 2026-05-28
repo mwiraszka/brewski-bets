@@ -24,10 +24,6 @@ ea-card {
   width: 100%;
 }
 
-:host ::ng-deep ea-textarea .ea-textarea {
-  max-height: 200px;
-}
-
 fieldset {
   min-width: 0;
   padding: 0;
