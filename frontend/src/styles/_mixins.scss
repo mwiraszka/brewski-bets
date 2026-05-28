@@ -42,13 +42,8 @@ $breakpoints: (
   --color-bg-subtle: var(--bb-color-surfaceSubtle);
   --color-text-primary: var(--bb-color-textStrong);
   --color-text-secondary: var(--bb-color-textBody);
-  --color-text-inverse: var(--bb-color-onButtonPrimary);
   --color-border-default: var(--bb-color-borderDefault);
   --color-neutral-400: var(--bb-color-textBody);
-
-  --color-brand-default: var(--bb-color-buttonPrimary);
-  --color-brand-hover: var(--bb-color-buttonPrimaryHover);
-  --color-brand-active: var(--bb-color-buttonPrimaryActive);
 }
 
 /// Responsive breakpoint manager

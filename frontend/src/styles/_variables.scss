@@ -9,12 +9,6 @@
   --bb-color-secondary: #2e3440;
   --bb-color-secondarySemiTransparent: #2e34404e;
 
-  /* Primary button palette — drives `--color-brand-*` via _mixins.scss */
-  --bb-color-buttonPrimary: #abcbe3;
-  --bb-color-buttonPrimaryHover: #95bcd9;
-  --bb-color-buttonPrimaryActive: #7fadce;
-  --bb-color-onButtonPrimary: #1a1a1a;
-
   /* Neutral surfaces */
   --bb-color-white: #ffffff;
   --bb-color-surfaceRaised: #ffffff;
@@ -74,11 +68,6 @@
   --bb-color-primary: #d4b96a;
   --bb-color-primarySemiTransparent: rgba(212, 185, 106, 0.32);
   --bb-color-primaryLink: #e0c89a;
-
-  --bb-color-buttonPrimary: #1f4866;
-  --bb-color-buttonPrimaryHover: #295576;
-  --bb-color-buttonPrimaryActive: #173a55;
-  --bb-color-onButtonPrimary: #f0f0f0;
 
   --bb-color-surfaceRaised: #1a1c20;
   --bb-color-surfaceSubtle: #101216;
