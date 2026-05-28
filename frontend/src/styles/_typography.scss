@@ -53,10 +53,7 @@ sup {
 
 ea-empty-state {
   --ea-empty-state-title-font-weight: 400;
+  --ea-empty-state-title-color: var(--bb-color-textSecondary);
   --ea-empty-state-description-color: var(--bb-color-textFaint);
   --ea-empty-state-media-color: var(--bb-color-iconFaint);
-}
-
-ea-empty-state .ea-empty-state .ea-empty-state__title {
-  color: var(--bb-color-textSecondary);
 }
