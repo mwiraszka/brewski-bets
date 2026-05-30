@@ -5,15 +5,25 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.0.0] - 2026-05-30
+## [1.0.0] - 2026-05-31
+
+### Added
+
+- Build out the full bet lifecycle: create a bet and pass it back and forth with edits until a friend accepts it, then either side proposes the final result (or a void) for the other to approve before the bet settles
+- Add a Standings tab to the Bets page that tallies settled bets into a per-friend beer balance, shown as a chart with a breakdown of the bets behind each total
+- Keep the Bets page live so new bets and a friend's changes (and the pending-action badge) appear automatically without a manual refresh
 
 ### Changed
 
-- Update the Friends page instantly when sending, accepting, declining, or cancelling a request, and roll the change back automatically if the server rejects it
+- Surface bet state as clear tags (active, changes pending, settled) on both the Bets list and the bet view
+- Make each bet row clickable to open a read-only view, add quick edit and delete actions, and label the two sides of every outcome simply as "You" and "Them"
+- Show a single consistent loading spinner with a contextual label (for example "Loading bets...") in place of the mix of spinners and plain "Loading..." text
+- Reflect Friends page actions instantly and roll them back automatically if the server rejects them
 
 ### Fixed
 
 - Make account deletion resilient so an interrupted deletion can no longer leave an account in a half-removed state
+- Improve the contrast of status tags in dark mode so they stay legible
 - Match the light-mode browser theme colour and boot background to the app background so the page no longer flashes a faint colour seam before it loads
 - Strengthen request validation and access controls across the backend API, and resolve all known dependency security advisories
 
