@@ -22,7 +22,7 @@ import { ActivatedRoute } from '@angular/router';
 import { Friend, FriendRequest, SentFriendRequest, UserSearchResult } from '@app/models';
 import { FriendsService } from '@app/services/friends.service';
 
-const ACTIVE_TAB_STORAGE_KEY = 'brewskibets.friendsActiveTab';
+const ACTIVE_TAB_STORAGE_KEY = 'bb-friends-active-tab';
 const VALID_TABS = ['friends', 'requests', 'find'] as const;
 type FriendsTab = (typeof VALID_TABS)[number];
 type RequestAction = 'accept' | 'decline' | 'cancel';
@@ -173,12 +173,13 @@ export class FriendsPageComponent implements OnInit {
 
   async onSendRequest(user: UserSearchResult): Promise<void> {
     this.markSending(user.id, true);
+    this.friendsService.addOptimisticSentRequest(user);
     try {
       await this.friendsService.sendRequest(user.id);
-      this.friendsService.addOptimisticSentRequest(user);
       this.toast.success('Friend request sent');
       void this.friendsService.loadSentRequests();
     } catch {
+      this.friendsService.removeOptimisticSentRequest(`optimistic-${user.id}`);
       this.toast.error('Failed to send friend request');
     } finally {
       this.markSending(user.id, false);
@@ -187,9 +188,9 @@ export class FriendsPageComponent implements OnInit {
 
   async onAcceptRequest(request: FriendRequest): Promise<void> {
     this.markProcessing(request.id, 'accept');
+    this.friendsService.acceptOptimistic(request);
     try {
       await this.friendsService.acceptRequest(request.id);
-      this.friendsService.acceptOptimistic(request);
       this.toast.success(
         `${request.requester.firstName} ${request.requester.lastName} added as a friend`,
       );
@@ -197,6 +198,8 @@ export class FriendsPageComponent implements OnInit {
       void this.friendsService.loadIncomingRequests();
     } catch {
       this.toast.error('Failed to accept friend request');
+      void this.friendsService.loadFriends();
+      void this.friendsService.loadIncomingRequests();
     } finally {
       this.markProcessing(request.id, null);
     }
@@ -204,12 +207,13 @@ export class FriendsPageComponent implements OnInit {
 
   async onDeclineRequest(request: FriendRequest): Promise<void> {
     this.markProcessing(request.id, 'decline');
+    this.friendsService.removeOptimisticIncomingRequest(request.id);
     try {
       await this.friendsService.declineOrRemove(request.id);
-      this.friendsService.removeOptimisticIncomingRequest(request.id);
       void this.friendsService.loadIncomingRequests();
     } catch {
       this.toast.error('Failed to decline friend request');
+      void this.friendsService.loadIncomingRequests();
     } finally {
       this.markProcessing(request.id, null);
     }
@@ -217,12 +221,13 @@ export class FriendsPageComponent implements OnInit {
 
   async onCancelSentRequest(request: SentFriendRequest): Promise<void> {
     this.markProcessing(request.id, 'cancel');
+    this.friendsService.removeOptimisticSentRequest(request.id);
     try {
       await this.friendsService.declineOrRemove(request.id);
-      this.friendsService.removeOptimisticSentRequest(request.id);
       void this.friendsService.loadSentRequests();
     } catch {
       this.toast.error('Failed to cancel friend request');
+      void this.friendsService.loadSentRequests();
     } finally {
       this.markProcessing(request.id, null);
     }
