@@ -178,12 +178,27 @@
         </a>
       </nav>
     }
-  } @else if (showLoginButton()) {
-    <ea-button
-      variant="ghost"
-      size="sm"
-      routerLink="/login">
-      Log in
-    </ea-button>
+  } @else {
+    <div class="auth-actions">
+      @if (showLoginButton()) {
+        <ea-button
+          variant="ghost"
+          size="sm"
+          routerLink="/login">
+          Log in
+        </ea-button>
+      }
+      <ea-button
+        variant="ghost"
+        size="sm"
+        [aria-label]="isDarkMode() ? 'Switch to light mode' : 'Switch to dark mode'"
+        (clicked)="toggleTheme()">
+        @if (isDarkMode()) {
+          <ea-icon-sun />
+        } @else {
+          <ea-icon-moon />
+        }
+      </ea-button>
+    </div>
   }
 </header>

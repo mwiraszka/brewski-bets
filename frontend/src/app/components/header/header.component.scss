@@ -23,7 +23,6 @@
     backdrop-filter 0.2s,
     box-shadow 0.2s,
     border-color 0.2s;
-  --color-text-primary: var(--bb-color-textStrong);
 }
 
 .header--scrolled {
@@ -119,7 +118,7 @@
     color 0.15s;
 
   &:hover {
-    background-color: var(--color-bg-muted);
+    background-color: var(--bb-color-surfaceHover);
     color: var(--bb-color-textStrong);
   }
 }
@@ -242,6 +241,14 @@
   background-color: var(--bb-color-borderDefault);
 }
 
+// Auth actions (logged-out)
+
+.auth-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 // Hamburger button
 
 .hamburger-button {
@@ -262,7 +269,7 @@
   cursor: pointer;
 
   &:hover {
-    background-color: var(--color-bg-muted);
+    background-color: var(--bb-color-surfaceHover);
   }
 }
 

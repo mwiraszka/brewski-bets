@@ -84,4 +84,12 @@
       <a href="mailto:support@brewskibets.com">support&#64;brewskibets.com</a>.
     </p>
   </section>
+
+  @if (showReturnToLogin()) {
+    <a
+      routerLink="/login"
+      class="return-to-login">
+      Return to login
+    </a>
+  }
 </article>
