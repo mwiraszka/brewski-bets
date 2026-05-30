@@ -12,11 +12,23 @@ const betResultSchema = z.object({
   assignedTo: z.enum(['user1', 'user2']).nullable(),
 });
 
+const iconSlugSchema = z
+  .string()
+  .regex(/^[a-z0-9-]+$/)
+  .max(50)
+  .nullable()
+  .optional();
+const iconColorSchema = z
+  .string()
+  .regex(/^#[0-9a-fA-F]{6}$/)
+  .nullable()
+  .optional();
+
 const createBetSchema = z.object({
   title: z.string().min(1),
   description: z.string().min(1),
-  iconSlug: z.string().nullable().optional(),
-  iconColor: z.string().nullable().optional(),
+  iconSlug: iconSlugSchema,
+  iconColor: iconColorSchema,
   user2Id: z.string().uuid(),
   results: z.array(betResultSchema).min(1).max(20),
 });
@@ -24,8 +36,8 @@ const createBetSchema = z.object({
 const updateBetSchema = z.object({
   title: z.string().min(1).optional(),
   description: z.string().min(1).optional(),
-  iconSlug: z.string().nullable().optional(),
-  iconColor: z.string().nullable().optional(),
+  iconSlug: iconSlugSchema,
+  iconColor: iconColorSchema,
   results: z.array(betResultSchema).min(1).max(20).optional(),
   selectedResultIndex: z.number().int().min(0).optional(),
   action: z.enum(['submit', 'accept']),
@@ -252,7 +264,14 @@ export const betRoutes = new Hono<AppContext>()
     } else if (body.action === 'accept') {
       const currentResults = (updates.results ?? existing.results) as BetResult[];
       const selectedIndex = updates.selectedResultIndex ?? existing.selectedResultIndex;
-      const selectedResult = selectedIndex != null ? currentResults[selectedIndex] : null;
+      if (
+        selectedIndex == null ||
+        selectedIndex < 0 ||
+        selectedIndex >= currentResults.length
+      ) {
+        return c.json({ error: 'Invalid result index' }, 400);
+      }
+      const selectedResult = currentResults[selectedIndex];
 
       if (selectedResult?.isSpecial === 'active') {
         updates.status = 'active';

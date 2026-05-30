@@ -19,6 +19,17 @@ const avatarCropStateSchema = z
   })
   .nullable();
 
+function parseCropState(raw: unknown): z.infer<typeof avatarCropStateSchema> {
+  if (typeof raw !== 'string') {
+    return null;
+  }
+  try {
+    return avatarCropStateSchema.parse(JSON.parse(raw));
+  } catch {
+    return null;
+  }
+}
+
 const updateUserSchema = z.object({
   firstName: z.string().min(1).optional(),
   lastName: z.string().min(1).optional(),
@@ -41,10 +52,10 @@ export const userRoutes = new Hono<AppContext>()
     }
 
     // Tokenize on whitespace so multi-word queries like "Bob Van" match
-    // "Bob Vance" — each token must appear (case-insensitive substring) in
+    // "Bob Vance": each token must appear (case-insensitive substring) in
     // either the first or last name. AND across tokens, OR across name
     // columns. Order-independent: "Van Bob" matches "Bob Vance" too.
-    // Email stays excluded — it's private and shouldn't surface in search.
+    // Email stays excluded: it's private and shouldn't surface in search.
     const tokens = q.split(/\s+/).filter(t => t.length > 0);
     const tokenConditions = tokens.map(token => {
       const pattern = `%${token}%`;
@@ -129,19 +140,7 @@ export const userRoutes = new Hono<AppContext>()
       return c.json({ error: 'Cropped file is required' }, 400);
     }
 
-    const cropStateRaw = body['cropState'];
-    let cropState: { zoom: number; offsetX: number; offsetY: number } | null = null;
-    if (typeof cropStateRaw === 'string') {
-      try {
-        cropState = JSON.parse(cropStateRaw) as {
-          zoom: number;
-          offsetX: number;
-          offsetY: number;
-        };
-      } catch {
-        // ignore invalid crop state
-      }
-    }
+    const cropState = parseCropState(body['cropState']);
 
     const url = await uploadAvatar(c.env, userId, await file.arrayBuffer(), file.type);
 
@@ -184,19 +183,7 @@ export const userRoutes = new Hono<AppContext>()
       return c.json({ error: 'Cropped file is required' }, 400);
     }
 
-    const cropStateRaw = body['cropState'];
-    let cropState: { zoom: number; offsetX: number; offsetY: number } | null = null;
-    if (typeof cropStateRaw === 'string') {
-      try {
-        cropState = JSON.parse(cropStateRaw) as {
-          zoom: number;
-          offsetX: number;
-          offsetY: number;
-        };
-      } catch {
-        // ignore invalid crop state
-      }
-    }
+    const cropState = parseCropState(body['cropState']);
 
     const clerk = createClerkClient({ secretKey: c.env.CLERK_SECRET_KEY });
     const clerkUser = await clerk.users.updateUserProfileImage(clerkId, {
@@ -229,6 +216,12 @@ export const userRoutes = new Hono<AppContext>()
       return c.json({ error: 'User not found' }, 404);
     }
 
+    // Delete from Clerk first: once it succeeds the user's tokens are invalid,
+    // so the auth middleware can't lazy-recreate the row mid-deletion. If a DB
+    // step then fails, the user.deleted webhook reconciles the leftover rows.
+    const clerk = createClerkClient({ secretKey: c.env.CLERK_SECRET_KEY });
+    await clerk.users.deleteUser(clerkId);
+
     await db.delete(bets).where(or(eq(bets.user1Id, userId), eq(bets.user2Id, userId)));
     await db
       .delete(friendships)
@@ -239,13 +232,10 @@ export const userRoutes = new Hono<AppContext>()
     try {
       await deleteAvatar(c.env, userId);
     } catch {
-      // ignore — avatar may not exist in R2
+      // avatar may not exist in R2
     }
 
     await db.delete(users).where(eq(users.id, userId));
-
-    const clerk = createClerkClient({ secretKey: c.env.CLERK_SECRET_KEY });
-    await clerk.users.deleteUser(clerkId);
 
     return c.json({ deleted: true });
   })
