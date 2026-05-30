@@ -5,7 +5,7 @@ export type ThemeMode = 'light' | 'dark';
 
 const STORAGE_KEY = 'bb-theme';
 const THEME_COLOR_LIGHT = '#faf7f2';
-const THEME_COLOR_DARK = '#0f1014';
+const THEME_COLOR_DARK = '#16181d';
 
 @Injectable({ providedIn: 'root' })
 export class ThemeService {
