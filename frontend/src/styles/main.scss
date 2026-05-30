@@ -9,8 +9,7 @@
 
 // Apply the brewski → @eagami/ui token bridge globally so every embedded
 // library component (buttons outside cards, dropdowns in dialogs, etc.) picks
-// up the active theme. Per-page `@include eagami-theme;` scopes still apply
-// where they exist, but they're no longer load-bearing.
+// up the active theme.
 :root {
   @include eagami-theme;
 }
