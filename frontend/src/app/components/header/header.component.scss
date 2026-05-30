@@ -106,7 +106,7 @@
   position: relative;
   display: flex;
   align-items: center;
-  padding: 6px 12px;
+  padding: 8px 12px;
   font-size: 14px;
   font-weight: 500;
   white-space: nowrap;
@@ -241,15 +241,11 @@
   background-color: var(--bb-color-borderDefault);
 }
 
-// Auth actions (logged-out)
-
 .auth-actions {
   display: flex;
   align-items: center;
   gap: 8px;
 }
-
-// Hamburger button
 
 .hamburger-button {
   position: relative;
@@ -272,8 +268,6 @@
     background-color: var(--bb-color-surfaceHover);
   }
 }
-
-// Mobile menu
 
 .mobile-backdrop {
   position: fixed;
@@ -322,8 +316,6 @@
     color: var(--bb-color-danger);
   }
 }
-
-// Responsive visibility
 
 .mobile-only {
   display: none;

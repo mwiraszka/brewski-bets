@@ -1,4 +1,4 @@
-import { AvatarEditorCropState } from '@eagami/ui';
+import { type AvatarEditorCropState } from '@eagami/ui';
 
 import { Injectable, computed, inject, signal } from '@angular/core';
 
@@ -51,12 +51,14 @@ export class UserService {
   readonly hasAvatar = computed(() => !!this.avatarUrl());
 
   async load(): Promise<void> {
-    if (!this.clerk.isLoggedIn()) return;
+    if (!this.clerk.isLoggedIn()) {
+      return;
+    }
     try {
       const user = await this.api.get<UserRecord>('/users/me');
       this._user.set(user);
     } catch {
-      // silently ignore — app still works without user record
+      // silently ignore; app still works without user record
     }
   }
 

@@ -1,11 +1,11 @@
 import { Injectable, inject, signal } from '@angular/core';
 
 import {
-  Friend,
-  FriendRequest,
-  FriendsOverview,
-  SentFriendRequest,
-  UserSearchResult,
+  type Friend,
+  type FriendRequest,
+  type FriendsOverview,
+  type SentFriendRequest,
+  type UserSearchResult,
 } from '@app/models';
 
 import { ApiService } from './api.service';
@@ -61,7 +61,9 @@ export class FriendsService {
   }
 
   startPolling(): void {
-    if (this.pollIntervalId !== null || typeof document === 'undefined') return;
+    if (this.pollIntervalId !== null || typeof document === 'undefined') {
+      return;
+    }
 
     this.pollIntervalId = setInterval(() => {
       if (document.visibilityState === 'visible') {
@@ -90,7 +92,9 @@ export class FriendsService {
 
   addOptimisticSentRequest(addressee: UserSearchResult): void {
     this._sentRequests.update(list => {
-      if (list.some(r => r.addressee.id === addressee.id)) return list;
+      if (list.some(r => r.addressee.id === addressee.id)) {
+        return list;
+      }
       return [
         ...list,
         {
@@ -111,7 +115,9 @@ export class FriendsService {
     this._incomingRequests.update(list => list.filter(r => r.id !== request.id));
     this._incomingRequestsCount.update(c => Math.max(0, c - 1));
     this._friends.update(list => {
-      if (list.some(f => f.id === request.requester.id)) return list;
+      if (list.some(f => f.id === request.requester.id)) {
+        return list;
+      }
       return [
         ...list,
         {

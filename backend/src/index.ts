@@ -14,14 +14,20 @@ import type { AppBindings, AppContext } from './types/index.js';
 
 const bindings = process.env as unknown as AppBindings;
 
+const ALLOWED_ORIGINS = [
+  'https://brewskibets.com',
+  'https://www.brewskibets.com',
+  'https://preview.brewskibets.com',
+  'http://localhost:4200',
+];
+
 let cachedDb: Db | null = null;
 
 export const app = new Hono<AppContext>().basePath('/api');
 
 app.onError((err, c) => {
   console.error(`[api] ${c.req.method} ${c.req.path} failed:`, err);
-  const message = err instanceof Error ? err.message : 'Internal server error';
-  return c.json({ error: message }, 500);
+  return c.json({ error: 'Internal server error' }, 500);
 });
 
 app.use('*', async (c, next) => {
@@ -29,25 +35,10 @@ app.use('*', async (c, next) => {
   return next();
 });
 
-app.get('/debug/env', c => {
-  return c.json({
-    hasDbUrl: !!c.env.DATABASE_URL,
-    hasClerkSecret: !!c.env.CLERK_SECRET_KEY,
-    hasWebhookSecret: !!c.env.CLERK_WEBHOOK_SECRET,
-    hasR2Account: !!c.env.R2_ACCOUNT_ID,
-    envKeys: Object.keys(c.env).length,
-  });
-});
-
-app.post('/debug/body', async c => {
-  const body = await c.req.text();
-  return c.json({ bodyLength: body.length, bodyPreview: body.slice(0, 100) });
-});
-
 app.use(
   '*',
   cors({
-    origin: '*',
+    origin: origin => (ALLOWED_ORIGINS.includes(origin) ? origin : null),
     allowHeaders: ['Authorization', 'Content-Type'],
     allowMethods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   }),
@@ -76,6 +67,12 @@ app.get('/users/:id/avatar', async c => {
     return c.json({ error: 'No avatar found' }, 404);
   }
 
+  // Only ever proxy objects from our own R2 bucket; never fetch an arbitrary
+  // stored URL, so a poisoned column can't turn this into an SSRF vector.
+  if (!user.avatarOriginalUrl.startsWith(`${c.env.R2_PUBLIC_URL}/`)) {
+    return c.json({ error: 'No avatar found' }, 404);
+  }
+
   const r2Response = await fetch(user.avatarOriginalUrl);
   if (!r2Response.ok) {
     return c.json({ error: 'Failed to fetch avatar' }, 502);
@@ -83,7 +80,7 @@ app.get('/users/:id/avatar', async c => {
 
   return new Response(r2Response.body, {
     headers: {
-      'Content-Type': r2Response.headers.get('Content-Type') || 'image/jpeg',
+      'Content-Type': r2Response.headers.get('content-type') || 'image/jpeg',
       'Cache-Control': 'public, max-age=3600',
     },
   });

@@ -2,6 +2,7 @@ import {
   AlertCircleIconComponent,
   AnchorIconComponent,
   AwardIconComponent,
+  BadgeComponent,
   BatteryIconComponent,
   BellIconComponent,
   BookIconComponent,
@@ -63,7 +64,6 @@ import {
   StarIconComponent,
   SunIconComponent,
   TableIconComponent,
-  TagComponent,
   TagIconComponent,
   TargetIconComponent,
   TextareaComponent,
@@ -80,8 +80,8 @@ import { NgComponentOutlet } from '@angular/common';
 import {
   Component,
   ElementRef,
-  OnInit,
-  QueryList,
+  type OnInit,
+  type QueryList,
   ViewChild,
   ViewChildren,
   computed,
@@ -90,7 +90,8 @@ import {
 } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 
-import { BetResult, BetWithOpponent } from '@app/models';
+import { LoadingComponent } from '@app/components/loading/loading.component';
+import { type BetResult, type BetWithOpponent } from '@app/models';
 import { BetsService } from '@app/services/bets.service';
 import { FriendsService } from '@app/services/friends.service';
 import { UserService } from '@app/services/user.service';
@@ -175,7 +176,7 @@ const OUTCOME_MAX_LENGTH = 50;
 const ICON_FILTER_MAX_LENGTH = 30;
 const NOTCH_VALUES: ReadonlyArray<number> = [6, 5, 4, 3, 2, 1, 0, 1, 2, 3, 4, 5, 6];
 
-type ActionInFlight = 'submit' | 'accept' | 'void' | 'delete' | null;
+type ActionInFlight = 'submit' | 'accept' | 'settle' | 'reject' | 'delete' | null;
 
 @Component({
   selector: 'bb-bet-form-page',
@@ -184,6 +185,7 @@ type ActionInFlight = 'submit' | 'accept' | 'void' | 'delete' | null;
   imports: [
     NgComponentOutlet,
     AlertCircleIconComponent,
+    BadgeComponent,
     ButtonComponent,
     CardComponent,
     CheckIconComponent,
@@ -191,13 +193,13 @@ type ActionInFlight = 'submit' | 'accept' | 'void' | 'delete' | null;
     DropdownComponent,
     EditIconComponent,
     InputComponent,
+    LoadingComponent,
     PlusIconComponent,
     RadioComponent,
     RadioGroupComponent,
     RouterLink,
     SearchIconComponent,
     SliderComponent,
-    TagComponent,
     TextareaComponent,
     TooltipDirective,
     TrashIconComponent,
@@ -228,9 +230,11 @@ export class BetFormPageComponent implements OnInit {
   readonly sliderTicks = NOTCH_VALUES;
 
   readonly mode = signal<'create' | 'edit'>('create');
+  readonly readonlyView = signal(false);
   readonly loading = signal(true);
   readonly actionInFlight = signal<ActionInFlight>(null);
   readonly deleteDialogOpen = signal(false);
+  readonly settleDialogOpen = signal(false);
 
   readonly title = signal('');
   readonly description = signal('');
@@ -242,7 +246,7 @@ export class BetFormPageComponent implements OnInit {
   readonly outcomes = signal<BetResult[]>([
     { name: '', brewskiCount: 0, assignedTo: null },
   ]);
-  readonly selectedOutcomeIndex = signal('');
+  readonly settleIndex = signal('');
 
   readonly titleTouched = signal(false);
   readonly descriptionTouched = signal(false);
@@ -254,30 +258,46 @@ export class BetFormPageComponent implements OnInit {
 
   readonly titleError = computed(() => {
     const empty = !this.title().trim();
-    if (!empty) return '';
-    if (this.titleTouched() || this.submitAttempted()) return 'Title is required';
+    if (!empty) {
+      return '';
+    }
+    if (this.titleTouched() || this.submitAttempted()) {
+      return 'Title is required';
+    }
     return '';
   });
 
   readonly descriptionError = computed(() => {
     const empty = !this.description().trim();
-    if (!empty) return '';
-    if (this.descriptionTouched() || this.submitAttempted())
+    if (!empty) {
+      return '';
+    }
+    if (this.descriptionTouched() || this.submitAttempted()) {
       return 'Description is required';
+    }
     return '';
   });
 
   readonly friendError = computed(() => {
-    if (this.mode() !== 'create') return '';
-    if (this.selectedFriendId()) return '';
-    if (this.friendTouched() || this.submitAttempted())
+    if (this.mode() !== 'create') {
+      return '';
+    }
+    if (this.selectedFriendId()) {
+      return '';
+    }
+    if (this.friendTouched() || this.submitAttempted()) {
       return 'Select a friend to bet against';
+    }
     return '';
   });
 
   readonly iconError = computed(() => {
-    if (this.iconSlug()) return '';
-    if (this.iconTouched() || this.submitAttempted()) return 'Icon is required';
+    if (this.iconSlug()) {
+      return '';
+    }
+    if (this.iconTouched() || this.submitAttempted()) {
+      return 'Icon is required';
+    }
     return '';
   });
 
@@ -297,7 +317,9 @@ export class BetFormPageComponent implements OnInit {
 
   readonly filteredIcons = computed(() => {
     const filter = this.iconFilter().trim().toLowerCase();
-    if (!filter) return this.stockIcons;
+    if (!filter) {
+      return this.stockIcons;
+    }
     const tokens = filter.split(/\s+/).filter(Boolean);
     return this.stockIcons.filter(icon =>
       tokens.every(token => icon.tags.some(tag => tag.toLowerCase().includes(token))),
@@ -309,13 +331,119 @@ export class BetFormPageComponent implements OnInit {
   );
 
   readonly myPosition = computed((): 'user1' | 'user2' | null => {
-    if (!this.bet) return null;
+    if (!this.bet) {
+      return null;
+    }
     return this.bet.user1Id === this.currentUserId() ? 'user1' : 'user2';
   });
 
   readonly isMyTurn = computed(() => {
-    if (!this.bet) return true;
+    if (!this.bet) {
+      return true;
+    }
     return this.bet.pendingAction === this.myPosition();
+  });
+
+  readonly betStatus = computed(() => this.bet?.status ?? null);
+  readonly settlementProposed = computed(() => this.bet?.settlementProposed ?? false);
+  readonly changesPending = computed(() => this.bet?.pendingAction != null);
+  readonly activeResting = computed(
+    () => this.betStatus() === 'active' && this.bet?.pendingAction == null,
+  );
+  readonly isSettled = computed(() => this.betStatus() === 'settled');
+
+  readonly statusTagVariant = computed((): 'success' | 'default' =>
+    this.betStatus() === 'active' ? 'success' : 'default',
+  );
+
+  readonly canEditTerms = computed(() => {
+    if (this.mode() === 'create') {
+      return true;
+    }
+    if (this.readonlyView() || this.isSettled() || this.settlementProposed()) {
+      return false;
+    }
+    return this.isMyTurn() || this.activeResting();
+  });
+
+  readonly isViewing = computed(() => !this.canEditTerms());
+
+  readonly canApproveTerms = computed(
+    () =>
+      this.mode() === 'edit' &&
+      !this.readonlyView() &&
+      !this.isSettled() &&
+      !this.settlementProposed() &&
+      this.isMyTurn(),
+  );
+
+  readonly canApproveSettlement = computed(
+    () => !this.readonlyView() && this.settlementProposed() && this.isMyTurn(),
+  );
+
+  readonly canSubmitChanges = computed(
+    () =>
+      this.mode() === 'edit' &&
+      !this.readonlyView() &&
+      !this.isSettled() &&
+      !this.settlementProposed() &&
+      (this.isMyTurn() || this.activeResting()),
+  );
+
+  readonly canSettle = computed(
+    () =>
+      !this.readonlyView() &&
+      this.betStatus() === 'active' &&
+      !this.settlementProposed() &&
+      (this.isMyTurn() || this.activeResting()),
+  );
+
+  readonly canDelete = computed(
+    () =>
+      this.mode() === 'edit' &&
+      !this.readonlyView() &&
+      !this.isSettled() &&
+      !this.settlementProposed(),
+  );
+
+  readonly isWaiting = computed(
+    () =>
+      this.mode() === 'edit' &&
+      !this.readonlyView() &&
+      !this.isSettled() &&
+      !this.isMyTurn() &&
+      !this.activeResting(),
+  );
+
+  readonly tagTooltip = computed(() =>
+    this.changesPending() && !this.isSettled()
+      ? 'The bet is read-only while changes are pending'
+      : '',
+  );
+
+  readonly winnerLabel = computed(() => {
+    const idx = this.bet?.selectedResultIndex;
+    if (this.bet == null || idx == null) {
+      return '';
+    }
+    const result = this.bet.results[idx];
+    if (!result) {
+      return '';
+    }
+    return result.isSpecial === 'void' ? 'Void' : result.name;
+  });
+
+  readonly settleOptions = computed(() => {
+    if (!this.bet) {
+      return [] as { value: string; label: string }[];
+    }
+    return this.bet.results
+      .map((result, index) => ({ result, index }))
+      .filter(({ result }) => !result.isSpecial || result.isSpecial === 'void')
+      .map(({ result, index }) => ({
+        value: String(index),
+        label: result.isSpecial === 'void' ? 'Void the bet' : result.name,
+      }));
   });
 
   readonly opponentName = computed(() => {
@@ -325,32 +453,28 @@ export class BetFormPageComponent implements OnInit {
     return '';
   });
 
-  readonly youLabel = computed(() => {
-    if (!this.bet) return 'You';
-    return this.myPosition() === 'user1' ? 'You' : this.opponentName();
-  });
-
-  readonly themLabel = computed(() => {
-    if (!this.bet) {
-      const friend = this.friends().find(f => f.id === this.selectedFriendId());
-      return friend ? `${friend.firstName} ${friend.lastName}` : 'Them';
-    }
-    return this.myPosition() === 'user2' ? 'You' : this.opponentName();
-  });
-
-  readonly specialOutcomes = computed(() => {
-    if (!this.bet) return [];
-    return this.bet.results.filter(outcome => outcome.isSpecial);
-  });
-
   readonly isFormValid = computed(() => {
-    if (!this.title().trim()) return false;
-    if (!this.description().trim()) return false;
-    if (this.mode() === 'create' && !this.selectedFriendId()) return false;
-    if (!this.iconSlug()) return false;
-    if (!this.outcomes().length) return false;
-    if (this.outcomes().some(outcome => !outcome.name.trim())) return false;
-    if (this.outcomes().some(outcome => outcome.brewskiCount <= 0)) return false;
+    if (!this.title().trim()) {
+      return false;
+    }
+    if (!this.description().trim()) {
+      return false;
+    }
+    if (this.mode() === 'create' && !this.selectedFriendId()) {
+      return false;
+    }
+    if (!this.iconSlug()) {
+      return false;
+    }
+    if (!this.outcomes().length) {
+      return false;
+    }
+    if (this.outcomes().some(outcome => !outcome.name.trim())) {
+      return false;
+    }
+    if (this.outcomes().some(outcome => outcome.brewskiCount <= 0)) {
+      return false;
+    }
     return true;
   });
 
@@ -370,6 +494,7 @@ export class BetFormPageComponent implements OnInit {
 
   async ngOnInit(): Promise<void> {
     const id = this.route.snapshot.paramMap.get('id');
+    this.readonlyView.set(this.route.snapshot.queryParamMap.get('mode') === 'view');
 
     if (id) {
       this.mode.set('edit');
@@ -381,11 +506,6 @@ export class BetFormPageComponent implements OnInit {
         this.iconColor.set(this.bet.iconColor ?? DEFAULT_ICON_COLOR);
         this.iconEditing.set(!this.bet.iconSlug);
         this.outcomes.set(this.bet.results.filter(outcome => !outcome.isSpecial));
-        this.selectedOutcomeIndex.set(
-          this.bet.selectedResultIndex != null
-            ? String(this.bet.selectedResultIndex)
-            : '',
-        );
       } catch {
         this.toast.error('Failed to load bet');
         await this.router.navigate(['/bets']);
@@ -407,7 +527,9 @@ export class BetFormPageComponent implements OnInit {
   }
 
   confirmIcon(): void {
-    if (!this.iconSlug()) return;
+    if (!this.iconSlug()) {
+      return;
+    }
     this.iconEditing.set(false);
   }
 
@@ -416,7 +538,9 @@ export class BetFormPageComponent implements OnInit {
   }
 
   addOutcome(): void {
-    if (this.outcomes().length >= MAX_OUTCOMES) return;
+    if (this.outcomes().length >= MAX_OUTCOMES) {
+      return;
+    }
     this.outcomes.update(outcomes => [
       ...outcomes,
       { name: '', brewskiCount: 1, assignedTo: 'user2' },
@@ -428,16 +552,22 @@ export class BetFormPageComponent implements OnInit {
     this.outcomeDescriptionTouched.update(s => {
       const next = new Set<number>();
       for (const i of s) {
-        if (i < index) next.add(i);
-        else if (i > index) next.add(i - 1);
+        if (i < index) {
+          next.add(i);
+        } else if (i > index) {
+          next.add(i - 1);
+        }
       }
       return next;
     });
     this.outcomeAmountTouched.update(s => {
       const next = new Set<number>();
       for (const i of s) {
-        if (i < index) next.add(i);
-        else if (i > index) next.add(i - 1);
+        if (i < index) {
+          next.add(i);
+        } else if (i > index) {
+          next.add(i - 1);
+        }
       }
       return next;
     });
@@ -500,39 +630,63 @@ export class BetFormPageComponent implements OnInit {
 
   outcomeDescriptionError(index: number, description: string): string {
     const empty = !description.trim();
-    if (!empty) return '';
-    if (this.outcomeDescriptionTouched().has(index) || this.submitAttempted())
+    if (!empty) {
+      return '';
+    }
+    if (this.outcomeDescriptionTouched().has(index) || this.submitAttempted()) {
       return 'Outcome description is required';
+    }
     return '';
   }
 
   outcomeAmountError(outcome: BetResult, index: number): string {
-    if (outcome.brewskiCount > 0) return '';
-    if (this.submitAttempted()) return 'At least one brewski must be bet';
+    if (outcome.brewskiCount > 0) {
+      return '';
+    }
+    if (this.submitAttempted()) {
+      return 'At least one brewski must be bet';
+    }
     if (
       this.outcomeAmountTouched().has(index) &&
       this.outcomeDescriptionTouched().has(index)
-    )
+    ) {
       return 'At least one brewski must be bet';
+    }
     return '';
   }
 
   private validate(): boolean {
     this.submitAttempted.set(true);
 
-    if (!this.title().trim()) return false;
-    if (!this.description().trim()) return false;
-    if (this.mode() === 'create' && !this.selectedFriendId()) return false;
-    if (!this.iconSlug()) return false;
-    if (!this.outcomes().length) return false;
-    if (this.outcomes().some(outcome => !outcome.name.trim())) return false;
-    if (this.outcomes().some(outcome => outcome.brewskiCount <= 0)) return false;
+    if (!this.title().trim()) {
+      return false;
+    }
+    if (!this.description().trim()) {
+      return false;
+    }
+    if (this.mode() === 'create' && !this.selectedFriendId()) {
+      return false;
+    }
+    if (!this.iconSlug()) {
+      return false;
+    }
+    if (!this.outcomes().length) {
+      return false;
+    }
+    if (this.outcomes().some(outcome => !outcome.name.trim())) {
+      return false;
+    }
+    if (this.outcomes().some(outcome => outcome.brewskiCount <= 0)) {
+      return false;
+    }
 
     return true;
   }
 
   async onSubmitForReview(): Promise<void> {
-    if (!this.validate()) return;
+    if (!this.validate()) {
+      return;
+    }
     this.actionInFlight.set('submit');
 
     try {
@@ -561,9 +715,6 @@ export class BetFormPageComponent implements OnInit {
             brewskiCount: outcome.brewskiCount,
             assignedTo: outcome.assignedTo,
           })),
-          selectedResultIndex: this.selectedOutcomeIndex()
-            ? Number(this.selectedOutcomeIndex())
-            : undefined,
           action: 'submit',
         });
         this.toast.success('Changes submitted for review');
@@ -577,20 +728,64 @@ export class BetFormPageComponent implements OnInit {
   }
 
   async onAccept(): Promise<void> {
-    if (!this.bet) return;
+    if (!this.bet) {
+      return;
+    }
     this.actionInFlight.set('accept');
 
     try {
-      await this.betsService.updateBet(this.bet.id, {
-        selectedResultIndex: this.selectedOutcomeIndex()
-          ? Number(this.selectedOutcomeIndex())
-          : undefined,
-        action: 'accept',
-      });
-      this.toast.success('Bet accepted');
+      await this.betsService.updateBet(this.bet.id, { action: 'accept' });
+      this.toast.success(this.settlementProposed() ? 'Bet settled' : 'Bet accepted');
       await this.router.navigate(['/bets']);
     } catch {
       this.toast.error('Failed to accept bet');
+    } finally {
+      this.actionInFlight.set(null);
+    }
+  }
+
+  async onReject(): Promise<void> {
+    if (!this.bet) {
+      return;
+    }
+    this.actionInFlight.set('reject');
+
+    try {
+      await this.betsService.updateBet(this.bet.id, { action: 'reject' });
+      this.toast.success('Settlement rejected');
+      await this.router.navigate(['/bets']);
+    } catch {
+      this.toast.error('Failed to reject settlement');
+    } finally {
+      this.actionInFlight.set(null);
+    }
+  }
+
+  openSettleDialog(): void {
+    this.settleIndex.set('');
+    this.settleDialogOpen.set(true);
+  }
+
+  cancelSettle(): void {
+    this.settleDialogOpen.set(false);
+  }
+
+  async onSettle(): Promise<void> {
+    if (!this.bet || this.settleIndex() === '') {
+      return;
+    }
+    this.actionInFlight.set('settle');
+
+    try {
+      await this.betsService.updateBet(this.bet.id, {
+        selectedResultIndex: Number(this.settleIndex()),
+        action: 'settle',
+      });
+      this.settleDialogOpen.set(false);
+      this.toast.success('Settlement proposed');
+      await this.router.navigate(['/bets']);
+    } catch {
+      this.toast.error('Failed to propose settlement');
     } finally {
       this.actionInFlight.set(null);
     }
@@ -605,7 +800,9 @@ export class BetFormPageComponent implements OnInit {
   }
 
   async confirmDelete(): Promise<void> {
-    if (!this.bet) return;
+    if (!this.bet) {
+      return;
+    }
     this.actionInFlight.set('delete');
 
     try {
@@ -615,27 +812,6 @@ export class BetFormPageComponent implements OnInit {
       await this.router.navigate(['/bets']);
     } catch {
       this.toast.error('Failed to delete bet');
-    } finally {
-      this.actionInFlight.set(null);
-    }
-  }
-
-  async onProposeVoid(): Promise<void> {
-    if (!this.bet) return;
-
-    const voidIndex = this.bet.results.findIndex(outcome => outcome.isSpecial === 'void');
-    if (voidIndex === -1) return;
-
-    this.actionInFlight.set('void');
-    try {
-      await this.betsService.updateBet(this.bet.id, {
-        selectedResultIndex: voidIndex,
-        action: 'submit',
-      });
-      this.toast.success('Void proposed');
-      await this.router.navigate(['/bets']);
-    } catch {
-      this.toast.error('Failed to propose void');
     } finally {
       this.actionInFlight.set(null);
     }

@@ -6,7 +6,7 @@ import {
   InputComponent,
 } from '@eagami/ui';
 
-import { Component, ElementRef, inject, signal, viewChild } from '@angular/core';
+import { Component, type ElementRef, inject, signal, viewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 
@@ -50,7 +50,9 @@ export class LoginPageComponent {
   pendingSecondFactor = signal(false);
 
   onEmailBlur(): void {
-    if (!this.email()) return;
+    if (!this.email()) {
+      return;
+    }
     this.emailError.set(
       EMAIL_REGEX.test(this.email()) ? '' : 'Please enter a valid email address',
     );
@@ -104,7 +106,9 @@ export class LoginPageComponent {
   }
 
   async onSubmit(): Promise<void> {
-    if (!this.validateAll()) return;
+    if (!this.validateAll()) {
+      return;
+    }
 
     this.error.set('');
     this.loading.set(true);

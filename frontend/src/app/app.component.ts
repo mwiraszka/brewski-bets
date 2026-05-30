@@ -1,10 +1,10 @@
 import { ToastComponent, ToastService } from '@eagami/ui';
 
 import {
-  AfterViewInit,
+  type AfterViewInit,
   Component,
   DestroyRef,
-  ElementRef,
+  type ElementRef,
   effect,
   inject,
   signal,

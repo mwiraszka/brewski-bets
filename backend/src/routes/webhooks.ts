@@ -56,7 +56,7 @@ export const webhookRoutes = new Hono<AppContext>().post('/clerk', async c => {
         .insert(users)
         .values({
           clerkId,
-          email: event.data.email_addresses[0].email_address,
+          email: event.data.email_addresses[0]?.email_address ?? '',
           firstName: event.data.first_name ?? '',
           lastName: event.data.last_name ?? '',
           clerkImageUrl: event.data.image_url,
@@ -75,7 +75,7 @@ export const webhookRoutes = new Hono<AppContext>().post('/clerk', async c => {
             .set({ avatarOriginalUrl: url })
             .where(eq(users.id, newUser.id));
         } catch {
-          // ignore — account still works without R2 avatar
+          // account still works without R2 avatar
         }
       }
     }
@@ -92,7 +92,7 @@ export const webhookRoutes = new Hono<AppContext>().post('/clerk', async c => {
       const imageChanged = event.data.image_url !== user.clerkImageUrl;
 
       const profileFields = {
-        email: event.data.email_addresses[0].email_address,
+        email: event.data.email_addresses[0]?.email_address ?? '',
         firstName: event.data.first_name ?? '',
         lastName: event.data.last_name ?? '',
         clerkImageUrl: event.data.image_url,
@@ -100,7 +100,7 @@ export const webhookRoutes = new Hono<AppContext>().post('/clerk', async c => {
       };
 
       if (imageChanged && event.data.has_image && !user.avatarManagedByApp) {
-        // Avatar was set via Clerk dashboard (not the app) — sync it to R2
+        // Avatar was set via Clerk dashboard (not the app), so sync it to R2
         try {
           const response = await fetch(event.data.image_url);
           const buffer = await response.arrayBuffer();
@@ -122,7 +122,7 @@ export const webhookRoutes = new Hono<AppContext>().post('/clerk', async c => {
         try {
           await deleteAvatar(c.env, user.id);
         } catch {
-          // ignore — avatar may not exist in R2
+          // avatar may not exist in R2
         }
 
         await db
@@ -160,7 +160,7 @@ export const webhookRoutes = new Hono<AppContext>().post('/clerk', async c => {
       try {
         await deleteAvatar(c.env, user.id);
       } catch {
-        // ignore — avatar may not exist in R2
+        // avatar may not exist in R2
       }
 
       await db.delete(users).where(eq(users.id, user.id));

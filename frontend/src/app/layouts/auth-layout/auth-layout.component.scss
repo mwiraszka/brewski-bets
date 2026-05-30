@@ -29,6 +29,10 @@
   max-width: 460px;
 }
 
+.bg-preloader {
+  display: none;
+}
+
 .bg-panel {
   display: none;
 
@@ -96,12 +100,12 @@
 
 .slogan-bet {
   animation: word-in 0.1s steps(1) 1.5s forwards;
-  margin-left: 7px;
+  margin-left: 8px;
 }
 
 .slogan-brewskis {
   animation: word-in 0.1s steps(1) 2.5s forwards;
-  margin-left: 14px;
+  margin-left: 16px;
 }
 
 @keyframes word-in {

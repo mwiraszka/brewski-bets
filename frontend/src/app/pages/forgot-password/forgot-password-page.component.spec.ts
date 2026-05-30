@@ -15,15 +15,15 @@ jest.mock('@env', () => ({
   },
 }));
 
-type MockClerkService = {
+interface MockClerkService {
   sendPasswordResetCode: jest.Mock<Promise<void>, [string]>;
   resetPassword: jest.Mock<Promise<void>, [string, string]>;
   extractError: jest.Mock<string, [unknown]>;
-};
+}
 
-type MockRouter = {
+interface MockRouter {
   navigate: jest.Mock<Promise<boolean>, [string[]]>;
-};
+}
 
 describe('ForgotPasswordPageComponent', () => {
   let component: ForgotPasswordPageComponent;
@@ -244,10 +244,10 @@ describe('ForgotPasswordPageComponent', () => {
   });
 
   // ---------------------------------------------------------------------------
-  // onResetPassword — validation
+  // onResetPassword: validation
   // ---------------------------------------------------------------------------
 
-  describe('onResetPassword — validation', () => {
+  describe('onResetPassword: validation', () => {
     it('sets code error when code is empty', async () => {
       component.newPassword.set('password1');
       component.confirmPassword.set('password1');
@@ -298,10 +298,10 @@ describe('ForgotPasswordPageComponent', () => {
   });
 
   // ---------------------------------------------------------------------------
-  // onResetPassword — success
+  // onResetPassword: success
   // ---------------------------------------------------------------------------
 
-  describe('onResetPassword — success', () => {
+  describe('onResetPassword: success', () => {
     beforeEach(() => {
       component.code.set('123456');
       component.newPassword.set('newpass123');
@@ -323,10 +323,10 @@ describe('ForgotPasswordPageComponent', () => {
   });
 
   // ---------------------------------------------------------------------------
-  // onResetPassword — error
+  // onResetPassword: error
   // ---------------------------------------------------------------------------
 
-  describe('onResetPassword — error', () => {
+  describe('onResetPassword: error', () => {
     it('sets error on failure', async () => {
       component.code.set('123456');
       component.newPassword.set('newpass123');

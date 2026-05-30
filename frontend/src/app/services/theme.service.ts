@@ -4,7 +4,7 @@ import { Injectable, inject, signal } from '@angular/core';
 export type ThemeMode = 'light' | 'dark';
 
 const STORAGE_KEY = 'bb-theme';
-const THEME_COLOR_LIGHT = '#faf7f2';
+const THEME_COLOR_LIGHT = '#fcfbfa';
 const THEME_COLOR_DARK = '#16181d';
 
 @Injectable({ providedIn: 'root' })
@@ -29,7 +29,9 @@ export class ThemeService {
   private readStoredMode(): ThemeMode {
     try {
       const stored = localStorage.getItem(STORAGE_KEY);
-      if (stored === 'dark' || stored === 'light') return stored;
+      if (stored === 'dark' || stored === 'light') {
+        return stored;
+      }
     } catch {
       // localStorage unavailable
     }

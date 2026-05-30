@@ -15,16 +15,16 @@ jest.mock('@env', () => ({
   },
 }));
 
-type MockClerkService = {
+interface MockClerkService {
   logIn: jest.Mock<Promise<{ needsSecondFactor: boolean }>, [string, string]>;
   verifyLoginCode: jest.Mock<Promise<void>, [string]>;
   continueWithGoogle: jest.Mock<Promise<void>>;
   extractError: jest.Mock<string, [unknown]>;
-};
+}
 
-type MockRouter = {
+interface MockRouter {
   navigate: jest.Mock<Promise<boolean>, [string[]]>;
-};
+}
 
 describe('LoginPageComponent', () => {
   let component: LoginPageComponent;
@@ -122,10 +122,10 @@ describe('LoginPageComponent', () => {
   });
 
   // ---------------------------------------------------------------------------
-  // onSubmit — validation
+  // onSubmit: validation
   // ---------------------------------------------------------------------------
 
-  describe('onSubmit — validation', () => {
+  describe('onSubmit: validation', () => {
     it('sets email error when email is empty', async () => {
       component.password.set('password123');
 
@@ -175,10 +175,10 @@ describe('LoginPageComponent', () => {
   });
 
   // ---------------------------------------------------------------------------
-  // onSubmit — success
+  // onSubmit: success
   // ---------------------------------------------------------------------------
 
-  describe('onSubmit — success', () => {
+  describe('onSubmit: success', () => {
     beforeEach(() => {
       component.email.set('user@test.com');
       component.password.set('password123');
@@ -212,10 +212,10 @@ describe('LoginPageComponent', () => {
   });
 
   // ---------------------------------------------------------------------------
-  // onSubmit — second factor
+  // onSubmit: second factor
   // ---------------------------------------------------------------------------
 
-  describe('onSubmit — second factor', () => {
+  describe('onSubmit: second factor', () => {
     beforeEach(() => {
       component.email.set('user@test.com');
       component.password.set('password123');
@@ -279,10 +279,10 @@ describe('LoginPageComponent', () => {
   });
 
   // ---------------------------------------------------------------------------
-  // onSubmit — error
+  // onSubmit: error
   // ---------------------------------------------------------------------------
 
-  describe('onSubmit — error', () => {
+  describe('onSubmit: error', () => {
     it('sets error from clerk.extractError on failure', async () => {
       component.email.set('user@test.com');
       component.password.set('password123');

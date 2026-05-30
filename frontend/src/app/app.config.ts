@@ -1,6 +1,7 @@
 import {
-  APP_INITIALIZER,
-  ApplicationConfig,
+  type ApplicationConfig,
+  inject,
+  provideAppInitializer,
   provideZoneChangeDetection,
 } from '@angular/core';
 import { PreloadAllModules, provideRouter, withPreloading } from '@angular/router';
@@ -14,14 +15,11 @@ export const appConfig: ApplicationConfig = {
   providers: [
     provideZoneChangeDetection({ eventCoalescing: true }),
     provideRouter(routes, withPreloading(PreloadAllModules)),
-    {
-      provide: APP_INITIALIZER,
-      useFactory: (clerk: ClerkService, user: UserService) => async () => {
-        await clerk.load();
-        await user.load();
-      },
-      deps: [ClerkService, UserService],
-      multi: true,
-    },
+    provideAppInitializer(async () => {
+      const clerk = inject(ClerkService);
+      const user = inject(UserService);
+      await clerk.load();
+      await user.load();
+    }),
   ],
 };

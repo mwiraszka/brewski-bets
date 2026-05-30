@@ -1,6 +1,6 @@
 import { ButtonComponent, CardComponent, InputComponent } from '@eagami/ui';
 
-import { Component, OnDestroy, inject, signal } from '@angular/core';
+import { Component, type OnDestroy, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 
@@ -37,7 +37,9 @@ export class ForgotPasswordPageComponent implements OnDestroy {
   }
 
   onEmailBlur(): void {
-    if (!this.email()) return;
+    if (!this.email()) {
+      return;
+    }
     this.emailError.set(
       EMAIL_REGEX.test(this.email()) ? '' : 'Please enter a valid email address',
     );
@@ -48,14 +50,18 @@ export class ForgotPasswordPageComponent implements OnDestroy {
   }
 
   onNewPasswordBlur(): void {
-    if (!this.newPassword()) return;
+    if (!this.newPassword()) {
+      return;
+    }
     this.newPasswordError.set(
       this.newPassword().length >= 8 ? '' : 'Must be at least 8 characters',
     );
   }
 
   onConfirmPasswordBlur(): void {
-    if (!this.confirmPassword()) return;
+    if (!this.confirmPassword()) {
+      return;
+    }
     this.confirmPasswordError.set(
       !this.newPassword() || this.confirmPassword() === this.newPassword()
         ? ''
@@ -114,7 +120,9 @@ export class ForgotPasswordPageComponent implements OnDestroy {
   }
 
   async onResetPassword(): Promise<void> {
-    if (!this.validateReset()) return;
+    if (!this.validateReset()) {
+      return;
+    }
 
     this.error.set('');
     this.loading.set(true);

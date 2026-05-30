@@ -121,7 +121,7 @@ fieldset[disabled] {
 .btn-content {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
 }
 
 .find-friend-row {
@@ -317,7 +317,7 @@ fieldset[disabled] {
   min-width: 100px;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 8px;
 }
 
 .outcome-row__slider ea-slider {
@@ -461,6 +461,67 @@ fieldset[disabled] {
   border-radius: 8px;
   background-color: var(--bb-color-surfacePrimaryTint);
   color: var(--bb-color-textWarning);
+}
+
+.card-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 32px;
+}
+
+.card-header__title {
+  margin: 0;
+}
+
+.status-tags {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.winner-banner {
+  padding: 12px;
+  margin-bottom: 16px;
+  text-align: center;
+  border-radius: 8px;
+  background-color: var(--bb-color-surfacePrimaryTint);
+  color: var(--bb-color-textStrong);
+}
+
+.readonly-description {
+  padding: 12px;
+  margin: 0;
+  font-size: 16px;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  word-break: break-word;
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-md);
+  background-color: var(--color-bg-base);
+  color: var(--color-text-primary);
+}
+
+.settle-options {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.back-link {
+  display: block;
+  padding-top: 16px;
+  font-size: 14px;
+  text-align: center;
+  text-decoration: none;
+  border-top: 1px solid var(--bb-color-borderSubtle);
+  color: var(--bb-color-primaryLink);
+  cursor: pointer;
+
+  &:hover {
+    text-decoration: underline;
+  }
 }
 
 .actions {

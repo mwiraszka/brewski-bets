@@ -1,19 +1,18 @@
 import {
   AvatarEditorComponent,
-  AvatarEditorCropState,
+  type AvatarEditorCropState,
   ButtonComponent,
   CardComponent,
   DialogComponent,
   DividerComponent,
   InputComponent,
-  SkeletonComponent,
   ToastService,
 } from '@eagami/ui';
 
 import {
   Component,
   DestroyRef,
-  OnInit,
+  type OnInit,
   computed,
   inject,
   signal,
@@ -21,9 +20,10 @@ import {
 } from '@angular/core';
 import { Router } from '@angular/router';
 
+import { LoadingComponent } from '@app/components/loading/loading.component';
 import { ApiService } from '@app/services/api.service';
 import { ClerkService } from '@app/services/clerk.service';
-import { UserRecord, UserService } from '@app/services/user.service';
+import { type UserRecord, UserService } from '@app/services/user.service';
 
 @Component({
   selector: 'bb-account-page',
@@ -36,7 +36,7 @@ import { UserRecord, UserService } from '@app/services/user.service';
     DialogComponent,
     DividerComponent,
     InputComponent,
-    SkeletonComponent,
+    LoadingComponent,
   ],
 })
 export class AccountPageComponent implements OnInit {
@@ -129,12 +129,16 @@ export class AccountPageComponent implements OnInit {
       const currentLast = this.originalLastName();
 
       if (user.firstName !== currentFirst) {
-        if (currentFirst) changes.push('first name');
+        if (currentFirst) {
+          changes.push('first name');
+        }
         this.firstName.set(user.firstName);
         this.originalFirstName.set(user.firstName);
       }
       if (user.lastName !== currentLast) {
-        if (currentLast) changes.push('last name');
+        if (currentLast) {
+          changes.push('last name');
+        }
         this.lastName.set(user.lastName);
         this.originalLastName.set(user.lastName);
       }
@@ -183,7 +187,9 @@ export class AccountPageComponent implements OnInit {
   }
 
   async onSave(): Promise<void> {
-    if (!this.validate()) return;
+    if (!this.validate()) {
+      return;
+    }
 
     this.saving.set(true);
 
@@ -214,8 +220,12 @@ export class AccountPageComponent implements OnInit {
     const firstEmpty = !this.firstName().trim();
     const lastEmpty = !this.lastName().trim();
 
-    if (firstEmpty) this.firstNameError.set('First name is required');
-    if (lastEmpty) this.lastNameError.set('Last name is required');
+    if (firstEmpty) {
+      this.firstNameError.set('First name is required');
+    }
+    if (lastEmpty) {
+      this.lastNameError.set('Last name is required');
+    }
 
     return !firstEmpty && !lastEmpty;
   }
@@ -234,8 +244,12 @@ export class AccountPageComponent implements OnInit {
     if (firstChanged || lastChanged) {
       await this.clerk.updateProfile(this.firstName(), this.lastName());
       await this.saveNameToBackend(firstChanged, lastChanged);
-      if (firstChanged) changes.push('first name');
-      if (lastChanged) changes.push('last name');
+      if (firstChanged) {
+        changes.push('first name');
+      }
+      if (lastChanged) {
+        changes.push('last name');
+      }
     }
 
     if (photoChanged) {
@@ -257,8 +271,12 @@ export class AccountPageComponent implements OnInit {
     lastChanged: boolean,
   ): Promise<void> {
     const body: { firstName?: string; lastName?: string } = {};
-    if (firstChanged) body.firstName = this.firstName();
-    if (lastChanged) body.lastName = this.lastName();
+    if (firstChanged) {
+      body.firstName = this.firstName();
+    }
+    if (lastChanged) {
+      body.lastName = this.lastName();
+    }
     await this.api.patch('/users/me', body);
   }
 
@@ -281,7 +299,9 @@ export class AccountPageComponent implements OnInit {
 
   private async saveCropState(): Promise<void> {
     const cropState = this.liveCropState();
-    if (!cropState) return;
+    if (!cropState) {
+      return;
+    }
     const blob = await this.exportCrop();
     const formData = new FormData();
     formData.append('cropped', blob, 'cropped.png');
@@ -302,10 +322,14 @@ export class AccountPageComponent implements OnInit {
   }
 
   private isCropChanged(): boolean {
-    if (this.avatarDirty()) return false;
+    if (this.avatarDirty()) {
+      return false;
+    }
     const saved = this.savedCropState();
     const live = this.liveCropState();
-    if (!live) return false;
+    if (!live) {
+      return false;
+    }
     if (!saved) {
       return live.zoom !== 1 || live.offsetX !== 0 || live.offsetY !== 0;
     }

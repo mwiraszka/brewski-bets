@@ -4,20 +4,25 @@ import {
   BottleIconComponent,
   ButtonComponent,
   CardComponent,
-  DataTableColumn,
+  type DataTableColumn,
   DataTableComponent,
-  DataTableSortState,
+  type DataTableSortState,
+  DialogComponent,
   DropdownComponent,
+  EditIconComponent,
   EmptyStateComponent,
   InputComponent,
-  SkeletonComponent,
+  TabComponent,
+  TabsComponent,
   ToastService,
+  TooltipDirective,
+  TrashIconComponent,
 } from '@eagami/ui';
 
 import {
   Component,
-  OnInit,
-  TemplateRef,
+  type OnInit,
+  type TemplateRef,
   computed,
   inject,
   signal,
@@ -25,9 +30,12 @@ import {
 } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 
-import { BetWithOpponent } from '@app/models';
+import { LoadingComponent } from '@app/components/loading/loading.component';
+import { type BetWithOpponent } from '@app/models';
 import { BetsService } from '@app/services/bets.service';
 import { UserService } from '@app/services/user.service';
+
+import { StandingsComponent } from './standings.component';
 
 @Component({
   selector: 'bb-bets-page',
@@ -41,10 +49,17 @@ import { UserService } from '@app/services/user.service';
     ButtonComponent,
     CardComponent,
     DataTableComponent,
+    DialogComponent,
     DropdownComponent,
+    EditIconComponent,
     EmptyStateComponent,
     InputComponent,
-    SkeletonComponent,
+    LoadingComponent,
+    StandingsComponent,
+    TabComponent,
+    TabsComponent,
+    TooltipDirective,
+    TrashIconComponent,
   ],
 })
 export class BetsPageComponent implements OnInit {
@@ -54,11 +69,18 @@ export class BetsPageComponent implements OnInit {
   private readonly toast = inject(ToastService);
 
   readonly loading = signal(true);
-  readonly skeletonRows = Array.from({ length: 5 });
+  readonly activeTab = signal('bets');
+  readonly allBets = this.betsService.bets;
   readonly filterText = signal('');
   readonly filterStatus = signal('all');
   readonly sort = signal<DataTableSortState>({ column: '', direction: null });
 
+  readonly deleteDialogOpen = signal(false);
+  readonly deleting = signal(false);
+  private betToDelete: BetWithOpponent | null = null;
+
+  readonly titleCell =
+    viewChild<TemplateRef<{ $implicit: BetWithOpponent; value: unknown }>>('titleCell');
   readonly opponentCell =
     viewChild<TemplateRef<{ $implicit: BetWithOpponent; value: unknown }>>(
       'opponentCell',
@@ -69,27 +91,27 @@ export class BetsPageComponent implements OnInit {
     viewChild<TemplateRef<{ $implicit: BetWithOpponent; value: unknown }>>('actionCell');
 
   readonly columns = computed((): DataTableColumn<BetWithOpponent>[] => [
-    { key: 'title', label: 'Title', sortable: true },
+    { key: 'title', label: 'Title', sortable: true, cellTemplate: this.titleCell() },
     { key: 'opponent', label: 'Opponent', cellTemplate: this.opponentCell() },
     { key: 'status', label: 'Status', sortable: true, cellTemplate: this.statusCell() },
-    { key: 'pendingAction', label: '', width: '120px', cellTemplate: this.actionCell() },
+    { key: 'pendingAction', label: '', width: '96px', cellTemplate: this.actionCell() },
   ]);
 
   readonly statusOptions = [
     { label: 'All', value: 'all' },
-    { label: 'Pending', value: 'pending' },
+    { label: 'Inactive', value: 'inactive' },
     { label: 'Active', value: 'active' },
-    { label: 'Complete', value: 'complete' },
+    { label: 'Settled', value: 'settled' },
   ];
 
   readonly emptyState = computed(() => {
     switch (this.filterStatus()) {
-      case 'pending':
-        return { title: 'No pending bets', description: '' };
+      case 'inactive':
+        return { title: 'No inactive bets', description: '' };
       case 'active':
         return { title: 'No active bets', description: '' };
-      case 'complete':
-        return { title: 'No completed bets', description: '' };
+      case 'settled':
+        return { title: 'No settled bets', description: '' };
       default:
         return {
           title: 'No bets yet',
@@ -118,7 +140,7 @@ export class BetsPageComponent implements OnInit {
     return bets;
   });
 
-  private readonly currentUserId = computed(() => this.userService.user()?.id);
+  readonly currentUserId = computed(() => this.userService.user()?.id);
 
   async ngOnInit(): Promise<void> {
     try {
@@ -130,28 +152,77 @@ export class BetsPageComponent implements OnInit {
     }
   }
 
-  onRowClick(bet: BetWithOpponent): void {
-    this.router.navigate(['/bets', bet.id]);
+  onTableClick(event: MouseEvent): void {
+    const target = event.target as HTMLElement;
+    if (target.closest('[data-row-action]')) {
+      return;
+    }
+
+    const betId = target.closest('tr')?.querySelector<HTMLElement>('[data-bet-id]')
+      ?.dataset['betId'];
+    if (betId) {
+      void this.router.navigate(['/bets', betId], { queryParams: { mode: 'view' } });
+    }
   }
 
-  isMyTurn(bet: BetWithOpponent): boolean {
+  onEdit(bet: BetWithOpponent): void {
+    void this.router.navigate(['/bets', bet.id]);
+  }
+
+  openDeleteDialog(bet: BetWithOpponent): void {
+    this.betToDelete = bet;
+    this.deleteDialogOpen.set(true);
+  }
+
+  cancelDelete(): void {
+    this.deleteDialogOpen.set(false);
+    this.betToDelete = null;
+  }
+
+  async confirmDelete(): Promise<void> {
+    if (!this.betToDelete) {
+      return;
+    }
+    this.deleting.set(true);
+    try {
+      await this.betsService.deleteBet(this.betToDelete.id);
+      this.deleteDialogOpen.set(false);
+      this.betToDelete = null;
+      await Promise.allSettled([
+        this.betsService.loadBets(),
+        this.betsService.loadPendingCount(),
+      ]);
+    } catch {
+      this.toast.error('Failed to delete bet');
+    } finally {
+      this.deleting.set(false);
+    }
+  }
+
+  private isMyTurn(bet: BetWithOpponent): boolean {
     const userId = this.currentUserId();
-    if (!userId || !bet.pendingAction) return false;
+    if (!userId || !bet.pendingAction) {
+      return false;
+    }
     return (
       (bet.pendingAction === 'user1' && bet.user1Id === userId) ||
       (bet.pendingAction === 'user2' && bet.user2Id === userId)
     );
   }
 
-  getStatusVariant(status: string): 'success' | 'warning' | 'default' | 'info' | 'error' {
-    switch (status) {
-      case 'active':
-        return 'success';
-      case 'pending':
-        return 'warning';
-      default:
-        return 'default';
+  isChangesPending(bet: BetWithOpponent): boolean {
+    return bet.pendingAction != null && bet.status !== 'settled';
+  }
+
+  canAct(bet: BetWithOpponent): boolean {
+    if (bet.status === 'settled') {
+      return false;
     }
+    return this.isMyTurn(bet) || (bet.status === 'active' && bet.pendingAction == null);
+  }
+
+  canDelete(bet: BetWithOpponent): boolean {
+    return bet.status !== 'settled' && !bet.settlementProposed;
   }
 
   getAvatarSrc(clerkImageUrl: string | null): string | undefined {

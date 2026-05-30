@@ -13,9 +13,9 @@ jest.mock('@env', () => ({
   },
 }));
 
-type MockClerkService = {
+interface MockClerkService {
   getToken: jest.Mock<Promise<string | null>>;
-};
+}
 
 describe('ApiService', () => {
   let service: ApiService;

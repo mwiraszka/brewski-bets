@@ -23,25 +23,6 @@
   color: var(--bb-color-textMuted);
 }
 
-.avatar-skeleton {
-  display: inline-flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 12px;
-}
-
-.email-skeleton {
-  display: flex;
-  justify-content: center;
-  margin-bottom: 24px;
-}
-
-.field-skeleton {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
 .fields {
   display: flex;
   flex-direction: column;
