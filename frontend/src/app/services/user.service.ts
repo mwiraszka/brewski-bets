@@ -56,7 +56,7 @@ export class UserService {
       const user = await this.api.get<UserRecord>('/users/me');
       this._user.set(user);
     } catch {
-      // silently ignore — app still works without user record
+      // silently ignore; app still works without user record
     }
   }
 

@@ -425,10 +425,10 @@ describe('AccountPageComponent', () => {
   });
 
   // ---------------------------------------------------------------------------
-  // onSave — validation
+  // onSave: validation
   // ---------------------------------------------------------------------------
 
-  describe('onSave — validation', () => {
+  describe('onSave: validation', () => {
     it('sets firstNameError and does not save when firstName is empty', async () => {
       component.firstName.set('');
 
@@ -478,10 +478,10 @@ describe('AccountPageComponent', () => {
   });
 
   // ---------------------------------------------------------------------------
-  // onSave — name changes
+  // onSave: name changes
   // ---------------------------------------------------------------------------
 
-  describe('onSave — name changes', () => {
+  describe('onSave: name changes', () => {
     it('calls clerk.updateProfile when firstName changes', async () => {
       component.firstName.set('Jane');
 
@@ -555,10 +555,10 @@ describe('AccountPageComponent', () => {
   });
 
   // ---------------------------------------------------------------------------
-  // onSave — success toast messages
+  // onSave: success toast messages
   // ---------------------------------------------------------------------------
 
-  describe('onSave — success toast', () => {
+  describe('onSave: success toast', () => {
     it('shows "First name updated" when only firstName changes', async () => {
       component.firstName.set('Jane');
 
@@ -616,10 +616,10 @@ describe('AccountPageComponent', () => {
   });
 
   // ---------------------------------------------------------------------------
-  // onSave — photo save
+  // onSave: photo save
   // ---------------------------------------------------------------------------
 
-  describe('onSave — photo save', () => {
+  describe('onSave: photo save', () => {
     let mockBlob: Blob;
 
     beforeEach(() => {
@@ -693,10 +693,10 @@ describe('AccountPageComponent', () => {
   });
 
   // ---------------------------------------------------------------------------
-  // onSave — crop state
+  // onSave: crop state
   // ---------------------------------------------------------------------------
 
-  describe('onSave — crop state', () => {
+  describe('onSave: crop state', () => {
     beforeEach(() => {
       component.savedCropState.set({ zoom: 1, offsetX: 0, offsetY: 0 });
       component.liveCropState.set({ zoom: 2, offsetX: 10, offsetY: 5 });
@@ -778,10 +778,10 @@ describe('AccountPageComponent', () => {
   });
 
   // ---------------------------------------------------------------------------
-  // onSave — photo remove
+  // onSave: photo remove
   // ---------------------------------------------------------------------------
 
-  describe('onSave — photo remove', () => {
+  describe('onSave: photo remove', () => {
     beforeEach(async () => {
       mockClerk.user = signal({
         ...MOCK_USER,
@@ -842,10 +842,10 @@ describe('AccountPageComponent', () => {
   });
 
   // ---------------------------------------------------------------------------
-  // onSave — state management
+  // onSave: state management
   // ---------------------------------------------------------------------------
 
-  describe('onSave — state management', () => {
+  describe('onSave: state management', () => {
     it('sets saving to false after a successful save', async () => {
       component.firstName.set('Jane');
 
@@ -1004,10 +1004,10 @@ describe('AccountPageComponent', () => {
   });
 
   // ---------------------------------------------------------------------------
-  // isCropChanged — null saved state
+  // isCropChanged: null saved state
   // ---------------------------------------------------------------------------
 
-  describe('hasChanges — crop with null saved state', () => {
+  describe('hasChanges: crop with null saved state', () => {
     it('is true when savedCropState is null and liveCropState has non-default values', () => {
       component.savedCropState.set(null);
       component.liveCropState.set({ zoom: 2, offsetX: 0, offsetY: 0 });

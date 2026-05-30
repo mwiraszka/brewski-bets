@@ -147,10 +147,10 @@ describe('ChangePasswordPageComponent', () => {
   });
 
   // ---------------------------------------------------------------------------
-  // onSubmit — validation
+  // onSubmit: validation
   // ---------------------------------------------------------------------------
 
-  describe('onSubmit — validation', () => {
+  describe('onSubmit: validation', () => {
     it('sets all errors when all fields are empty', async () => {
       await component.onSubmit();
 
@@ -182,10 +182,10 @@ describe('ChangePasswordPageComponent', () => {
   });
 
   // ---------------------------------------------------------------------------
-  // onSubmit — success
+  // onSubmit: success
   // ---------------------------------------------------------------------------
 
-  describe('onSubmit — success', () => {
+  describe('onSubmit: success', () => {
     beforeEach(() => {
       component.currentPassword.set('oldpass123');
       component.newPassword.set('newpass123');
@@ -215,10 +215,10 @@ describe('ChangePasswordPageComponent', () => {
   });
 
   // ---------------------------------------------------------------------------
-  // onSubmit — error
+  // onSubmit: error
   // ---------------------------------------------------------------------------
 
-  describe('onSubmit — error', () => {
+  describe('onSubmit: error', () => {
     it('sets error on failure', async () => {
       component.currentPassword.set('oldpass123');
       component.newPassword.set('newpass123');

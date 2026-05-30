@@ -166,10 +166,10 @@ describe('CreateAccountPageComponent', () => {
   });
 
   // ---------------------------------------------------------------------------
-  // onSubmit — validation
+  // onSubmit: validation
   // ---------------------------------------------------------------------------
 
-  describe('onSubmit — validation', () => {
+  describe('onSubmit: validation', () => {
     it('sets all errors when all fields are empty', async () => {
       await component.onSubmit();
 
@@ -222,10 +222,10 @@ describe('CreateAccountPageComponent', () => {
   });
 
   // ---------------------------------------------------------------------------
-  // onSubmit — success without verification
+  // onSubmit: success without verification
   // ---------------------------------------------------------------------------
 
-  describe('onSubmit — success without verification', () => {
+  describe('onSubmit: success without verification', () => {
     beforeEach(() => {
       component.firstName.set('John');
       component.lastName.set('Doe');
@@ -255,10 +255,10 @@ describe('CreateAccountPageComponent', () => {
   });
 
   // ---------------------------------------------------------------------------
-  // onSubmit — success with verification
+  // onSubmit: success with verification
   // ---------------------------------------------------------------------------
 
-  describe('onSubmit — success with verification', () => {
+  describe('onSubmit: success with verification', () => {
     it('sets pendingVerification when verification is needed', async () => {
       component.firstName.set('John');
       component.lastName.set('Doe');
@@ -275,10 +275,10 @@ describe('CreateAccountPageComponent', () => {
   });
 
   // ---------------------------------------------------------------------------
-  // onSubmit — error
+  // onSubmit: error
   // ---------------------------------------------------------------------------
 
-  describe('onSubmit — error', () => {
+  describe('onSubmit: error', () => {
     it('sets error from clerk.extractError on failure', async () => {
       component.firstName.set('John');
       component.lastName.set('Doe');

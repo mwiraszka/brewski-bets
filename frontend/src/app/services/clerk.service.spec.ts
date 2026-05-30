@@ -564,20 +564,18 @@ describe('ClerkService', () => {
   describe('changePassword', () => {
     it('updates the password via clerk user', async () => {
       await service.load();
+      const updatePassword = jest.fn().mockResolvedValue(undefined);
       mockClerkInstance.user = {
         reload: jest.fn(),
         update: jest.fn(),
         setProfileImage: jest.fn(),
         imageUrl: '',
-        updatePassword: jest.fn().mockResolvedValue(undefined),
+        updatePassword,
       } as never;
 
       await service.changePassword('oldpass', 'newpass');
 
-      expect(
-        (mockClerkInstance.user as unknown as { updatePassword: jest.Mock })
-          .updatePassword,
-      ).toHaveBeenCalledWith({
+      expect(updatePassword).toHaveBeenCalledWith({
         currentPassword: 'oldpass',
         newPassword: 'newpass',
       });
