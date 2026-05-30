@@ -13,7 +13,7 @@ import { filter, map } from 'rxjs';
 import {
   Component,
   DestroyRef,
-  OnInit,
+  type OnInit,
   computed,
   effect,
   inject,
@@ -106,12 +106,17 @@ export class HeaderComponent implements OnInit {
     effect(() => {
       if (this.clerk.isLoggedIn()) {
         this.friendsService.startPolling();
+        this.betsService.startPolling();
       } else {
         this.friendsService.stopPolling();
+        this.betsService.stopPolling();
       }
     });
 
-    this.destroyRef.onDestroy(() => this.friendsService.stopPolling());
+    this.destroyRef.onDestroy(() => {
+      this.friendsService.stopPolling();
+      this.betsService.stopPolling();
+    });
   }
 
   async ngOnInit(): Promise<void> {

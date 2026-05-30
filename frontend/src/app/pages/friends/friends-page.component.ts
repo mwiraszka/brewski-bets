@@ -7,7 +7,6 @@ import {
   InboxIconComponent,
   InputComponent,
   SearchIconComponent,
-  SkeletonComponent,
   TabComponent,
   TabsComponent,
   ToastService,
@@ -16,10 +15,16 @@ import {
   UsersIconComponent,
 } from '@eagami/ui';
 
-import { Component, OnInit, computed, effect, inject, signal } from '@angular/core';
+import { Component, type OnInit, computed, effect, inject, signal } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 
-import { Friend, FriendRequest, SentFriendRequest, UserSearchResult } from '@app/models';
+import { LoadingComponent } from '@app/components/loading/loading.component';
+import {
+  type Friend,
+  type FriendRequest,
+  type SentFriendRequest,
+  type UserSearchResult,
+} from '@app/models';
 import { FriendsService } from '@app/services/friends.service';
 
 const ACTIVE_TAB_STORAGE_KEY = 'bb-friends-active-tab';
@@ -44,8 +49,8 @@ function readStoredTab(): FriendsTab {
     EmptyStateComponent,
     InboxIconComponent,
     InputComponent,
+    LoadingComponent,
     SearchIconComponent,
-    SkeletonComponent,
     TabComponent,
     TabsComponent,
     TooltipDirective,
@@ -68,7 +73,6 @@ export class FriendsPageComponent implements OnInit {
     })(),
   );
   readonly loading = signal(true);
-  readonly skeletonRows = Array.from({ length: 4 });
 
   constructor() {
     effect(() => {
@@ -239,7 +243,9 @@ export class FriendsPageComponent implements OnInit {
   }
 
   async onConfirmRemove(): Promise<void> {
-    if (!this.friendToRemove) return;
+    if (!this.friendToRemove) {
+      return;
+    }
     this.removingId.set(this.friendToRemove.friendshipId);
 
     try {

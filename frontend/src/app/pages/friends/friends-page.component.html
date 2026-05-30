@@ -7,26 +7,7 @@
         value="friends"
         label="Friends">
         @if (loading()) {
-          <ul class="friend-list">
-            @for (_ of skeletonRows; track $index) {
-              <li class="friend-item">
-                <div class="friend-info">
-                  <ea-skeleton
-                    variant="circle"
-                    width="32px"
-                    height="32px" />
-                  <ea-skeleton
-                    variant="text"
-                    width="140px"
-                    height="16px" />
-                </div>
-                <ea-skeleton
-                  variant="rect"
-                  width="72px"
-                  height="32px" />
-              </li>
-            }
-          </ul>
+          <bb-loading label="Loading friends" />
         } @else if (friends().length === 0) {
           <ea-empty-state
             size="sm"
@@ -67,32 +48,7 @@
         value="requests"
         [label]="requestsTabLabel()">
         @if (loading()) {
-          <ul class="friend-list">
-            @for (_ of skeletonRows; track $index) {
-              <li class="friend-item">
-                <div class="friend-info">
-                  <ea-skeleton
-                    variant="circle"
-                    width="32px"
-                    height="32px" />
-                  <ea-skeleton
-                    variant="text"
-                    width="140px"
-                    height="16px" />
-                </div>
-                <div class="action-buttons">
-                  <ea-skeleton
-                    variant="rect"
-                    width="68px"
-                    height="32px" />
-                  <ea-skeleton
-                    variant="rect"
-                    width="72px"
-                    height="32px" />
-                </div>
-              </li>
-            }
-          </ul>
+          <bb-loading label="Loading friends" />
         } @else {
           @if (incomingRequests().length > 0) {
             <h3 class="section-label">Received</h3>
