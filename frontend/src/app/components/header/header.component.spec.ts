@@ -1,12 +1,11 @@
 import { Subject } from 'rxjs';
 
-import { WritableSignal, signal } from '@angular/core';
-import { NO_ERRORS_SCHEMA } from '@angular/core';
+import { NO_ERRORS_SCHEMA, type WritableSignal, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { NavigationEnd, Router } from '@angular/router';
 
 import { ClerkService } from '@app/services/clerk.service';
-import { ThemeMode, ThemeService } from '@app/services/theme.service';
+import { type ThemeMode, ThemeService } from '@app/services/theme.service';
 
 import { HeaderComponent } from './header.component';
 
@@ -19,25 +18,25 @@ jest.mock('@env', () => ({
   },
 }));
 
-type MockUser = {
+interface MockUser {
   firstName: string;
   lastName: string;
   hasImage: boolean;
   imageUrl: string;
-};
+}
 
-type MockClerkService = {
+interface MockClerkService {
   isLoaded: WritableSignal<boolean>;
   isLoggedIn: WritableSignal<boolean>;
   user: WritableSignal<MockUser | null>;
   logOut: jest.Mock<Promise<void>>;
-};
+}
 
-type MockThemeService = {
+interface MockThemeService {
   mode: WritableSignal<ThemeMode>;
   set: jest.Mock<void, [ThemeMode]>;
   cycle: jest.Mock<void, []>;
-};
+}
 
 describe('HeaderComponent', () => {
   let component: HeaderComponent;

@@ -15,7 +15,7 @@ jest.mock('@env', () => ({
   },
 }));
 
-type MockClerkService = {
+interface MockClerkService {
   createAccount: jest.Mock<
     Promise<{ needsVerification: boolean }>,
     [string, string, string, string]
@@ -23,11 +23,11 @@ type MockClerkService = {
   verifyEmail: jest.Mock<Promise<void>, [string]>;
   continueWithGoogle: jest.Mock<Promise<void>>;
   extractError: jest.Mock<string, [unknown]>;
-};
+}
 
-type MockRouter = {
+interface MockRouter {
   navigate: jest.Mock<Promise<boolean>, [string[]]>;
-};
+}
 
 describe('CreateAccountPageComponent', () => {
   let component: CreateAccountPageComponent;

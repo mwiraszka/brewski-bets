@@ -1,10 +1,10 @@
-import { WritableSignal, signal } from '@angular/core';
+import { type WritableSignal, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 
 import { ApiService } from '@app/services/api.service';
 import { ClerkService } from '@app/services/clerk.service';
 
-import { UserRecord, UserService } from './user.service';
+import { type UserRecord, UserService } from './user.service';
 
 jest.mock('@env', () => ({
   environment: {
@@ -15,14 +15,14 @@ jest.mock('@env', () => ({
   },
 }));
 
-type MockClerkService = {
+interface MockClerkService {
   isLoggedIn: WritableSignal<boolean>;
   user: WritableSignal<{ hasImage: boolean; imageUrl: string } | null>;
-};
+}
 
-type MockApiService = {
+interface MockApiService {
   get: jest.Mock<Promise<unknown>>;
-};
+}
 
 const MOCK_USER_RECORD: UserRecord = {
   id: 'user-1',

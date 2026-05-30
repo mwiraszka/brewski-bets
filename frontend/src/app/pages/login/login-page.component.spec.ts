@@ -15,16 +15,16 @@ jest.mock('@env', () => ({
   },
 }));
 
-type MockClerkService = {
+interface MockClerkService {
   logIn: jest.Mock<Promise<{ needsSecondFactor: boolean }>, [string, string]>;
   verifyLoginCode: jest.Mock<Promise<void>, [string]>;
   continueWithGoogle: jest.Mock<Promise<void>>;
   extractError: jest.Mock<string, [unknown]>;
-};
+}
 
-type MockRouter = {
+interface MockRouter {
   navigate: jest.Mock<Promise<boolean>, [string[]]>;
-};
+}
 
 describe('LoginPageComponent', () => {
   let component: LoginPageComponent;

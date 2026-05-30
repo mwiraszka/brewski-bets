@@ -1,19 +1,19 @@
-import { WritableSignal, signal } from '@angular/core';
+import { type WritableSignal, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { Router, UrlTree } from '@angular/router';
+import { Router, type UrlTree } from '@angular/router';
 
 import { ClerkService } from '@app/services/clerk.service';
 
 import { authGuard, guestGuard, ssoCallbackGuard } from './auth.guard';
 
-type MockClerkService = {
+interface MockClerkService {
   isLoggedIn: WritableSignal<boolean>;
   handleSSOCallback: jest.Mock<Promise<void>>;
-};
+}
 
-type MockRouter = {
+interface MockRouter {
   createUrlTree: jest.Mock<UrlTree, [string[]]>;
-};
+}
 
 describe('auth guards', () => {
   let mockClerk: MockClerkService;

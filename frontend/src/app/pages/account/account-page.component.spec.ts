@@ -1,6 +1,6 @@
-import { AvatarEditorCropState, ToastService } from '@eagami/ui';
+import { type AvatarEditorCropState, ToastService } from '@eagami/ui';
 
-import { NO_ERRORS_SCHEMA, WritableSignal, signal } from '@angular/core';
+import { NO_ERRORS_SCHEMA, type WritableSignal, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
 
@@ -19,15 +19,15 @@ jest.mock('@env', () => ({
   },
 }));
 
-type MockUser = {
+interface MockUser {
   firstName: string;
   lastName: string;
   hasImage: boolean;
   imageUrl: string;
   primaryEmailAddress: { emailAddress: string } | null;
-};
+}
 
-type MockClerkService = {
+interface MockClerkService {
   user: WritableSignal<MockUser | null>;
   reloadUser: jest.Mock<Promise<void>>;
   updateProfile: jest.Mock<Promise<void>, [string, string]>;
@@ -35,20 +35,20 @@ type MockClerkService = {
   expectSessionEnd: jest.Mock<void>;
   logOut: jest.Mock<Promise<void>>;
   extractError: jest.Mock<string, [unknown]>;
-};
+}
 
-type MockRouter = {
+interface MockRouter {
   navigate: jest.Mock<Promise<boolean>, [string[]]>;
-};
+}
 
-type MockApiService = {
+interface MockApiService {
   get: jest.Mock<Promise<unknown>>;
   patch: jest.Mock<Promise<unknown>>;
   post: jest.Mock<Promise<unknown>>;
   delete: jest.Mock<Promise<unknown>>;
-};
+}
 
-type MockUserService = {
+interface MockUserService {
   user: WritableSignal<{ firstName: string; lastName: string } | null>;
   fullSizeAvatarUrl: WritableSignal<string | undefined>;
   avatarUrl: WritableSignal<string | undefined>;
@@ -57,12 +57,12 @@ type MockUserService = {
   load: jest.Mock<Promise<void>>;
   setUser: jest.Mock<void>;
   clearAvatar: jest.Mock<void>;
-};
+}
 
-type MockToastService = {
+interface MockToastService {
   success: jest.Mock<number, [string]>;
   error: jest.Mock<number, [string]>;
-};
+}
 
 const MOCK_USER: MockUser = {
   firstName: 'John',

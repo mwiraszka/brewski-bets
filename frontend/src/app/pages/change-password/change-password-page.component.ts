@@ -1,6 +1,6 @@
 import { ButtonComponent, CardComponent, InputComponent } from '@eagami/ui';
 
-import { Component, OnDestroy, inject, signal } from '@angular/core';
+import { Component, type OnDestroy, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 
@@ -37,14 +37,18 @@ export class ChangePasswordPageComponent implements OnDestroy {
   }
 
   onNewPasswordBlur(): void {
-    if (!this.newPassword()) return;
+    if (!this.newPassword()) {
+      return;
+    }
     this.newPasswordError.set(
       this.newPassword().length >= 8 ? '' : 'Must be at least 8 characters',
     );
   }
 
   onConfirmPasswordBlur(): void {
-    if (!this.confirmPassword()) return;
+    if (!this.confirmPassword()) {
+      return;
+    }
     this.confirmPasswordError.set(
       !this.newPassword() || this.confirmPassword() === this.newPassword()
         ? ''
@@ -83,7 +87,9 @@ export class ChangePasswordPageComponent implements OnDestroy {
   }
 
   async onSubmit(): Promise<void> {
-    if (!this.validateAll()) return;
+    if (!this.validateAll()) {
+      return;
+    }
 
     this.error.set('');
     this.loading.set(true);

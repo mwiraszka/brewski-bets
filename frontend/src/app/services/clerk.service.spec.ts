@@ -11,23 +11,23 @@ jest.mock('@env', () => ({
   },
 }));
 
-type MockSignUp = {
+interface MockSignUp {
   create: jest.Mock;
   prepareEmailAddressVerification: jest.Mock;
   attemptEmailAddressVerification: jest.Mock;
   firstName: string | null;
   lastName: string | null;
-};
+}
 
-type MockSignIn = {
+interface MockSignIn {
   create: jest.Mock;
   authenticateWithRedirect: jest.Mock;
   attemptFirstFactor: jest.Mock;
   attemptSecondFactor: jest.Mock;
   firstFactorVerification: { status: string } | null;
-};
+}
 
-type MockClerk = {
+interface MockClerk {
   load: jest.Mock;
   addListener: jest.Mock;
   setActive: jest.Mock;
@@ -44,7 +44,7 @@ type MockClerk = {
     signUp: MockSignUp;
     signIn: MockSignIn;
   };
-};
+}
 
 let mockClerkInstance: MockClerk;
 

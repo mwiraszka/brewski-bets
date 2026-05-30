@@ -8,8 +8,8 @@ import {
 
 import {
   Component,
-  ElementRef,
-  OnDestroy,
+  type ElementRef,
+  type OnDestroy,
   inject,
   signal,
   viewChild,
@@ -67,21 +67,27 @@ export class CreateAccountPageComponent implements OnDestroy {
   }
 
   onEmailBlur(): void {
-    if (!this.email()) return;
+    if (!this.email()) {
+      return;
+    }
     this.emailError.set(
       EMAIL_REGEX.test(this.email()) ? '' : 'Please enter a valid email address',
     );
   }
 
   onPasswordBlur(): void {
-    if (!this.password()) return;
+    if (!this.password()) {
+      return;
+    }
     this.passwordError.set(
       this.password().length >= 8 ? '' : 'Must be at least 8 characters',
     );
   }
 
   onConfirmPasswordBlur(): void {
-    if (!this.confirmPassword()) return;
+    if (!this.confirmPassword()) {
+      return;
+    }
     this.confirmPasswordError.set(
       !this.password() || this.confirmPassword() === this.password()
         ? ''
@@ -137,7 +143,9 @@ export class CreateAccountPageComponent implements OnDestroy {
   }
 
   async onSubmit(): Promise<void> {
-    if (!this.validateAll()) return;
+    if (!this.validateAll()) {
+      return;
+    }
 
     this.error.set('');
     this.loading.set(true);

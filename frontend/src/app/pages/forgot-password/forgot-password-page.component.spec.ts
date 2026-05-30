@@ -15,15 +15,15 @@ jest.mock('@env', () => ({
   },
 }));
 
-type MockClerkService = {
+interface MockClerkService {
   sendPasswordResetCode: jest.Mock<Promise<void>, [string]>;
   resetPassword: jest.Mock<Promise<void>, [string, string]>;
   extractError: jest.Mock<string, [unknown]>;
-};
+}
 
-type MockRouter = {
+interface MockRouter {
   navigate: jest.Mock<Promise<boolean>, [string[]]>;
-};
+}
 
 describe('ForgotPasswordPageComponent', () => {
   let component: ForgotPasswordPageComponent;
