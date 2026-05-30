@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.0] - 2026-05-30
+
+### Changed
+
+- Update the Friends page instantly when sending, accepting, declining, or cancelling a request, and roll the change back automatically if the server rejects it
+
+### Fixed
+
+- Make account deletion resilient so an interrupted deletion can no longer leave an account in a half-removed state
+- Match the light-mode browser theme colour and boot background to the app background so the page no longer flashes a faint colour seam before it loads
+- Strengthen request validation and access controls across the backend API, and resolve all known dependency security advisories
+
 ## [0.30.0] - 2026-05-30
 
 ### Added
@@ -538,6 +550,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - PWA manifest and service worker configuration
 - GitHub issue templates
 
+[1.0.0]: https://github.com/mwiraszka/brewski-bets/compare/v0.30.0...v1.0.0
 [0.30.0]: https://github.com/mwiraszka/brewski-bets/compare/v0.29.0...v0.30.0
 [0.29.0]: https://github.com/mwiraszka/brewski-bets/compare/v0.28.0...v0.29.0
 [0.28.0]: https://github.com/mwiraszka/brewski-bets/compare/v0.27.0...v0.28.0
