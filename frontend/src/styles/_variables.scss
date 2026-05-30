@@ -63,16 +63,16 @@
   // Tokens not redeclared are stable across themes (e.g. `--bb-color-white`,
   // `--bb-color-secondary`, `surfaceAuth`).
 
-  --bb-color-appBackground: #0f1014;
+  --bb-color-appBackground: #16181d;
 
   --bb-color-primary: #d4b96a;
   --bb-color-primarySemiTransparent: rgba(212, 185, 106, 0.32);
   --bb-color-primaryLink: #e0c89a;
 
-  --bb-color-surfaceRaised: #1a1c20;
+  --bb-color-surfaceRaised: #20232a;
   --bb-color-surfaceSubtle: #101216;
   --bb-color-surfaceMuted: #15161a;
-  --bb-color-surfaceHover: #24272d;
+  --bb-color-surfaceHover: #2a2d35;
   --bb-color-surfaceDisabled: #1c1e22;
   --bb-color-surfacePrimaryTint: rgba(203, 168, 85, 0.12);
   --bb-color-surfaceCreamWarm: rgba(203, 168, 85, 0.2);
@@ -105,6 +105,9 @@
 
   --bb-boxShadow: 0 4px 8px rgba(0, 0, 0, 0.4);
   --bb-boxShadowRaised: 0 6px 12px rgba(0, 0, 0, 0.5);
+
+  // TODO: remove once @eagami/ui softens its dark-mode ghost-button hover; the library maps --color-bg-muted to a mid neutral that reads too strong on dark surfaces
+  --color-bg-muted: var(--bb-color-surfaceHover);
 }
 
 @media (prefers-color-scheme: dark) {

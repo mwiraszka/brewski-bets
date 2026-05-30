@@ -3,6 +3,8 @@ import {
   BadgeComponent,
   ButtonComponent,
   MenuIconComponent,
+  MoonIconComponent,
+  SunIconComponent,
   SwitchComponent,
   XIconComponent,
 } from '@eagami/ui';
@@ -38,6 +40,8 @@ import { environment } from '@env';
     BadgeComponent,
     ButtonComponent,
     MenuIconComponent,
+    MoonIconComponent,
+    SunIconComponent,
     SwitchComponent,
     XIconComponent,
   ],
@@ -54,6 +58,10 @@ export class HeaderComponent implements OnInit {
 
   onDarkModeToggle(checked: boolean): void {
     this.theme.set(checked ? 'dark' : 'light');
+  }
+
+  toggleTheme(): void {
+    this.theme.cycle();
   }
   private readonly currentUrl = toSignal(
     this.router.events.pipe(

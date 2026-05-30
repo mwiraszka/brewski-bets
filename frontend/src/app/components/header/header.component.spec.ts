@@ -6,6 +6,7 @@ import { TestBed } from '@angular/core/testing';
 import { NavigationEnd, Router } from '@angular/router';
 
 import { ClerkService } from '@app/services/clerk.service';
+import { ThemeMode, ThemeService } from '@app/services/theme.service';
 
 import { HeaderComponent } from './header.component';
 
@@ -32,9 +33,16 @@ type MockClerkService = {
   logOut: jest.Mock<Promise<void>>;
 };
 
+type MockThemeService = {
+  mode: WritableSignal<ThemeMode>;
+  set: jest.Mock<void, [ThemeMode]>;
+  cycle: jest.Mock<void, []>;
+};
+
 describe('HeaderComponent', () => {
   let component: HeaderComponent;
   let mockClerk: MockClerkService;
+  let mockTheme: MockThemeService;
   let routerEvents$: Subject<unknown>;
 
   beforeEach(async () => {
@@ -45,12 +53,19 @@ describe('HeaderComponent', () => {
       logOut: jest.fn().mockResolvedValue(undefined),
     };
 
+    mockTheme = {
+      mode: signal<ThemeMode>('light'),
+      set: jest.fn(),
+      cycle: jest.fn(),
+    };
+
     routerEvents$ = new Subject();
 
     await TestBed.configureTestingModule({
       imports: [HeaderComponent],
       providers: [
         { provide: ClerkService, useValue: mockClerk },
+        { provide: ThemeService, useValue: mockTheme },
         {
           provide: Router,
           useValue: { events: routerEvents$.asObservable(), url: '/' },
@@ -250,6 +265,34 @@ describe('HeaderComponent', () => {
 
       expect(component.menuOpen()).toBe(false);
       expect(mockClerk.logOut).toHaveBeenCalled();
+    });
+  });
+
+  // ---------------------------------------------------------------------------
+  // theme
+  // ---------------------------------------------------------------------------
+
+  describe('theme', () => {
+    it('reflects the theme mode in isDarkMode', () => {
+      expect(component.isDarkMode()).toBe(false);
+
+      mockTheme.mode.set('dark');
+
+      expect(component.isDarkMode()).toBe(true);
+    });
+
+    it('cycles the theme on toggleTheme', () => {
+      component.toggleTheme();
+
+      expect(mockTheme.cycle).toHaveBeenCalled();
+    });
+
+    it('sets the requested mode on onDarkModeToggle', () => {
+      component.onDarkModeToggle(true);
+      expect(mockTheme.set).toHaveBeenCalledWith('dark');
+
+      component.onDarkModeToggle(false);
+      expect(mockTheme.set).toHaveBeenCalledWith('light');
     });
   });
 });
