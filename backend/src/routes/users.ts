@@ -51,11 +51,9 @@ export const userRoutes = new Hono<AppContext>()
       return c.json([]);
     }
 
-    // Tokenize on whitespace so multi-word queries like "Bob Van" match
-    // "Bob Vance": each token must appear (case-insensitive substring) in
-    // either the first or last name. AND across tokens, OR across name
-    // columns. Order-independent: "Van Bob" matches "Bob Vance" too.
-    // Email stays excluded: it's private and shouldn't surface in search.
+    // Order-independent multi-word match: every token must hit the first or last
+    // name, so "Bob Van" and "Van Bob" both find "Bob Vance". Email is
+    // intentionally excluded as private.
     const tokens = q.split(/\s+/).filter(t => t.length > 0);
     const tokenConditions = tokens.map(token => {
       const pattern = `%${token}%`;
