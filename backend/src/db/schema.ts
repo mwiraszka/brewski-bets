@@ -12,7 +12,7 @@ import {
 
 export const friendshipStatusEnum = pgEnum('friendship_status', ['pending', 'accepted']);
 
-export const betStatusEnum = pgEnum('bet_status', ['pending', 'active', 'complete']);
+export const betStatusEnum = pgEnum('bet_status', ['inactive', 'active', 'settled']);
 export const betOutcomeEnum = pgEnum('bet_outcome', ['open', 'resolved', 'void']);
 export const betActionEnum = pgEnum('bet_action', ['user1', 'user2']);
 
@@ -20,7 +20,7 @@ export interface BetResult {
   name: string;
   brewskiCount: number;
   assignedTo: 'user1' | 'user2' | null;
-  isSpecial?: 'void' | 'active';
+  isSpecial?: 'void';
 }
 
 export const users = pgTable('users', {
@@ -76,9 +76,10 @@ export const bets = pgTable('bets', {
     .references(() => users.id),
   results: jsonb('results').notNull().$type<BetResult[]>(),
   selectedResultIndex: integer('selected_result_index'),
-  status: betStatusEnum('status').notNull().default('pending'),
+  status: betStatusEnum('status').notNull().default('inactive'),
   outcome: betOutcomeEnum('outcome').notNull().default('open'),
   pendingAction: betActionEnum('pending_action'),
+  settlementProposed: boolean('settlement_proposed').notNull().default(false),
   createdDate: timestamp('created_date', { withTimezone: true }).notNull().defaultNow(),
   lastModifiedDate: timestamp('last_modified_date', { withTimezone: true })
     .notNull()

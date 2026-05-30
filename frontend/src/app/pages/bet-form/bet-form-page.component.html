@@ -1,17 +1,46 @@
 @if (loading()) {
   <div class="bet-form-page">
-    <p class="loading">Loading...</p>
+    <bb-loading label="Loading bet" />
   </div>
 } @else {
   <div class="bet-form-page">
     <ea-card variant="outlined">
-      <h2 slot="header">{{ mode() === 'create' ? 'Create a bet' : 'Edit bet' }}</h2>
+      <div
+        slot="header"
+        class="card-header">
+        <h2 class="card-header__title">
+          {{
+            readonlyView()
+              ? 'View bet'
+              : mode() === 'create'
+                ? 'Create a bet'
+                : 'Edit bet'
+          }}
+        </h2>
+        @if (mode() === 'edit') {
+          <div class="status-tags">
+            @if (betStatus() === 'active') {
+              <ea-badge variant="success">active</ea-badge>
+            }
+            @if (isSettled()) {
+              <ea-badge variant="default">settled</ea-badge>
+            }
+            @if (changesPending() && !isSettled()) {
+              <ea-badge
+                variant="warning"
+                [eaTooltip]="tagTooltip()">
+                changes pending
+              </ea-badge>
+            }
+          </div>
+        }
+      </div>
 
-      @if (mode() === 'edit' && !isMyTurn()) {
+      @if (isWaiting()) {
         <div class="waiting-banner">Waiting for {{ opponentName() }} to respond</div>
       }
 
-      <fieldset [disabled]="(mode() === 'edit' && !isMyTurn()) || isBusy()">
+      <fieldset [disabled]="!canEditTerms() || isBusy()">
         @if (mode() === 'create') {
           <div class="form-field">
             @if (friends().length) {
@@ -49,14 +78,19 @@
         </div>
 
         <div class="form-field">
-          <ea-textarea
-            label="Description"
-            [required]="true"
-            [maxlength]="descriptionMaxLength"
-            [maxHeight]="200"
-            [errorMsg]="descriptionError()"
-            [(value)]="description"
-            (blurred)="descriptionTouched.set(true)" />
+          @if (isViewing()) {
+            <span class="field-label">Description</span>
+            <p class="readonly-description">{{ description() }}</p>
+          } @else {
+            <ea-textarea
+              label="Description"
+              [required]="true"
+              [maxlength]="descriptionMaxLength"
+              [maxHeight]="200"
+              [errorMsg]="descriptionError()"
+              [(value)]="description"
+              (blurred)="descriptionTouched.set(true)" />
+          }
         </div>
 
         <div class="form-field">
@@ -137,182 +171,92 @@
         <div class="form-field">
           <label class="field-label field-label--required">Outcomes</label>
 
-          @if (mode() === 'edit') {
-            <ea-radio-group
-              name="outcome-selection"
-              [(value)]="selectedOutcomeIndex">
-              <div class="outcomes-list">
-                <div class="outcomes-list__header outcomes-list__header--editable">
-                  <span></span>
-                  <span class="outcomes-list__col outcomes-list__col--description">
-                    Outcome
-                  </span>
-                  <span class="outcomes-list__col outcomes-list__col--brewskis">
-                    Brewskis
-                  </span>
-                  <span></span>
-                </div>
-                @for (outcome of outcomes(); track $index; let rowIndex = $index) {
-                  <div class="outcome-row outcome-row--editable">
-                    <div class="outcome-row__main">
-                      <ea-radio
-                        class="outcome-row__radio"
-                        [value]="'' + rowIndex" />
-                      <div class="outcome-row__description">
-                        <ea-input
-                          #outcomeInputRef
-                          placeholder="e.g. Poland wins"
-                          [value]="outcome.name"
-                          [errorMsg]="outcomeDescriptionError(rowIndex, outcome.name)"
-                          (valueChange)="updateOutcomeDescription(rowIndex, $event)"
-                          (blurred)="markOutcomeDescriptionTouched(rowIndex)" />
-                      </div>
-                      <div class="outcome-row__brewskis">
-                        <div class="outcome-row__slider-row">
-                          <span class="outcome-row__user">{{ youLabel() }}</span>
-                          <div class="outcome-row__slider">
-                            <ea-slider
-                              size="sm"
-                              [hasError]="!!outcomeAmountError(outcome, rowIndex)"
-                              [min]="-maxBrewskiCount"
-                              [max]="maxBrewskiCount"
-                              [step]="1"
-                              [showValue]="true"
-                              [formatValue]="absFormat"
-                              [value]="signedBrewskiCount(outcome)"
-                              (changed)="updateOutcomeSigned(rowIndex, $event)" />
-                            <div
-                              class="slider-ticks"
-                              aria-hidden="true">
-                              @for (
-                                tick of sliderTicks;
-                                track $index;
-                                let tickIndex = $index
-                              ) {
-                                @if (tick !== 0) {
-                                  <span
-                                    class="slider-ticks__tick"
-                                    [style.--tick-index]="tickIndex">
-                                    {{ tick }}
-                                  </span>
-                                }
-                              }
-                            </div>
-                          </div>
-                          <span class="outcome-row__user">{{ themLabel() }}</span>
-                        </div>
-                        @if (outcomeAmountError(outcome, rowIndex)) {
-                          <p class="outcome-row__error">
-                            <ea-icon-alert-circle class="outcome-row__error-icon" />
-                            {{ outcomeAmountError(outcome, rowIndex) }}
-                          </p>
-                        }
-                      </div>
-                    </div>
-                    @if (outcomes().length > 1) {
-                      <button
-                        type="button"
-                        class="remove-icon-btn"
-                        aria-label="Remove outcome"
-                        [eaTooltip]="'Remove outcome'"
-                        (click)="removeOutcome(rowIndex)">
-                        <ea-icon-trash />
-                      </button>
-                    }
-                  </div>
-                }
-
-                @for (special of specialOutcomes(); track special.isSpecial) {
-                  <div class="outcome-row outcome-row--special">
-                    <ea-radio
-                      [value]="'' + (outcomes().length + $index)"
-                      [label]="special.name" />
-                    <ea-tag>{{ special.name }}</ea-tag>
-                  </div>
-                }
-              </div>
-            </ea-radio-group>
-          } @else {
-            <div class="outcomes-list">
-              <div class="outcomes-list__header">
-                <span class="outcomes-list__col outcomes-list__col--description">
-                  Outcome
-                </span>
-                <span class="outcomes-list__col outcomes-list__col--brewskis">
-                  Brewskis
-                </span>
-                <span></span>
-              </div>
-              @for (outcome of outcomes(); track $index; let rowIndex = $index) {
-                <div class="outcome-row">
-                  <div class="outcome-row__main">
-                    <div class="outcome-row__description">
-                      <ea-input
-                        #outcomeInputRef
-                        placeholder="e.g. Poland wins"
-                        [value]="outcome.name"
-                        [errorMsg]="outcomeDescriptionError(rowIndex, outcome.name)"
-                        (valueChange)="updateOutcomeDescription(rowIndex, $event)"
-                        (blurred)="markOutcomeDescriptionTouched(rowIndex)" />
-                    </div>
-                    <div class="outcome-row__brewskis">
-                      <div class="outcome-row__slider-row">
-                        <span class="outcome-row__user">{{ youLabel() }}</span>
-                        <div class="outcome-row__slider">
-                          <ea-slider
-                            size="sm"
-                            [hasError]="!!outcomeAmountError(outcome, rowIndex)"
-                            [min]="-maxBrewskiCount"
-                            [max]="maxBrewskiCount"
-                            [step]="1"
-                            [showValue]="true"
-                            [formatValue]="absFormat"
-                            [value]="signedBrewskiCount(outcome)"
-                            (changed)="updateOutcomeSigned(rowIndex, $event)" />
-                          <div
-                            class="slider-ticks"
-                            aria-hidden="true">
-                            @for (
-                              tick of sliderTicks;
-                              track $index;
-                              let tickIndex = $index
-                            ) {
-                              @if (tick !== 0) {
-                                <span
-                                  class="slider-ticks__tick"
-                                  [style.--tick-index]="tickIndex">
-                                  {{ tick }}
-                                </span>
-                              }
-                            }
-                          </div>
-                        </div>
-                        <span class="outcome-row__user">{{ themLabel() }}</span>
-                      </div>
-                      @if (outcomeAmountError(outcome, rowIndex)) {
-                        <p class="outcome-row__error">
-                          <ea-icon-alert-circle class="outcome-row__error-icon" />
-                          {{ outcomeAmountError(outcome, rowIndex) }}
-                        </p>
-                      }
-                    </div>
-                  </div>
-                  @if (outcomes().length > 1) {
-                    <button
-                      type="button"
-                      class="remove-icon-btn"
-                      aria-label="Remove outcome"
-                      [eaTooltip]="'Remove outcome'"
-                      (click)="removeOutcome(rowIndex)">
-                      <ea-icon-trash />
-                    </button>
-                  }
-                </div>
-              }
+          @if (settlementProposed() || isSettled()) {
+            <div class="winner-banner">
+              {{ isSettled() ? 'Settled result' : 'Proposed result' }}:
+              <strong>{{ winnerLabel() }}</strong>
             </div>
           }
 
-          @if (outcomes().length < maxOutcomes) {
+          <div class="outcomes-list">
+            <div class="outcomes-list__header">
+              <span class="outcomes-list__col outcomes-list__col--description">
+                Outcome
+              </span>
+              <span class="outcomes-list__col outcomes-list__col--brewskis">
+                Brewskis
+              </span>
+              <span></span>
+            </div>
+            @for (outcome of outcomes(); track $index; let rowIndex = $index) {
+              <div class="outcome-row">
+                <div class="outcome-row__main">
+                  <div class="outcome-row__description">
+                    <ea-input
+                      #outcomeInputRef
+                      placeholder="e.g. Poland wins"
+                      [value]="outcome.name"
+                      [errorMsg]="outcomeDescriptionError(rowIndex, outcome.name)"
+                      (valueChange)="updateOutcomeDescription(rowIndex, $event)"
+                      (blurred)="markOutcomeDescriptionTouched(rowIndex)" />
+                  </div>
+                  <div class="outcome-row__brewskis">
+                    <div class="outcome-row__slider-row">
+                      <span class="outcome-row__user">You</span>
+                      <div class="outcome-row__slider">
+                        <ea-slider
+                          size="sm"
+                          [hasError]="!!outcomeAmountError(outcome, rowIndex)"
+                          [min]="-maxBrewskiCount"
+                          [max]="maxBrewskiCount"
+                          [step]="1"
+                          [showValue]="true"
+                          [formatValue]="absFormat"
+                          [value]="signedBrewskiCount(outcome)"
+                          (changed)="updateOutcomeSigned(rowIndex, $event)" />
+                        <div
+                          class="slider-ticks"
+                          aria-hidden="true">
+                          @for (
+                            tick of sliderTicks;
+                            track $index;
+                            let tickIndex = $index
+                          ) {
+                            @if (tick !== 0) {
+                              <span
+                                class="slider-ticks__tick"
+                                [style.--tick-index]="tickIndex">
+                                {{ tick }}
+                              </span>
+                            }
+                          }
+                        </div>
+                      </div>
+                      <span class="outcome-row__user">Them</span>
+                    </div>
+                    @if (outcomeAmountError(outcome, rowIndex)) {
+                      <p class="outcome-row__error">
+                        <ea-icon-alert-circle class="outcome-row__error-icon" />
+                        {{ outcomeAmountError(outcome, rowIndex) }}
+                      </p>
+                    }
+                  </div>
+                </div>
+                @if (canEditTerms() && outcomes().length > 1) {
+                  <button
+                    type="button"
+                    class="remove-icon-btn"
+                    aria-label="Remove outcome"
+                    [eaTooltip]="'Remove outcome'"
+                    (click)="removeOutcome(rowIndex)">
+                    <ea-icon-trash />
+                  </button>
+                }
+              </div>
+            }
+          </div>
+
+          @if (canEditTerms() && outcomes().length < maxOutcomes) {
             <ea-button
               variant="secondary"
               (clicked)="addOutcome()">
@@ -335,41 +279,73 @@
             (clicked)="onSubmitForReview()">
             SUBMIT FOR REVIEW
           </ea-button>
-        } @else if (isMyTurn()) {
-          <div class="action-primary">
-            <ea-button
-              [fullWidth]="true"
-              [loading]="actionInFlight() === 'accept'"
-              [disabled]="isBusy() || !isFormValid()"
-              (clicked)="onAccept()">
-              Accept
-            </ea-button>
-            <ea-button
-              variant="secondary"
-              [fullWidth]="true"
-              [loading]="actionInFlight() === 'submit'"
-              [disabled]="isBusy() || !isFormValid()"
-              (clicked)="onSubmitForReview()">
-              Send back with edits
-            </ea-button>
-          </div>
-          <div class="action-danger">
-            <ea-button
-              variant="ghost"
-              size="sm"
-              [loading]="actionInFlight() === 'void'"
-              [disabled]="isBusy()"
-              (clicked)="onProposeVoid()">
-              Propose void
-            </ea-button>
-            <ea-button
-              variant="danger"
-              size="sm"
-              [disabled]="isBusy()"
-              (clicked)="openDeleteDialog()">
-              Delete bet
-            </ea-button>
-          </div>
+        } @else {
+          @if (canApproveSettlement()) {
+            <div class="action-primary">
+              <ea-button
+                [fullWidth]="true"
+                [loading]="actionInFlight() === 'accept'"
+                [disabled]="isBusy()"
+                (clicked)="onAccept()">
+                Approve settlement
+              </ea-button>
+              <ea-button
+                variant="secondary"
+                [fullWidth]="true"
+                [loading]="actionInFlight() === 'reject'"
+                [disabled]="isBusy()"
+                (clicked)="onReject()">
+                Reject
+              </ea-button>
+            </div>
+          } @else {
+            @if (canApproveTerms()) {
+              <ea-button
+                [fullWidth]="true"
+                [loading]="actionInFlight() === 'accept'"
+                [disabled]="isBusy() || !isFormValid()"
+                (clicked)="onAccept()">
+                {{ betStatus() === 'inactive' ? 'Accept & activate' : 'Accept changes' }}
+              </ea-button>
+            }
+            @if (canSubmitChanges()) {
+              <ea-button
+                variant="secondary"
+                [fullWidth]="true"
+                [loading]="actionInFlight() === 'submit'"
+                [disabled]="isBusy() || !isFormValid()"
+                (clicked)="onSubmitForReview()">
+                {{ canApproveTerms() ? 'Send back with edits' : 'Request changes' }}
+              </ea-button>
+            }
+            @if (canSettle()) {
+              <ea-button
+                variant="secondary"
+                [fullWidth]="true"
+                [disabled]="isBusy()"
+                (clicked)="openSettleDialog()">
+                Settle bet
+              </ea-button>
+            }
+          }
+
+          @if (canDelete()) {
+            <div class="action-danger">
+              <ea-button
+                variant="danger"
+                size="sm"
+                [disabled]="isBusy()"
+                (clicked)="openDeleteDialog()">
+                Delete bet
+              </ea-button>
+            </div>
+          }
+
+          <a
+            class="back-link"
+            routerLink="/bets">
+            Back to bets
+          </a>
         }
       </div>
     </ea-card>
@@ -398,6 +374,41 @@
         [loading]="actionInFlight() === 'delete'"
         (clicked)="confirmDelete()">
         Delete
+      </ea-button>
+    </div>
+  </ea-dialog>
+
+  <ea-dialog
+    size="sm"
+    aria-label="Settle bet"
+    [(open)]="settleDialogOpen">
+    <h3 slot="header">Settle this bet</h3>
+    <p>Select the actual result. {{ opponentName() }} must approve before it is final.</p>
+    <ea-radio-group
+      name="settle-outcome"
+      [(value)]="settleIndex">
+      <div class="settle-options">
+        @for (option of settleOptions(); track option.value) {
+          <ea-radio
+            [value]="option.value"
+            [label]="option.label" />
+        }
+      </div>
+    </ea-radio-group>
+    <div
+      slot="footer"
+      class="dialog-actions">
+      <ea-button
+        variant="secondary"
+        [disabled]="actionInFlight() === 'settle'"
+        (clicked)="cancelSettle()">
+        Cancel
+      </ea-button>
+      <ea-button
+        [loading]="actionInFlight() === 'settle'"
+        [disabled]="settleIndex() === ''"
+        (clicked)="onSettle()">
+        Propose settlement
       </ea-button>
     </div>
   </ea-dialog>

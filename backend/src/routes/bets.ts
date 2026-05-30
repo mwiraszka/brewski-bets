@@ -40,19 +40,13 @@ const updateBetSchema = z.object({
   iconColor: iconColorSchema,
   results: z.array(betResultSchema).min(1).max(20).optional(),
   selectedResultIndex: z.number().int().min(0).optional(),
-  action: z.enum(['submit', 'accept']),
+  action: z.enum(['submit', 'accept', 'settle', 'reject']),
 });
 
-function appendSpecialResults(results: BetResult[]): BetResult[] {
+function appendVoidOption(results: BetResult[]): BetResult[] {
   return [
     ...results,
     { name: 'VOID', brewskiCount: 0, assignedTo: null, isSpecial: 'void' as const },
-    {
-      name: 'ACTIVE',
-      brewskiCount: 0,
-      assignedTo: null,
-      isSpecial: 'active' as const,
-    },
   ];
 }
 
@@ -94,8 +88,6 @@ export const betRoutes = new Hono<AppContext>()
       return c.json({ error: 'You can only create bets with friends' }, 403);
     }
 
-    const resultsWithSpecial = appendSpecialResults(body.results);
-
     const [bet] = await db
       .insert(bets)
       .values({
@@ -105,8 +97,8 @@ export const betRoutes = new Hono<AppContext>()
         iconColor: body.iconColor ?? null,
         user1Id: userId,
         user2Id: body.user2Id,
-        results: resultsWithSpecial,
-        selectedResultIndex: resultsWithSpecial.length - 1,
+        results: appendVoidOption(body.results),
+        status: 'inactive',
         pendingAction: 'user2',
         createdBy: userId,
         lastModifiedBy: userId,
@@ -229,11 +221,30 @@ export const betRoutes = new Hono<AppContext>()
       return c.json({ error: 'Bet not found' }, 404);
     }
 
+    if (existing.status === 'settled') {
+      return c.json({ error: 'This bet has been settled' }, 403);
+    }
+
     const userPosition = existing.user1Id === userId ? 'user1' : 'user2';
     const otherPosition = userPosition === 'user1' ? 'user2' : 'user1';
+    const isMyTurn = existing.pendingAction === userPosition;
+    const isResting = existing.pendingAction === null;
 
-    if (existing.pendingAction !== userPosition) {
+    if (body.action === 'accept' || body.action === 'reject') {
+      if (!isMyTurn) {
+        return c.json({ error: 'It is not your turn to act on this bet' }, 403);
+      }
+    } else if (!isMyTurn && !isResting) {
       return c.json({ error: 'It is not your turn to act on this bet' }, 403);
+    }
+
+    // While a settlement awaits approval, only accept/reject are allowed
+    if (
+      existing.settlementProposed &&
+      body.action !== 'accept' &&
+      body.action !== 'reject'
+    ) {
+      return c.json({ error: 'Approve or reject the proposed settlement first' }, 409);
     }
 
     const updates: Partial<typeof bets.$inferInsert> = {
@@ -241,51 +252,62 @@ export const betRoutes = new Hono<AppContext>()
       lastModifiedBy: userId,
     };
 
-    if (body.title !== undefined) updates.title = body.title;
-    if (body.description !== undefined) updates.description = body.description;
-    if (body.iconSlug !== undefined) updates.iconSlug = body.iconSlug;
-    if (body.iconColor !== undefined) updates.iconColor = body.iconColor;
-
-    if (body.results !== undefined) {
-      updates.results = appendSpecialResults(body.results);
-    }
-
-    if (body.selectedResultIndex !== undefined) {
-      const currentResults = (updates.results ?? existing.results) as BetResult[];
-      if (body.selectedResultIndex >= currentResults.length) {
-        return c.json({ error: 'Invalid result index' }, 400);
-      }
-      updates.selectedResultIndex = body.selectedResultIndex;
-    }
-
     if (body.action === 'submit') {
+      if (body.title !== undefined) {
+        updates.title = body.title;
+      }
+      if (body.description !== undefined) {
+        updates.description = body.description;
+      }
+      if (body.iconSlug !== undefined) {
+        updates.iconSlug = body.iconSlug;
+      }
+      if (body.iconColor !== undefined) {
+        updates.iconColor = body.iconColor;
+      }
+      if (body.results !== undefined) {
+        updates.results = appendVoidOption(body.results);
+      }
+      updates.selectedResultIndex = null;
+      updates.settlementProposed = false;
       updates.pendingAction = otherPosition;
-      updates.status = 'pending';
-    } else if (body.action === 'accept') {
-      const currentResults = (updates.results ?? existing.results) as BetResult[];
-      const selectedIndex = updates.selectedResultIndex ?? existing.selectedResultIndex;
-      if (
-        selectedIndex == null ||
-        selectedIndex < 0 ||
-        selectedIndex >= currentResults.length
-      ) {
+    } else if (body.action === 'settle') {
+      if (existing.status !== 'active') {
+        return c.json({ error: 'Only an active bet can be settled' }, 409);
+      }
+      const currentResults = existing.results as BetResult[];
+      const index = body.selectedResultIndex;
+      if (index == null || index < 0 || index >= currentResults.length) {
         return c.json({ error: 'Invalid result index' }, 400);
       }
-      const selectedResult = currentResults[selectedIndex];
-
-      if (selectedResult?.isSpecial === 'active') {
-        updates.status = 'active';
-        updates.outcome = 'open';
+      updates.selectedResultIndex = index;
+      updates.settlementProposed = true;
+      updates.pendingAction = otherPosition;
+    } else if (body.action === 'accept') {
+      if (existing.settlementProposed) {
+        const currentResults = existing.results as BetResult[];
+        const index = existing.selectedResultIndex;
+        if (index == null || index < 0 || index >= currentResults.length) {
+          return c.json({ error: 'Invalid result index' }, 400);
+        }
+        updates.status = 'settled';
+        updates.outcome =
+          currentResults[index]?.isSpecial === 'void' ? 'void' : 'resolved';
+        updates.settlementProposed = false;
         updates.pendingAction = null;
-      } else if (selectedResult?.isSpecial === 'void') {
-        updates.status = 'complete';
-        updates.outcome = 'void';
+      } else if (existing.status === 'inactive') {
+        updates.status = 'active';
         updates.pendingAction = null;
       } else {
-        updates.status = 'complete';
-        updates.outcome = 'resolved';
         updates.pendingAction = null;
       }
+    } else {
+      if (!existing.settlementProposed) {
+        return c.json({ error: 'There is nothing to reject' }, 409);
+      }
+      updates.settlementProposed = false;
+      updates.selectedResultIndex = null;
+      updates.pendingAction = null;
     }
 
     const [bet] = await db.update(bets).set(updates).where(eq(bets.id, id)).returning();

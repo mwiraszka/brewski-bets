@@ -1,0 +1,75 @@
+@if (standings().length) {
+  <div class="standings">
+    @for (standing of standings(); track standing.opponentId) {
+      <div class="standing">
+        <div class="standing__head">
+          <ea-avatar
+            [src]="getAvatarSrc(standing.clerkImageUrl)"
+            [initials]="getInitials(standing.name)"
+            size="xs" />
+          <span class="standing__name">{{ standing.name }}</span>
+          <span
+            class="standing__summary"
+            [class.standing__summary--positive]="standing.net > 0"
+            [class.standing__summary--negative]="standing.net < 0">
+            {{ summary(standing.net) }}
+          </span>
+        </div>
+
+        <div class="standing__track">
+          <div
+            class="standing__center"
+            aria-hidden="true">
+          </div>
+          @if (standing.net < 0) {
+            <div
+              class="standing__bar standing__bar--owe"
+              [style.width.%]="barWidth(standing.net)">
+            </div>
+          } @else if (standing.net > 0) {
+            <div
+              class="standing__bar standing__bar--owed"
+              [style.width.%]="barWidth(standing.net)">
+            </div>
+          }
+
+          <div class="standing__tooltip">
+            <ul class="breakdown">
+              @for (item of standing.breakdown; track $index) {
+                <li class="breakdown__item">
+                  <span class="breakdown__title">{{ item.title }}</span>
+                  <span
+                    class="breakdown__beers"
+                    [class.breakdown__beers--owe]="item.iOwe">
+                    {{ item.iOwe ? '-' : '+' }}{{ item.beers }}
+                  </span>
+                </li>
+              }
+            </ul>
+          </div>
+        </div>
+
+        <ul class="standing__breakdown">
+          @for (item of standing.breakdown; track $index) {
+            <li class="breakdown__item">
+              <span class="breakdown__title">{{ item.title }}</span>
+              <span
+                class="breakdown__beers"
+                [class.breakdown__beers--owe]="item.iOwe">
+                {{ item.iOwe ? '-' : '+' }}{{ item.beers }}
+              </span>
+            </li>
+          }
+        </ul>
+      </div>
+    }
+  </div>
+} @else {
+  <ea-empty-state
+    size="sm"
+    headingLevel="h3"
+    title="No settled bets yet"
+    description="Once you settle a bet, the running beer tally shows up here">
+    <ea-icon-bottle slot="media" />
+  </ea-empty-state>
+}

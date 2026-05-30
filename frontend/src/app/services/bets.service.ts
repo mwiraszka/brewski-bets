@@ -1,6 +1,6 @@
 import { Injectable, inject, signal } from '@angular/core';
 
-import { Bet, BetResult, BetWithOpponent } from '@app/models';
+import { type Bet, type BetResult, type BetWithOpponent } from '@app/models';
 
 import { ApiService } from './api.service';
 
@@ -20,8 +20,10 @@ export interface UpdateBetPayload {
   iconColor?: string | null;
   results?: Omit<BetResult, 'isSpecial'>[];
   selectedResultIndex?: number;
-  action: 'submit' | 'accept';
+  action: 'submit' | 'accept' | 'settle' | 'reject';
 }
+
+const POLL_INTERVAL_MS = 30_000;
 
 @Injectable({
   providedIn: 'root',
@@ -35,6 +37,9 @@ export class BetsService {
   readonly bets = this._bets.asReadonly();
   readonly pendingCount = this._pendingCount.asReadonly();
 
+  private pollIntervalId: ReturnType<typeof setInterval> | null = null;
+  private visibilityHandler: (() => void) | null = null;
+
   async loadBets(): Promise<void> {
     const bets = await this.api.get<BetWithOpponent[]>('/bets');
     this._bets.set(bets);
@@ -43,6 +48,35 @@ export class BetsService {
   async loadPendingCount(): Promise<void> {
     const result = await this.api.get<{ count: number }>('/bets/pending-count');
     this._pendingCount.set(result.count);
+  }
+
+  startPolling(): void {
+    if (this.pollIntervalId !== null || typeof document === 'undefined') {
+      return;
+    }
+
+    const refresh = (): void => {
+      if (document.visibilityState === 'visible') {
+        void this.loadBets();
+        void this.loadPendingCount();
+      }
+    };
+
+    this.pollIntervalId = setInterval(refresh, POLL_INTERVAL_MS);
+
+    this.visibilityHandler = refresh;
+    document.addEventListener('visibilitychange', this.visibilityHandler);
+  }
+
+  stopPolling(): void {
+    if (this.pollIntervalId !== null) {
+      clearInterval(this.pollIntervalId);
+      this.pollIntervalId = null;
+    }
+    if (this.visibilityHandler) {
+      document.removeEventListener('visibilitychange', this.visibilityHandler);
+      this.visibilityHandler = null;
+    }
   }
 
   async getBet(id: string): Promise<BetWithOpponent> {

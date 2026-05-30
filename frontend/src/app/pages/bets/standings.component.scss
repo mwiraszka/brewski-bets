@@ -1,0 +1,146 @@
+.standings {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.standing {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.standing__head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.standing__name {
+  flex: 1;
+  min-width: 0;
+  font-weight: 600;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  color: var(--bb-color-textStrong);
+}
+
+.standing__summary {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--bb-color-textSecondary);
+
+  &--positive {
+    color: var(--bb-color-positive);
+  }
+
+  &--negative {
+    color: var(--bb-color-danger);
+  }
+}
+
+.standing__track {
+  position: relative;
+  height: 24px;
+  border-radius: 6px;
+  background-color: var(--bb-color-surfaceSubtle);
+}
+
+.standing__center {
+  z-index: 1;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 1px;
+  background-color: var(--bb-color-borderDivider);
+}
+
+.standing__bar {
+  position: absolute;
+  top: 4px;
+  bottom: 4px;
+  border-radius: 4px;
+
+  &--owed {
+    left: 50%;
+    background-color: var(--bb-color-positive);
+  }
+
+  &--owe {
+    right: 50%;
+    background-color: var(--bb-color-danger);
+  }
+}
+
+.standing__tooltip {
+  z-index: 2;
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  display: none;
+  min-width: 180px;
+  max-width: 280px;
+  padding: 8px 12px;
+  border: 1px solid var(--bb-color-borderDefault);
+  border-radius: 8px;
+  box-shadow: var(--bb-boxShadowRaised);
+  background-color: var(--bb-color-surfaceRaised);
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+.standing__breakdown {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.breakdown {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.breakdown__item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 13px;
+  color: var(--bb-color-textBody);
+}
+
+.breakdown__title {
+  min-width: 0;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+}
+
+.breakdown__beers {
+  flex-shrink: 0;
+  font-weight: 600;
+  color: var(--bb-color-positive);
+
+  &--owe {
+    color: var(--bb-color-danger);
+  }
+}
+
+@media (hover: hover) {
+  .standing__breakdown {
+    display: none;
+  }
+
+  .standing__track:hover .standing__tooltip {
+    display: block;
+  }
+}

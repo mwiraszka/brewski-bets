@@ -53,8 +53,10 @@ export interface BetResult {
   name: string;
   brewskiCount: number;
   assignedTo: 'user1' | 'user2' | null;
-  isSpecial?: 'void' | 'active';
+  isSpecial?: 'void';
 }
+
+export type BetStatus = 'inactive' | 'active' | 'settled';
 
 export interface Bet {
   id: string;
@@ -66,9 +68,10 @@ export interface Bet {
   user2Id: string;
   results: BetResult[];
   selectedResultIndex: number | null;
-  status: 'pending' | 'active' | 'complete';
+  status: BetStatus;
   outcome: 'open' | 'resolved' | 'void';
   pendingAction: 'user1' | 'user2' | null;
+  settlementProposed: boolean;
   createdBy: string;
   lastModifiedBy: string;
   createdDate: string;

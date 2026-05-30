@@ -6,85 +6,66 @@
   <ea-card variant="outlined">
     <h2 slot="header">My bets</h2>
 
-    <div class="filters">
-      <ea-input
-        label="Search"
-        [value]="filterText()"
-        (valueChange)="filterText.set($event)" />
-      <ea-dropdown
-        label="Status"
-        [options]="statusOptions"
-        [value]="filterStatus()"
-        (valueChange)="filterStatus.set($event)" />
-    </div>
-
-    @if (loading()) {
-      <div class="skeleton-table">
-        <div class="skeleton-row skeleton-row--header">
-          <ea-skeleton
-            variant="text"
-            width="60px"
-            height="14px" />
-          <ea-skeleton
-            variant="text"
-            width="80px"
-            height="14px" />
-          <ea-skeleton
-            variant="text"
-            width="50px"
-            height="14px" />
-          <ea-skeleton
-            variant="text"
-            width="60px"
-            height="14px" />
+    <ea-tabs [(activeTab)]="activeTab">
+      <ea-tab
+        value="bets"
+        label="Bets">
+        <div class="filters">
+          <ea-input
+            label="Search"
+            [value]="filterText()"
+            (valueChange)="filterText.set($event)" />
+          <ea-dropdown
+            label="Status"
+            [options]="statusOptions"
+            [value]="filterStatus()"
+            (valueChange)="filterStatus.set($event)" />
         </div>
-        @for (_ of skeletonRows; track $index) {
-          <div class="skeleton-row">
-            <ea-skeleton
-              variant="text"
-              width="140px"
-              height="16px" />
-            <div class="skeleton-opponent">
-              <ea-skeleton
-                variant="circle"
-                width="24px"
-                height="24px" />
-              <ea-skeleton
-                variant="text"
-                width="100px"
-                height="16px" />
-            </div>
-            <ea-skeleton
-              variant="rect"
-              width="64px"
-              height="20px" />
-            <ea-skeleton
-              variant="rect"
-              width="80px"
-              height="20px" />
-          </div>
+
+        @if (loading()) {
+          <bb-loading label="Loading bets" />
+        } @else {
+          <ea-data-table
+            class="bets-table"
+            [columns]="columns()"
+            [data]="filteredBets()"
+            trackBy="id"
+            [hoverable]="true"
+            [(sort)]="sort"
+            (click)="onTableClick($event)">
+            <ng-template #noData>
+              <ea-empty-state
+                size="sm"
+                headingLevel="h3"
+                [title]="emptyState().title"
+                [description]="emptyState().description">
+                <ea-icon-bottle slot="media" />
+              </ea-empty-state>
+            </ng-template>
+          </ea-data-table>
         }
-      </div>
-    } @else {
-      <ea-data-table
-        [columns]="columns()"
-        [data]="filteredBets()"
-        trackBy="id"
-        [hoverable]="true"
-        [(sort)]="sort">
-        <ng-template #noData>
-          <ea-empty-state
-            size="sm"
-            headingLevel="h3"
-            [title]="emptyState().title"
-            [description]="emptyState().description">
-            <ea-icon-bottle slot="media" />
-          </ea-empty-state>
-        </ng-template>
-      </ea-data-table>
-    }
+      </ea-tab>
+
+      <ea-tab
+        value="standings"
+        label="Standings">
+        @if (loading()) {
+          <bb-loading label="Loading bets" />
+        } @else {
+          <bb-standings
+            [bets]="allBets()"
+            [currentUserId]="currentUserId()" />
+        }
+      </ea-tab>
+    </ea-tabs>
   </ea-card>
 </div>
+
+<ng-template
+  #titleCell
+  let-bet>
+  <span [attr.data-bet-id]="bet.id">{{ bet.title }}</span>
+</ng-template>
 
 <ng-template
   #opponentCell
@@ -103,15 +84,71 @@
 <ng-template
   #statusCell
   let-bet>
-  <ea-badge [variant]="getStatusVariant(bet.status)">
-    {{ bet.status }}
-  </ea-badge>
+  <div class="status-tags">
+    @if (bet.status === 'active') {
+      <ea-badge variant="success">active</ea-badge>
+    }
+    @if (bet.status === 'settled') {
+      <ea-badge variant="default">settled</ea-badge>
+    }
+    @if (isChangesPending(bet)) {
+      <ea-badge variant="warning">changes pending</ea-badge>
+    }
+  </div>
 </ng-template>
 
 <ng-template
   #actionCell
   let-bet>
-  @if (isMyTurn(bet)) {
-    <ea-badge variant="info">Your turn</ea-badge>
-  }
+  <div
+    class="row-actions"
+    data-row-action>
+    @if (canAct(bet)) {
+      <button
+        type="button"
+        class="row-action-btn"
+        aria-label="Edit bet"
+        [eaTooltip]="'Edit bet'"
+        (click)="onEdit(bet)">
+        <ea-icon-edit />
+      </button>
+    }
+    @if (canDelete(bet)) {
+      <button
+        type="button"
+        class="row-action-btn row-action-btn--danger"
+        aria-label="Delete bet"
+        [eaTooltip]="'Delete bet'"
+        (click)="openDeleteDialog(bet)">
+        <ea-icon-trash />
+      </button>
+    }
+  </div>
 </ng-template>
+
+<ea-dialog
+  size="sm"
+  aria-label="Confirm delete bet"
+  [(open)]="deleteDialogOpen">
+  <h3 slot="header">Delete this bet?</h3>
+  <p>
+    This permanently removes the bet for both you and your opponent. This action cannot be
+    undone.
+  </p>
+  <div
+    slot="footer"
+    class="dialog-actions">
+    <ea-button
+      variant="secondary"
+      [disabled]="deleting()"
+      (clicked)="cancelDelete()">
+      Cancel
+    </ea-button>
+    <ea-button
+      variant="danger"
+      [loading]="deleting()"
+      (clicked)="confirmDelete()">
+      Delete
+    </ea-button>
+  </div>
+</ea-dialog>
