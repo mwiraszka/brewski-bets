@@ -7,6 +7,7 @@ import {
   InboxIconComponent,
   InputComponent,
   SearchIconComponent,
+  SkeletonComponent,
   TabComponent,
   TabsComponent,
   ToastService,
@@ -18,7 +19,6 @@ import {
 import { Component, type OnInit, computed, effect, inject, signal } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 
-import { LoadingComponent } from '@app/components/loading/loading.component';
 import {
   type Friend,
   type FriendRequest,
@@ -49,8 +49,8 @@ function readStoredTab(): FriendsTab {
     EmptyStateComponent,
     InboxIconComponent,
     InputComponent,
-    LoadingComponent,
     SearchIconComponent,
+    SkeletonComponent,
     TabComponent,
     TabsComponent,
     TooltipDirective,
@@ -59,6 +59,8 @@ function readStoredTab(): FriendsTab {
   ],
 })
 export class FriendsPageComponent implements OnInit {
+  readonly skeletonRows = Array.from({ length: 4 });
+
   private readonly friendsService = inject(FriendsService);
   private readonly toast = inject(ToastService);
   private readonly route = inject(ActivatedRoute);
