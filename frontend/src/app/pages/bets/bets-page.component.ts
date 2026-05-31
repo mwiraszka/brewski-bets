@@ -31,6 +31,7 @@ import {
 import { Router, RouterLink } from '@angular/router';
 
 import { LoadingComponent } from '@app/components/loading/loading.component';
+import { BetGraphicComponent } from '@app/graphics';
 import { type BetWithOpponent } from '@app/models';
 import { BetsService } from '@app/services/bets.service';
 import { UserService } from '@app/services/user.service';
@@ -45,6 +46,7 @@ import { StandingsComponent } from './standings.component';
     RouterLink,
     AvatarComponent,
     BadgeComponent,
+    BetGraphicComponent,
     BottleIconComponent,
     ButtonComponent,
     CardComponent,
@@ -128,7 +130,7 @@ export class BetsPageComponent implements OnInit {
       bets = bets.filter(
         b =>
           b.title.toLowerCase().includes(text) ||
-          b.description.toLowerCase().includes(text),
+          (b.description?.toLowerCase().includes(text) ?? false),
       );
     }
 

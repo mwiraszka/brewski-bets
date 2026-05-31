@@ -37,7 +37,13 @@
             <ul class="breakdown">
               @for (item of standing.breakdown; track $index) {
                 <li class="breakdown__item">
-                  <span class="breakdown__title">{{ item.title }}</span>
+                  <span class="breakdown__label">
+                    <bb-bet-graphic
+                      [slug]="item.iconSlug"
+                      [color]="item.iconColor"
+                      [size]="16" />
+                    <span class="breakdown__title">{{ item.title }}</span>
+                  </span>
                   <span
                     class="breakdown__beers"
                     [class.breakdown__beers--owe]="item.iOwe">
@@ -52,7 +58,13 @@
         <ul class="standing__breakdown">
           @for (item of standing.breakdown; track $index) {
             <li class="breakdown__item">
-              <span class="breakdown__title">{{ item.title }}</span>
+              <span class="breakdown__label">
+                <bb-bet-graphic
+                  [slug]="item.iconSlug"
+                  [color]="item.iconColor"
+                  [size]="16" />
+                <span class="breakdown__title">{{ item.title }}</span>
+              </span>
               <span
                 class="breakdown__beers"
                 [class.breakdown__beers--owe]="item.iOwe">

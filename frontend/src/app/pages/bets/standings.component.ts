@@ -2,10 +2,13 @@ import { AvatarComponent, BottleIconComponent, EmptyStateComponent } from '@eaga
 
 import { Component, computed, input } from '@angular/core';
 
+import { BetGraphicComponent } from '@app/graphics';
 import { type BetWithOpponent } from '@app/models';
 
 interface StandingBreakdownItem {
   title: string;
+  iconSlug: string | null;
+  iconColor: string | null;
   beers: number;
   iOwe: boolean;
 }
@@ -22,7 +25,12 @@ interface OpponentStanding {
   selector: 'bb-standings',
   templateUrl: './standings.component.html',
   styleUrl: './standings.component.scss',
-  imports: [AvatarComponent, BottleIconComponent, EmptyStateComponent],
+  imports: [
+    AvatarComponent,
+    BetGraphicComponent,
+    BottleIconComponent,
+    EmptyStateComponent,
+  ],
 })
 export class StandingsComponent {
   readonly bets = input.required<BetWithOpponent[]>();
@@ -60,7 +68,13 @@ export class StandingsComponent {
       }
 
       standing.net += iOwe ? -beers : beers;
-      standing.breakdown.push({ title: bet.title, beers, iOwe });
+      standing.breakdown.push({
+        title: bet.title,
+        iconSlug: bet.iconSlug,
+        iconColor: bet.iconColor,
+        beers,
+        iOwe,
+      });
     }
 
     return [...byOpponent.values()].sort((a, b) => b.net - a.net);

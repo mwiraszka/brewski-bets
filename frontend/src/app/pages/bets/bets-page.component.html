@@ -64,7 +64,15 @@
 <ng-template
   #titleCell
   let-bet>
-  <span [attr.data-bet-id]="bet.id">{{ bet.title }}</span>
+  <span
+    class="title-cell"
+    [attr.data-bet-id]="bet.id">
+    <bb-bet-graphic
+      [slug]="bet.iconSlug"
+      [color]="bet.iconColor"
+      [size]="20" />
+    {{ bet.title }}
+  </span>
 </ng-template>
 
 <ng-template

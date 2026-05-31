@@ -29,6 +29,12 @@
   gap: 8px;
 }
 
+.title-cell {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .bets-table ::ng-deep .ea-data-table__row:not(.ea-data-table__row--empty) {
   cursor: pointer;
 }
