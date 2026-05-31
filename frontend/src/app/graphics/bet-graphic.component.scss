@@ -1,5 +1,9 @@
-.bet-graphic {
+:host {
   display: inline-flex;
+}
+
+.bet-graphic {
+  display: flex;
   align-items: center;
   justify-content: center;
   line-height: 1;
