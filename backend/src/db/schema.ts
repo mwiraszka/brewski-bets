@@ -23,6 +23,21 @@ export interface BetResult {
   isSpecial?: 'void';
 }
 
+// One-step snapshot of a bet's terms and lifecycle state captured just before a
+// `submit` overwrites them, so a `reject` can restore the prior agreed version.
+export interface BetSnapshot {
+  title: string;
+  description: string | null;
+  iconSlug: string | null;
+  iconColor: string | null;
+  results: BetResult[];
+  status: 'inactive' | 'active' | 'settled';
+  outcome: 'open' | 'resolved' | 'void';
+  pendingAction: 'user1' | 'user2' | null;
+  settlementProposed: boolean;
+  selectedResultIndex: number | null;
+}
+
 export const users = pgTable('users', {
   id: uuid('id').primaryKey().defaultRandom(),
   clerkId: text('clerk_id').notNull().unique(),
@@ -65,7 +80,7 @@ export const friendships = pgTable(
 export const bets = pgTable('bets', {
   id: uuid('id').primaryKey().defaultRandom(),
   title: text('title').notNull(),
-  description: text('description').notNull(),
+  description: text('description'),
   iconSlug: text('icon_slug'),
   iconColor: text('icon_color'),
   user1Id: uuid('user1_id')
@@ -80,6 +95,7 @@ export const bets = pgTable('bets', {
   outcome: betOutcomeEnum('outcome').notNull().default('open'),
   pendingAction: betActionEnum('pending_action'),
   settlementProposed: boolean('settlement_proposed').notNull().default(false),
+  previousState: jsonb('previous_state').$type<BetSnapshot>(),
   createdDate: timestamp('created_date', { withTimezone: true }).notNull().defaultNow(),
   lastModifiedDate: timestamp('last_modified_date', { withTimezone: true })
     .notNull()
