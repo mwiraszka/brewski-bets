@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.1.0] - 2026-05-31
 
+### Added
+
+- Expand bet graphics well beyond the stock icons: pick from letters, numbers, emojis, and country flags in a searchable, scrollable picker
+- Reject proposed changes to a bet to roll it back to the last agreed terms, now available on bets that are not yet active as well as active ones
+- Edit a bet straight from its view page
+
+### Changed
+
+- Show each bet's graphic next to its name across the app, including the bets list and standings
+- Make the bet description optional
+- Widen the outcome name fields in the bet form to full width, with each stake slider on its own full-width row beneath
+
 ### Fixed
 
 - Resolve a dark-mode colour clash where the "changes pending" tag was hard to read over a hovered bet row, and soften row and button hover states so they lift more subtly
