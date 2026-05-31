@@ -19,6 +19,7 @@
 
 ea-card {
   --text-label-md-size: 16px;
+  position: relative;
   display: block;
   width: 100%;
 }
@@ -51,6 +52,12 @@ fieldset[disabled] {
 .field-label--required::after {
   content: ' *';
   color: var(--bb-color-danger);
+}
+
+.field-label__optional {
+  font-weight: 400;
+  font-style: italic;
+  color: var(--bb-color-textSecondary);
 }
 
 .graphics-grid {
@@ -210,31 +217,20 @@ fieldset[disabled] {
   justify-content: center;
   width: 52px;
   height: 52px;
+  padding: 0;
   font-size: 36px;
   border: 1px solid var(--bb-color-borderDefault);
   border-radius: 8px;
   background-color: var(--bb-color-surfaceMuted);
-}
-
-.icon-preview__edit {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 32px;
-  height: 32px;
-  padding: 0;
-  margin-left: auto;
-  font-size: 18px;
-  border: none;
-  border-radius: 6px;
-  background-color: transparent;
-  color: var(--bb-color-textBody);
   cursor: pointer;
-  transition: background-color 0.15s;
+  transition:
+    border-color 0.15s,
+    background-color 0.15s;
 }
 
-.icon-preview__edit:hover {
-  background-color: var(--bb-color-surfaceHover);
+.icon-preview__container:hover {
+  border-color: var(--bb-color-primary);
+  background-color: var(--bb-color-surfacePrimaryTint);
 }
 
 .field-error {
@@ -389,14 +385,52 @@ fieldset[disabled] {
 
 .card-header {
   display: flex;
-  flex-wrap: wrap;
+  flex-direction: column;
   align-items: center;
-  justify-content: center;
-  gap: 32px;
+  gap: 8px;
+}
+
+.form-skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.form-skeleton__field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
 .card-header__title {
   margin: 0;
+}
+
+.delete-corner {
+  z-index: 1;
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  font-size: 18px;
+  border: none;
+  border-radius: 6px;
+  background-color: transparent;
+  color: var(--bb-color-textSecondary);
+  cursor: pointer;
+  transition:
+    background-color 0.15s,
+    color 0.15s;
+
+  &:hover {
+    background-color: var(--bb-color-surfaceHover);
+    color: var(--bb-color-danger);
+  }
 }
 
 .status-tags {
@@ -439,6 +473,7 @@ fieldset[disabled] {
 }
 
 .back-link {
+  align-self: stretch;
   display: block;
   padding-top: 16px;
   font-size: 14px;
@@ -456,22 +491,48 @@ fieldset[disabled] {
 .actions {
   display: flex;
   flex-direction: column;
+  align-items: center;
   gap: 16px;
   margin-top: 24px;
 }
 
-.action-primary {
+// A row of equal-width inline action buttons (e.g. Accept / Reject / Request edits).
+.action-row {
   display: flex;
-  flex-direction: column;
+  align-self: stretch;
   gap: 8px;
 }
 
-.action-danger {
-  display: flex;
-  justify-content: center;
-  gap: 16px;
-  padding-top: 8px;
-  border-top: 1px solid var(--bb-color-borderSubtle);
+.action-row ea-button {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+.action-row ::ng-deep .ea-button {
+  width: 100%;
+}
+
+.btn-reject {
+  --ea-button-color: var(--bb-color-danger);
+  --ea-button-border-color: var(--bb-color-danger);
+}
+
+@include respond-to('lt-md') {
+  .action-row {
+    flex-direction: column;
+  }
+
+  .action-row ea-button {
+    flex: none;
+  }
+
+  .actions > ea-button {
+    align-self: stretch;
+  }
+
+  .actions ::ng-deep .ea-button {
+    width: 100%;
+  }
 }
 
 .dialog-actions {

@@ -1,10 +1,45 @@
 @if (loading()) {
   <div class="bet-form-page">
-    <bb-loading label="Loading bet" />
+    <ea-card variant="outlined">
+      <div
+        slot="header"
+        class="card-header">
+        <ea-skeleton
+          variant="text"
+          width="160px"
+          height="28px" />
+      </div>
+      <div class="form-skeleton">
+        @for (_ of skeletonFields; track $index) {
+          <div class="form-skeleton__field">
+            <ea-skeleton
+              variant="text"
+              width="100px"
+              height="16px" />
+            <ea-skeleton
+              variant="rect"
+              height="40px" />
+          </div>
+        }
+        <ea-skeleton
+          variant="rect"
+          height="44px" />
+      </div>
+    </ea-card>
   </div>
 } @else {
   <div class="bet-form-page">
     <ea-card variant="outlined">
+      @if (canDelete()) {
+        <button
+          type="button"
+          class="delete-corner"
+          aria-label="Delete bet"
+          [eaTooltip]="'Delete bet'"
+          (click)="openDeleteDialog()">
+          <ea-icon-trash />
+        </button>
+      }
       <div
         slot="header"
         class="card-header">
@@ -28,7 +63,8 @@
             @if (changesPending() && !isSettled()) {
               <ea-badge
                 variant="warning"
-                [eaTooltip]="tagTooltip()">
+                [eaTooltip]="tagTooltip()"
+                tooltipPosition="bottom">
                 changes pending
               </ea-badge>
             }
@@ -88,8 +124,14 @@
               </p>
             }
           } @else {
+            <label
+              class="field-label"
+              for="bet-description">
+              Description
+              <span class="field-label__optional">(optional)</span>
+            </label>
             <ea-textarea
-              label="Description (optional)"
+              id="bet-description"
               [maxlength]="descriptionMaxLength"
               [maxHeight]="200"
               [(value)]="description" />
@@ -153,19 +195,17 @@
             </div>
           } @else if (selectedGraphic(); as selected) {
             <div class="icon-preview">
-              <div class="icon-preview__container">
+              <button
+                type="button"
+                class="icon-preview__container"
+                aria-label="Edit graphic"
+                [eaTooltip]="'Edit graphic'"
+                tooltipPosition="right"
+                (click)="editIcon()">
                 <bb-bet-graphic
                   [slug]="selected.slug"
                   [color]="iconColor()"
                   [size]="40" />
-              </div>
-              <button
-                type="button"
-                class="icon-preview__edit"
-                aria-label="Edit graphic"
-                [eaTooltip]="'Edit graphic'"
-                (click)="editIcon()">
-                <ea-icon-edit />
               </button>
             </div>
           }
@@ -264,16 +304,19 @@
         @if (mode() === 'create') {
           <ea-button
             class="submit-for-review"
-            [fullWidth]="true"
             [loading]="actionInFlight() === 'submit'"
             [disabled]="isBusy() || !isFormValid()"
             (clicked)="onSubmitForReview()">
-            SUBMIT FOR REVIEW
+            Submit for review
           </ea-button>
+          <a
+            class="back-link"
+            routerLink="/bets">
+            Back to bets
+          </a>
         } @else {
           @if (canEditFromView()) {
             <ea-button
-              [fullWidth]="true"
               [disabled]="isBusy()"
               (clicked)="onEditFromView()">
               <span class="btn-content">
@@ -283,75 +326,65 @@
             </ea-button>
           }
           @if (canApproveSettlement()) {
-            <div class="action-primary">
+            <div class="action-row">
               <ea-button
-                [fullWidth]="true"
                 [loading]="actionInFlight() === 'accept'"
                 [disabled]="isBusy()"
                 (clicked)="onAccept()">
                 Approve settlement
               </ea-button>
               <ea-button
+                class="btn-reject"
                 variant="secondary"
-                [fullWidth]="true"
                 [loading]="actionInFlight() === 'reject'"
                 [disabled]="isBusy()"
                 (clicked)="onReject()">
                 Reject
               </ea-button>
             </div>
-          } @else {
-            @if (canApproveTerms()) {
-              <div class="action-primary">
-                <ea-button
-                  [fullWidth]="true"
-                  [loading]="actionInFlight() === 'accept'"
-                  [disabled]="isBusy() || !isFormValid()"
-                  (clicked)="onAccept()">
-                  {{
-                    betStatus() === 'inactive' ? 'Accept & activate' : 'Accept changes'
-                  }}
-                </ea-button>
-                <ea-button
-                  variant="secondary"
-                  [fullWidth]="true"
-                  [loading]="actionInFlight() === 'reject'"
-                  [disabled]="isBusy()"
-                  (clicked)="onReject()">
-                  Reject
-                </ea-button>
-              </div>
-            }
-            @if (canSubmitChanges()) {
+          } @else if (canApproveTerms()) {
+            <div class="action-row">
+              <ea-button
+                [loading]="actionInFlight() === 'accept'"
+                [disabled]="isBusy() || !isFormValid()"
+                (clicked)="onAccept()">
+                Accept changes
+              </ea-button>
               <ea-button
                 variant="secondary"
-                [fullWidth]="true"
                 [loading]="actionInFlight() === 'submit'"
                 [disabled]="isBusy() || !isFormValid()"
                 (clicked)="onSubmitForReview()">
-                {{ canApproveTerms() ? 'Send back with edits' : 'Request changes' }}
+                Send request
               </ea-button>
-            }
-            @if (canSettle()) {
               <ea-button
+                class="btn-reject"
                 variant="secondary"
-                [fullWidth]="true"
+                [loading]="actionInFlight() === 'reject'"
                 [disabled]="isBusy()"
-                (clicked)="openSettleDialog()">
-                Settle bet
+                (clicked)="onReject()">
+                Reject changes
               </ea-button>
-            }
-          }
-
-          @if (canDelete()) {
-            <div class="action-danger">
-              <ea-button
-                variant="danger"
-                size="sm"
-                [disabled]="isBusy()"
-                (clicked)="openDeleteDialog()">
-                Delete bet
-              </ea-button>
+            </div>
+          } @else if (canSubmitChanges() || canSettle()) {
+            <div class="action-row">
+              @if (canSubmitChanges()) {
+                <ea-button
+                  variant="secondary"
+                  [loading]="actionInFlight() === 'submit'"
+                  [disabled]="isBusy() || !isFormValid()"
+                  (clicked)="onSubmitForReview()">
+                  Send request
+                </ea-button>
+              }
+              @if (canSettle()) {
+                <ea-button
+                  variant="secondary"
+                  [disabled]="isBusy()"
+                  (clicked)="openSettleDialog()">
+                  Settle bet
+                </ea-button>
+              }
             </div>
           }
 
@@ -388,6 +421,29 @@
         [loading]="actionInFlight() === 'delete'"
         (clicked)="confirmDelete()">
         Delete
+      </ea-button>
+    </div>
+  </ea-dialog>
+
+  <ea-dialog
+    size="sm"
+    aria-label="Unsaved changes"
+    [open]="leaveDialogOpen()"
+    (openChange)="onLeaveDialogOpenChange($event)">
+    <h3 slot="header">Unsaved changes</h3>
+    <p> You have unsaved changes on this bet. Are you sure you want to discard them? </p>
+    <div
+      slot="footer"
+      class="dialog-actions">
+      <ea-button
+        variant="secondary"
+        (clicked)="cancelLeave()">
+        Cancel
+      </ea-button>
+      <ea-button
+        variant="danger"
+        (clicked)="confirmDiscard()">
+        Discard
       </ea-button>
     </div>
   </ea-dialog>

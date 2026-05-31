@@ -12,6 +12,7 @@ import {
   RadioComponent,
   RadioGroupComponent,
   SearchIconComponent,
+  SkeletonComponent,
   SliderComponent,
   TextareaComponent,
   ToastService,
@@ -22,6 +23,7 @@ import {
 import {
   Component,
   ElementRef,
+  HostListener,
   type OnInit,
   type QueryList,
   ViewChild,
@@ -32,13 +34,13 @@ import {
 } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 
-import { LoadingComponent } from '@app/components/loading/loading.component';
 import {
   BetGraphicComponent,
   GRAPHICS,
   graphicBySlug,
   isColorableGraphic,
 } from '@app/graphics';
+import { type CanComponentDeactivate } from '@app/guards/unsaved-changes.guard';
 import { type BetResult, type BetWithOpponent } from '@app/models';
 import { BetsService } from '@app/services/bets.service';
 import { FriendsService } from '@app/services/friends.service';
@@ -81,19 +83,19 @@ type ActionInFlight = 'submit' | 'accept' | 'settle' | 'reject' | 'delete' | nul
     DropdownComponent,
     EditIconComponent,
     InputComponent,
-    LoadingComponent,
     PlusIconComponent,
     RadioComponent,
     RadioGroupComponent,
     RouterLink,
     SearchIconComponent,
+    SkeletonComponent,
     SliderComponent,
     TextareaComponent,
     TooltipDirective,
     TrashIconComponent,
   ],
 })
-export class BetFormPageComponent implements OnInit {
+export class BetFormPageComponent implements OnInit, CanComponentDeactivate {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly betsService = inject(BetsService);
@@ -110,6 +112,7 @@ export class BetFormPageComponent implements OnInit {
 
   readonly graphics = GRAPHICS;
   readonly iconColors = ICON_COLORS;
+  readonly skeletonFields = Array.from({ length: 4 });
   readonly maxBrewskiCount = MAX_BREWSKI_COUNT;
   readonly maxOutcomes = MAX_OUTCOMES;
   readonly titleMaxLength = TITLE_MAX_LENGTH;
@@ -123,6 +126,14 @@ export class BetFormPageComponent implements OnInit {
   readonly actionInFlight = signal<ActionInFlight>(null);
   readonly deleteDialogOpen = signal(false);
   readonly settleDialogOpen = signal(false);
+  readonly leaveDialogOpen = signal(false);
+
+  // Snapshot of the form taken once it loads; `formSnapshot` diverging from it
+  // means there are unsaved edits. `allowNavigation` is flipped on right before
+  // a save/delete navigates away so the deactivate guard lets it through.
+  private initialSnapshot = '';
+  private allowNavigation = false;
+  private leaveResolver: ((leave: boolean) => void) | null = null;
 
   readonly title = signal('');
   readonly description = signal('');
@@ -132,7 +143,7 @@ export class BetFormPageComponent implements OnInit {
   readonly iconEditing = signal(true);
   readonly selectedFriendId = signal('');
   readonly outcomes = signal<BetResult[]>([
-    { name: '', brewskiCount: 0, assignedTo: null },
+    { name: '', brewskiCount: MAX_BREWSKI_COUNT, assignedTo: 'user1' },
   ]);
   readonly settleIndex = signal('');
 
@@ -360,6 +371,19 @@ export class BetFormPageComponent implements OnInit {
     return true;
   });
 
+  readonly formSnapshot = computed(() =>
+    JSON.stringify({
+      title: this.title(),
+      description: this.description(),
+      iconSlug: this.iconSlug(),
+      iconColor: this.iconColor(),
+      selectedFriendId: this.selectedFriendId(),
+      outcomes: this.outcomes(),
+    }),
+  );
+
+  readonly isDirty = computed(() => this.formSnapshot() !== this.initialSnapshot);
+
   readonly absFormat = (value: number): string => `${Math.abs(value)}`;
 
   graphicName(slug: string): string {
@@ -387,12 +411,14 @@ export class BetFormPageComponent implements OnInit {
         this.outcomes.set(this.bet.results.filter(outcome => !outcome.isSpecial));
       } catch {
         this.toast.error('Failed to load bet');
+        this.allowNavigation = true;
         await this.router.navigate(['/bets']);
         return;
       }
     }
 
     await this.friendsService.loadFriends();
+    this.initialSnapshot = this.formSnapshot();
     this.loading.set(false);
   }
 
@@ -420,9 +446,10 @@ export class BetFormPageComponent implements OnInit {
     if (this.outcomes().length >= MAX_OUTCOMES) {
       return;
     }
+    const me = (this.bet ? this.myPosition() : 'user1') ?? 'user1';
     this.outcomes.update(outcomes => [
       ...outcomes,
-      { name: '', brewskiCount: 1, assignedTo: 'user2' },
+      { name: '', brewskiCount: MAX_BREWSKI_COUNT, assignedTo: me },
     ]);
   }
 
@@ -595,6 +622,7 @@ export class BetFormPageComponent implements OnInit {
         });
         this.toast.success('Changes submitted for review');
       }
+      this.allowNavigation = true;
       await this.router.navigate(['/bets']);
     } catch {
       this.toast.error('Failed to submit bet');
@@ -612,6 +640,7 @@ export class BetFormPageComponent implements OnInit {
     try {
       await this.betsService.updateBet(this.bet.id, { action: 'accept' });
       this.toast.success(this.settlementProposed() ? 'Bet settled' : 'Bet accepted');
+      this.allowNavigation = true;
       await this.router.navigate(['/bets']);
     } catch {
       this.toast.error('Failed to accept bet');
@@ -640,6 +669,7 @@ export class BetFormPageComponent implements OnInit {
       this.toast.success(
         rejectingSettlement ? 'Settlement rejected' : 'Changes rejected',
       );
+      this.allowNavigation = true;
       await this.router.navigate(['/bets']);
     } catch {
       this.toast.error('Failed to reject');
@@ -670,6 +700,7 @@ export class BetFormPageComponent implements OnInit {
       });
       this.settleDialogOpen.set(false);
       this.toast.success('Settlement proposed');
+      this.allowNavigation = true;
       await this.router.navigate(['/bets']);
     } catch {
       this.toast.error('Failed to propose settlement');
@@ -696,11 +727,48 @@ export class BetFormPageComponent implements OnInit {
       await this.betsService.deleteBet(this.bet.id);
       this.deleteDialogOpen.set(false);
       this.toast.success('Bet deleted');
+      this.allowNavigation = true;
       await this.router.navigate(['/bets']);
     } catch {
       this.toast.error('Failed to delete bet');
     } finally {
       this.actionInFlight.set(null);
+    }
+  }
+
+  confirmLeave(): boolean | Promise<boolean> {
+    if (this.allowNavigation || !this.isDirty()) {
+      return true;
+    }
+    this.leaveDialogOpen.set(true);
+    return new Promise<boolean>(resolve => {
+      this.leaveResolver = resolve;
+    });
+  }
+
+  onLeaveDialogOpenChange(open: boolean): void {
+    this.leaveDialogOpen.set(open);
+    if (!open && this.leaveResolver) {
+      this.leaveResolver(false);
+      this.leaveResolver = null;
+    }
+  }
+
+  confirmDiscard(): void {
+    this.leaveResolver?.(true);
+    this.leaveResolver = null;
+    this.leaveDialogOpen.set(false);
+  }
+
+  cancelLeave(): void {
+    this.leaveDialogOpen.set(false);
+  }
+
+  @HostListener('window:beforeunload', ['$event'])
+  onBeforeUnload(event: BeforeUnloadEvent): void {
+    if (this.isDirty() && !this.allowNavigation) {
+      event.preventDefault();
+      event.returnValue = '';
     }
   }
 }

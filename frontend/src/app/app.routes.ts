@@ -1,6 +1,7 @@
 import { type Routes } from '@angular/router';
 
 import { authGuard, guestGuard, ssoCallbackGuard } from '@app/guards/auth.guard';
+import { unsavedChangesGuard } from '@app/guards/unsaved-changes.guard';
 
 export const routes: Routes = [
   {
@@ -34,6 +35,7 @@ export const routes: Routes = [
         c => c.BetFormPageComponent,
       ),
     canActivate: [authGuard],
+    canDeactivate: [unsavedChangesGuard],
   },
   {
     path: 'bets/:id',
@@ -42,6 +44,7 @@ export const routes: Routes = [
         c => c.BetFormPageComponent,
       ),
     canActivate: [authGuard],
+    canDeactivate: [unsavedChangesGuard],
   },
   {
     path: '',

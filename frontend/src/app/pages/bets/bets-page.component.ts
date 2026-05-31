@@ -12,6 +12,7 @@ import {
   EditIconComponent,
   EmptyStateComponent,
   InputComponent,
+  SkeletonComponent,
   TabComponent,
   TabsComponent,
   ToastService,
@@ -30,7 +31,6 @@ import {
 } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 
-import { LoadingComponent } from '@app/components/loading/loading.component';
 import { BetGraphicComponent } from '@app/graphics';
 import { type BetWithOpponent } from '@app/models';
 import { BetsService } from '@app/services/bets.service';
@@ -56,7 +56,7 @@ import { StandingsComponent } from './standings.component';
     EditIconComponent,
     EmptyStateComponent,
     InputComponent,
-    LoadingComponent,
+    SkeletonComponent,
     StandingsComponent,
     TabComponent,
     TabsComponent,
@@ -68,6 +68,8 @@ export class BetsPageComponent implements OnInit {
   private readonly betsService = inject(BetsService);
   private readonly userService = inject(UserService);
   private readonly router = inject(Router);
+
+  readonly skeletonRows = Array.from({ length: 4 });
   private readonly toast = inject(ToastService);
 
   readonly loading = signal(true);
