@@ -80,45 +80,50 @@
         <div class="form-field">
           @if (isViewing()) {
             <span class="field-label">Description</span>
-            <p class="readonly-description">{{ description() }}</p>
+            @if (description().trim()) {
+              <p class="readonly-description">{{ description() }}</p>
+            } @else {
+              <p class="readonly-description readonly-description--empty">
+                No description
+              </p>
+            }
           } @else {
             <ea-textarea
-              label="Description"
-              [required]="true"
+              label="Description (optional)"
               [maxlength]="descriptionMaxLength"
               [maxHeight]="200"
-              [errorMsg]="descriptionError()"
-              [(value)]="description"
-              (blurred)="descriptionTouched.set(true)" />
+              [(value)]="description" />
           }
         </div>
 
         <div class="form-field">
-          <label class="field-label field-label--required">Icon</label>
+          <label class="field-label field-label--required">Graphic</label>
           @if (iconEditing()) {
             <ea-input
               #iconFilterInputRef
-              placeholder="Filter icons"
+              placeholder="Search graphics"
               [value]="iconFilter()"
               (valueChange)="setIconFilter($event)">
               <ea-icon-search slot="prefix" />
             </ea-input>
-            <div class="icon-grid">
-              @for (icon of filteredIcons(); track icon.slug) {
+            <div class="graphics-grid">
+              @for (graphic of filteredGraphics(); track graphic.slug) {
                 <button
                   type="button"
-                  class="icon-option"
-                  [class.icon-option--selected]="iconSlug() === icon.slug"
-                  [style.color]="iconSlug() === icon.slug ? iconColor() : null"
-                  [eaTooltip]="iconName(icon.slug)"
-                  (click)="selectIcon(icon.slug)">
-                  <ng-container *ngComponentOutlet="icon" />
+                  class="graphic-option"
+                  [class.graphic-option--selected]="iconSlug() === graphic.slug"
+                  [eaTooltip]="graphic.label"
+                  (click)="selectIcon(graphic.slug)">
+                  <bb-bet-graphic
+                    [slug]="graphic.slug"
+                    [color]="iconSlug() === graphic.slug ? iconColor() : null"
+                    [size]="22" />
                 </button>
               } @empty {
-                <p class="icon-grid__empty">No icons match that filter</p>
+                <p class="graphics-grid__empty">No graphics match that search</p>
               }
             </div>
-            @if (iconSlug() && filteredIcons().length) {
+            @if (iconSlug() && selectedColorable()) {
               <div class="color-picker">
                 <span class="color-picker__label">COLOUR</span>
                 <div class="color-picker__swatches">
@@ -142,22 +147,23 @@
                 (clicked)="confirmIcon()">
                 <span class="btn-content">
                   <ea-icon-check />
-                  {{ mode() === 'create' ? 'Set icon' : 'Update icon' }}
+                  {{ mode() === 'create' ? 'Set graphic' : 'Update graphic' }}
                 </span>
               </ea-button>
             </div>
-          } @else if (selectedIcon(); as selected) {
+          } @else if (selectedGraphic(); as selected) {
             <div class="icon-preview">
-              <div
-                class="icon-preview__container"
-                [style.color]="iconColor()">
-                <ng-container *ngComponentOutlet="selected" />
+              <div class="icon-preview__container">
+                <bb-bet-graphic
+                  [slug]="selected.slug"
+                  [color]="iconColor()"
+                  [size]="40" />
               </div>
               <button
                 type="button"
                 class="icon-preview__edit"
-                aria-label="Edit icon"
-                [eaTooltip]="'Edit icon'"
+                aria-label="Edit graphic"
+                [eaTooltip]="'Edit graphic'"
                 (click)="editIcon()">
                 <ea-icon-edit />
               </button>
@@ -179,79 +185,64 @@
           }
 
           <div class="outcomes-list">
-            <div class="outcomes-list__header">
-              <span class="outcomes-list__col outcomes-list__col--description">
-                Outcome
-              </span>
-              <span class="outcomes-list__col outcomes-list__col--brewskis">
-                Brewskis
-              </span>
-              <span></span>
-            </div>
             @for (outcome of outcomes(); track $index; let rowIndex = $index) {
               <div class="outcome-row">
-                <div class="outcome-row__main">
-                  <div class="outcome-row__description">
-                    <ea-input
-                      #outcomeInputRef
-                      placeholder="e.g. Poland wins"
-                      [value]="outcome.name"
-                      [errorMsg]="outcomeDescriptionError(rowIndex, outcome.name)"
-                      (valueChange)="updateOutcomeDescription(rowIndex, $event)"
-                      (blurred)="markOutcomeDescriptionTouched(rowIndex)" />
-                  </div>
-                  <div class="outcome-row__brewskis">
-                    <div class="outcome-row__slider-row">
-                      <span class="outcome-row__user">You</span>
-                      <div class="outcome-row__slider">
-                        <ea-slider
-                          size="sm"
-                          [hasError]="!!outcomeAmountError(outcome, rowIndex)"
-                          [min]="-maxBrewskiCount"
-                          [max]="maxBrewskiCount"
-                          [step]="1"
-                          [showValue]="true"
-                          [formatValue]="absFormat"
-                          [value]="signedBrewskiCount(outcome)"
-                          (changed)="updateOutcomeSigned(rowIndex, $event)" />
-                        <div
-                          class="slider-ticks"
-                          aria-hidden="true">
-                          @for (
-                            tick of sliderTicks;
-                            track $index;
-                            let tickIndex = $index
-                          ) {
-                            @if (tick !== 0) {
-                              <span
-                                class="slider-ticks__tick"
-                                [style.--tick-index]="tickIndex">
-                                {{ tick }}
-                              </span>
-                            }
-                          }
-                        </div>
-                      </div>
-                      <span class="outcome-row__user">Them</span>
-                    </div>
-                    @if (outcomeAmountError(outcome, rowIndex)) {
-                      <p class="outcome-row__error">
-                        <ea-icon-alert-circle class="outcome-row__error-icon" />
-                        {{ outcomeAmountError(outcome, rowIndex) }}
-                      </p>
-                    }
-                  </div>
+                <div class="outcome-row__name">
+                  <ea-input
+                    #outcomeInputRef
+                    placeholder="e.g. Poland wins"
+                    [value]="outcome.name"
+                    [errorMsg]="outcomeDescriptionError(rowIndex, outcome.name)"
+                    (valueChange)="updateOutcomeDescription(rowIndex, $event)"
+                    (blurred)="markOutcomeDescriptionTouched(rowIndex)" />
+                  @if (canEditTerms() && outcomes().length > 1) {
+                    <button
+                      type="button"
+                      class="remove-icon-btn"
+                      aria-label="Remove outcome"
+                      [eaTooltip]="'Remove outcome'"
+                      (click)="removeOutcome(rowIndex)">
+                      <ea-icon-trash />
+                    </button>
+                  }
                 </div>
-                @if (canEditTerms() && outcomes().length > 1) {
-                  <button
-                    type="button"
-                    class="remove-icon-btn"
-                    aria-label="Remove outcome"
-                    [eaTooltip]="'Remove outcome'"
-                    (click)="removeOutcome(rowIndex)">
-                    <ea-icon-trash />
-                  </button>
-                }
+                <div class="outcome-row__brewskis">
+                  <div class="outcome-row__slider-row">
+                    <span class="outcome-row__user">You</span>
+                    <div class="outcome-row__slider">
+                      <ea-slider
+                        size="sm"
+                        [hasError]="!!outcomeAmountError(outcome, rowIndex)"
+                        [min]="-maxBrewskiCount"
+                        [max]="maxBrewskiCount"
+                        [step]="1"
+                        [showValue]="true"
+                        [formatValue]="absFormat"
+                        [value]="signedBrewskiCount(outcome)"
+                        (changed)="updateOutcomeSigned(rowIndex, $event)" />
+                      <div
+                        class="slider-ticks"
+                        aria-hidden="true">
+                        @for (tick of sliderTicks; track $index; let tickIndex = $index) {
+                          @if (tick !== 0) {
+                            <span
+                              class="slider-ticks__tick"
+                              [style.--tick-index]="tickIndex">
+                              {{ tick }}
+                            </span>
+                          }
+                        }
+                      </div>
+                    </div>
+                    <span class="outcome-row__user">Them</span>
+                  </div>
+                  @if (outcomeAmountError(outcome, rowIndex)) {
+                    <p class="outcome-row__error">
+                      <ea-icon-alert-circle class="outcome-row__error-icon" />
+                      {{ outcomeAmountError(outcome, rowIndex) }}
+                    </p>
+                  }
+                </div>
               </div>
             }
           </div>
@@ -280,6 +271,17 @@
             SUBMIT FOR REVIEW
           </ea-button>
         } @else {
+          @if (canEditFromView()) {
+            <ea-button
+              [fullWidth]="true"
+              [disabled]="isBusy()"
+              (clicked)="onEditFromView()">
+              <span class="btn-content">
+                <ea-icon-edit />
+                Edit bet
+              </span>
+            </ea-button>
+          }
           @if (canApproveSettlement()) {
             <div class="action-primary">
               <ea-button
@@ -300,13 +302,25 @@
             </div>
           } @else {
             @if (canApproveTerms()) {
-              <ea-button
-                [fullWidth]="true"
-                [loading]="actionInFlight() === 'accept'"
-                [disabled]="isBusy() || !isFormValid()"
-                (clicked)="onAccept()">
-                {{ betStatus() === 'inactive' ? 'Accept & activate' : 'Accept changes' }}
-              </ea-button>
+              <div class="action-primary">
+                <ea-button
+                  [fullWidth]="true"
+                  [loading]="actionInFlight() === 'accept'"
+                  [disabled]="isBusy() || !isFormValid()"
+                  (clicked)="onAccept()">
+                  {{
+                    betStatus() === 'inactive' ? 'Accept & activate' : 'Accept changes'
+                  }}
+                </ea-button>
+                <ea-button
+                  variant="secondary"
+                  [fullWidth]="true"
+                  [loading]="actionInFlight() === 'reject'"
+                  [disabled]="isBusy()"
+                  (clicked)="onReject()">
+                  Reject
+                </ea-button>
+              </div>
             }
             @if (canSubmitChanges()) {
               <ea-button

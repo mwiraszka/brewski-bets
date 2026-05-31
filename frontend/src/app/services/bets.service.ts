@@ -6,7 +6,7 @@ import { ApiService } from './api.service';
 
 export interface CreateBetPayload {
   title: string;
-  description: string;
+  description: string | null;
   iconSlug: string | null;
   iconColor: string | null;
   user2Id: string;
@@ -15,7 +15,7 @@ export interface CreateBetPayload {
 
 export interface UpdateBetPayload {
   title?: string;
-  description?: string;
+  description?: string | null;
   iconSlug?: string | null;
   iconColor?: string | null;
   results?: Omit<BetResult, 'isSpecial'>[];

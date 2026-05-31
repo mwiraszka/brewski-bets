@@ -1,82 +1,24 @@
 import {
   AlertCircleIconComponent,
-  AnchorIconComponent,
-  AwardIconComponent,
   BadgeComponent,
-  BatteryIconComponent,
-  BellIconComponent,
-  BookIconComponent,
-  BookmarkIconComponent,
-  BottleIconComponent,
-  BoxIconComponent,
-  BriefcaseIconComponent,
   ButtonComponent,
-  CalendarIconComponent,
-  CameraIconComponent,
-  CandleIconComponent,
   CardComponent,
   CheckIconComponent,
-  ClipboardIconComponent,
-  ClockIconComponent,
-  CoffeeIconComponent,
-  CompassIconComponent,
-  CreditCardIconComponent,
   DialogComponent,
-  DiscIconComponent,
   DropdownComponent,
   EditIconComponent,
-  FilmIconComponent,
-  FlagIconComponent,
-  FolderIconComponent,
-  GiftIconComponent,
-  GlobeIconComponent,
-  HeadphonesIconComponent,
-  HeartIconComponent,
-  HomeIconComponent,
-  type IconComponentType,
-  InboxIconComponent,
   InputComponent,
-  KeyIconComponent,
-  LampIconComponent,
-  LockIconComponent,
-  MailIconComponent,
-  MapIconComponent,
-  MonitorIconComponent,
-  MoonIconComponent,
-  MusicIconComponent,
-  PackageIconComponent,
-  PaperclipIconComponent,
-  PenToolIconComponent,
-  PhoneIconComponent,
   PlusIconComponent,
-  PrinterIconComponent,
   RadioComponent,
   RadioGroupComponent,
-  RadioIconComponent,
-  ScissorsIconComponent,
   SearchIconComponent,
-  ServerIconComponent,
-  ShieldIconComponent,
-  ShoppingCartIconComponent,
   SliderComponent,
-  SmartphoneIconComponent,
-  SoccerBallIconComponent,
-  StarIconComponent,
-  SunIconComponent,
-  TableIconComponent,
-  TagIconComponent,
-  TargetIconComponent,
   TextareaComponent,
-  ThermometerIconComponent,
   ToastService,
-  ToolIconComponent,
   TooltipDirective,
   TrashIconComponent,
-  TrophyIconComponent,
-  UmbrellaIconComponent,
 } from '@eagami/ui';
 
-import { NgComponentOutlet } from '@angular/common';
 import {
   Component,
   ElementRef,
@@ -91,70 +33,16 @@ import {
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 
 import { LoadingComponent } from '@app/components/loading/loading.component';
+import {
+  BetGraphicComponent,
+  GRAPHICS,
+  graphicBySlug,
+  isColorableGraphic,
+} from '@app/graphics';
 import { type BetResult, type BetWithOpponent } from '@app/models';
 import { BetsService } from '@app/services/bets.service';
 import { FriendsService } from '@app/services/friends.service';
 import { UserService } from '@app/services/user.service';
-
-const STOCK_ICONS: IconComponentType[] = [
-  AnchorIconComponent,
-  AwardIconComponent,
-  BatteryIconComponent,
-  BellIconComponent,
-  BookIconComponent,
-  BookmarkIconComponent,
-  BottleIconComponent,
-  BoxIconComponent,
-  BriefcaseIconComponent,
-  CalendarIconComponent,
-  CameraIconComponent,
-  CandleIconComponent,
-  ClipboardIconComponent,
-  ClockIconComponent,
-  CoffeeIconComponent,
-  CompassIconComponent,
-  CreditCardIconComponent,
-  DiscIconComponent,
-  FilmIconComponent,
-  FlagIconComponent,
-  FolderIconComponent,
-  GiftIconComponent,
-  GlobeIconComponent,
-  HeadphonesIconComponent,
-  HeartIconComponent,
-  HomeIconComponent,
-  InboxIconComponent,
-  KeyIconComponent,
-  LampIconComponent,
-  LockIconComponent,
-  MailIconComponent,
-  MapIconComponent,
-  MonitorIconComponent,
-  MoonIconComponent,
-  MusicIconComponent,
-  PackageIconComponent,
-  PaperclipIconComponent,
-  PenToolIconComponent,
-  PhoneIconComponent,
-  PrinterIconComponent,
-  RadioIconComponent,
-  ScissorsIconComponent,
-  ServerIconComponent,
-  ShieldIconComponent,
-  ShoppingCartIconComponent,
-  SmartphoneIconComponent,
-  SoccerBallIconComponent,
-  StarIconComponent,
-  SunIconComponent,
-  TableIconComponent,
-  TagIconComponent,
-  TargetIconComponent,
-  ThermometerIconComponent,
-  ToolIconComponent,
-  TrashIconComponent,
-  TrophyIconComponent,
-  UmbrellaIconComponent,
-];
 
 const ICON_COLORS = [
   '#e53935',
@@ -183,9 +71,9 @@ type ActionInFlight = 'submit' | 'accept' | 'settle' | 'reject' | 'delete' | nul
   templateUrl: './bet-form-page.component.html',
   styleUrl: './bet-form-page.component.scss',
   imports: [
-    NgComponentOutlet,
     AlertCircleIconComponent,
     BadgeComponent,
+    BetGraphicComponent,
     ButtonComponent,
     CardComponent,
     CheckIconComponent,
@@ -220,7 +108,7 @@ export class BetFormPageComponent implements OnInit {
   @ViewChildren('outcomeInputRef', { read: ElementRef })
   private outcomeInputRefs?: QueryList<ElementRef<HTMLElement>>;
 
-  readonly stockIcons = STOCK_ICONS;
+  readonly graphics = GRAPHICS;
   readonly iconColors = ICON_COLORS;
   readonly maxBrewskiCount = MAX_BREWSKI_COUNT;
   readonly maxOutcomes = MAX_OUTCOMES;
@@ -249,7 +137,6 @@ export class BetFormPageComponent implements OnInit {
   readonly settleIndex = signal('');
 
   readonly titleTouched = signal(false);
-  readonly descriptionTouched = signal(false);
   readonly friendTouched = signal(false);
   readonly iconTouched = signal(false);
   readonly outcomeDescriptionTouched = signal<Set<number>>(new Set());
@@ -263,17 +150,6 @@ export class BetFormPageComponent implements OnInit {
     }
     if (this.titleTouched() || this.submitAttempted()) {
       return 'Title is required';
-    }
-    return '';
-  });
-
-  readonly descriptionError = computed(() => {
-    const empty = !this.description().trim();
-    if (!empty) {
-      return '';
-    }
-    if (this.descriptionTouched() || this.submitAttempted()) {
-      return 'Description is required';
     }
     return '';
   });
@@ -296,7 +172,7 @@ export class BetFormPageComponent implements OnInit {
       return '';
     }
     if (this.iconTouched() || this.submitAttempted()) {
-      return 'Icon is required';
+      return 'Graphic is required';
     }
     return '';
   });
@@ -315,20 +191,20 @@ export class BetFormPageComponent implements OnInit {
 
   readonly isBusy = computed(() => this.actionInFlight() !== null);
 
-  readonly filteredIcons = computed(() => {
+  readonly filteredGraphics = computed(() => {
     const filter = this.iconFilter().trim().toLowerCase();
     if (!filter) {
-      return this.stockIcons;
+      return this.graphics;
     }
     const tokens = filter.split(/\s+/).filter(Boolean);
-    return this.stockIcons.filter(icon =>
-      tokens.every(token => icon.tags.some(tag => tag.toLowerCase().includes(token))),
+    return this.graphics.filter(graphic =>
+      tokens.every(token => graphic.tags.some(tag => tag.toLowerCase().includes(token))),
     );
   });
 
-  readonly selectedIcon = computed(() =>
-    this.stockIcons.find(icon => icon.slug === this.iconSlug()),
-  );
+  readonly selectedGraphic = computed(() => graphicBySlug(this.iconSlug()));
+
+  readonly selectedColorable = computed(() => isColorableGraphic(this.iconSlug()));
 
   readonly myPosition = computed((): 'user1' | 'user2' | null => {
     if (!this.bet) {
@@ -406,6 +282,15 @@ export class BetFormPageComponent implements OnInit {
       !this.settlementProposed(),
   );
 
+  readonly canEditFromView = computed(
+    () =>
+      this.mode() === 'edit' &&
+      this.readonlyView() &&
+      !this.isSettled() &&
+      !this.settlementProposed() &&
+      (this.isMyTurn() || this.activeResting()),
+  );
+
   readonly isWaiting = computed(
     () =>
       this.mode() === 'edit' &&
@@ -457,9 +342,6 @@ export class BetFormPageComponent implements OnInit {
     if (!this.title().trim()) {
       return false;
     }
-    if (!this.description().trim()) {
-      return false;
-    }
     if (this.mode() === 'create' && !this.selectedFriendId()) {
       return false;
     }
@@ -480,11 +362,8 @@ export class BetFormPageComponent implements OnInit {
 
   readonly absFormat = (value: number): string => `${Math.abs(value)}`;
 
-  iconName(slug: string): string {
-    return slug
-      .split('-')
-      .map(part => part.charAt(0).toUpperCase() + part.slice(1))
-      .join(' ');
+  graphicName(slug: string): string {
+    return graphicBySlug(slug)?.label ?? slug;
   }
 
   signedBrewskiCount(outcome: BetResult): number {
@@ -501,7 +380,7 @@ export class BetFormPageComponent implements OnInit {
       try {
         this.bet = await this.betsService.getBet(id);
         this.title.set(this.bet.title);
-        this.description.set(this.bet.description);
+        this.description.set(this.bet.description ?? '');
         this.iconSlug.set(this.bet.iconSlug);
         this.iconColor.set(this.bet.iconColor ?? DEFAULT_ICON_COLOR);
         this.iconEditing.set(!this.bet.iconSlug);
@@ -661,9 +540,6 @@ export class BetFormPageComponent implements OnInit {
     if (!this.title().trim()) {
       return false;
     }
-    if (!this.description().trim()) {
-      return false;
-    }
     if (this.mode() === 'create' && !this.selectedFriendId()) {
       return false;
     }
@@ -695,7 +571,7 @@ export class BetFormPageComponent implements OnInit {
           title: this.title(),
           description: this.description(),
           iconSlug: this.iconSlug(),
-          iconColor: this.iconSlug() ? this.iconColor() : null,
+          iconColor: this.selectedColorable() ? this.iconColor() : null,
           user2Id: this.selectedFriendId(),
           results: this.outcomes().map(outcome => ({
             name: outcome.name,
@@ -709,7 +585,7 @@ export class BetFormPageComponent implements OnInit {
           title: this.title(),
           description: this.description(),
           iconSlug: this.iconSlug(),
-          iconColor: this.iconSlug() ? this.iconColor() : null,
+          iconColor: this.selectedColorable() ? this.iconColor() : null,
           results: this.outcomes().map(outcome => ({
             name: outcome.name,
             brewskiCount: outcome.brewskiCount,
@@ -744,18 +620,29 @@ export class BetFormPageComponent implements OnInit {
     }
   }
 
+  onEditFromView(): void {
+    if (!this.bet) {
+      return;
+    }
+    this.readonlyView.set(false);
+    void this.router.navigate(['/bets', this.bet.id]);
+  }
+
   async onReject(): Promise<void> {
     if (!this.bet) {
       return;
     }
+    const rejectingSettlement = this.settlementProposed();
     this.actionInFlight.set('reject');
 
     try {
       await this.betsService.updateBet(this.bet.id, { action: 'reject' });
-      this.toast.success('Settlement rejected');
+      this.toast.success(
+        rejectingSettlement ? 'Settlement rejected' : 'Changes rejected',
+      );
       await this.router.navigate(['/bets']);
     } catch {
-      this.toast.error('Failed to reject settlement');
+      this.toast.error('Failed to reject');
     } finally {
       this.actionInFlight.set(null);
     }
