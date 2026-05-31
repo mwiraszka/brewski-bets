@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.0] - 2026-05-31
+
+### Fixed
+
+- Resolve a dark-mode colour clash where the "changes pending" tag was hard to read over a hovered bet row, and soften row and button hover states so they lift more subtly
+
 ## [1.0.0] - 2026-05-31
 
 ### Added
@@ -560,6 +566,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - PWA manifest and service worker configuration
 - GitHub issue templates
 
+[1.1.0]: https://github.com/mwiraszka/brewski-bets/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/mwiraszka/brewski-bets/compare/v0.30.0...v1.0.0
 [0.30.0]: https://github.com/mwiraszka/brewski-bets/compare/v0.29.0...v0.30.0
 [0.29.0]: https://github.com/mwiraszka/brewski-bets/compare/v0.28.0...v0.29.0
