@@ -107,12 +107,6 @@
 
   --bb-boxShadow: 0 4px 8px rgba(0, 0, 0, 0.4);
   --bb-boxShadowRaised: 0 6px 12px rgba(0, 0, 0, 0.5);
-
-  // TODO: remove once @eagami/ui softens its dark-mode ghost-button hover; the library maps --color-bg-muted to a mid neutral that reads too strong on dark surfaces
-  --color-bg-muted: var(--bb-color-surfaceHover);
-
-  // TODO: remove once @eagami/ui ships a dark-mode warning palette; it keeps --color-warning-700 (#b45309) in dark mode, which is unreadable as badge text on the translucent warning background (e.g. the "pending" status badge)
-  --color-warning-700: var(--bb-color-textWarning);
 }
 
 @media (prefers-color-scheme: dark) {

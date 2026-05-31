@@ -5,6 +5,27 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.0] - 2026-06-01
+
+### Added
+
+- Expand bet graphics well beyond the stock icons: pick from letters, numbers, emojis, and country flags in a searchable, scrollable picker
+- Reject proposed changes to a bet to roll it back to the last agreed terms, now available on bets that are not yet active as well as active ones
+- Edit a bet straight from its view page
+- Prompt before navigating away from a bet you are creating or editing while it has unsaved changes
+
+### Changed
+
+- Show each bet's graphic next to its name across the app, including the bets list and standings
+- Make the bet description optional
+- Widen the outcome name fields in the bet form to full width, with each stake slider on its own full-width row beneath
+- Replace the page loading spinners on the bets, friends, account, and bet pages with skeleton placeholders that mirror the final layout
+
+### Fixed
+
+- Resolve a dark-mode colour clash where the "changes pending" tag was hard to read over a hovered bet row, and soften row and button hover states so they lift more subtly
+- Ensure tooltips always contrast with the surface behind them in both light and dark mode
+
 ## [1.0.0] - 2026-05-31
 
 ### Added
@@ -560,6 +581,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - PWA manifest and service worker configuration
 - GitHub issue templates
 
+[1.1.0]: https://github.com/mwiraszka/brewski-bets/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/mwiraszka/brewski-bets/compare/v0.30.0...v1.0.0
 [0.30.0]: https://github.com/mwiraszka/brewski-bets/compare/v0.29.0...v0.30.0
 [0.29.0]: https://github.com/mwiraszka/brewski-bets/compare/v0.28.0...v0.29.0

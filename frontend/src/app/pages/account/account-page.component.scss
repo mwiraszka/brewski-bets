@@ -17,6 +17,25 @@
   margin-bottom: 24px;
 }
 
+.avatar-skeleton {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.email-skeleton {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 24px;
+}
+
+.field-skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
 .email {
   margin: 0 0 24px;
   text-align: center;

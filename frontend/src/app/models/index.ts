@@ -61,7 +61,7 @@ export type BetStatus = 'inactive' | 'active' | 'settled';
 export interface Bet {
   id: string;
   title: string;
-  description: string;
+  description: string | null;
   iconSlug: string | null;
   iconColor: string | null;
   user1Id: string;

@@ -1,85 +1,29 @@
 import {
   AlertCircleIconComponent,
-  AnchorIconComponent,
-  AwardIconComponent,
   BadgeComponent,
-  BatteryIconComponent,
-  BellIconComponent,
-  BookIconComponent,
-  BookmarkIconComponent,
-  BottleIconComponent,
-  BoxIconComponent,
-  BriefcaseIconComponent,
   ButtonComponent,
-  CalendarIconComponent,
-  CameraIconComponent,
-  CandleIconComponent,
   CardComponent,
   CheckIconComponent,
-  ClipboardIconComponent,
-  ClockIconComponent,
-  CoffeeIconComponent,
-  CompassIconComponent,
-  CreditCardIconComponent,
   DialogComponent,
-  DiscIconComponent,
   DropdownComponent,
   EditIconComponent,
-  FilmIconComponent,
-  FlagIconComponent,
-  FolderIconComponent,
-  GiftIconComponent,
-  GlobeIconComponent,
-  HeadphonesIconComponent,
-  HeartIconComponent,
-  HomeIconComponent,
-  type IconComponentType,
-  InboxIconComponent,
   InputComponent,
-  KeyIconComponent,
-  LampIconComponent,
-  LockIconComponent,
-  MailIconComponent,
-  MapIconComponent,
-  MonitorIconComponent,
-  MoonIconComponent,
-  MusicIconComponent,
-  PackageIconComponent,
-  PaperclipIconComponent,
-  PenToolIconComponent,
-  PhoneIconComponent,
   PlusIconComponent,
-  PrinterIconComponent,
   RadioComponent,
   RadioGroupComponent,
-  RadioIconComponent,
-  ScissorsIconComponent,
   SearchIconComponent,
-  ServerIconComponent,
-  ShieldIconComponent,
-  ShoppingCartIconComponent,
+  SkeletonComponent,
   SliderComponent,
-  SmartphoneIconComponent,
-  SoccerBallIconComponent,
-  StarIconComponent,
-  SunIconComponent,
-  TableIconComponent,
-  TagIconComponent,
-  TargetIconComponent,
   TextareaComponent,
-  ThermometerIconComponent,
   ToastService,
-  ToolIconComponent,
   TooltipDirective,
   TrashIconComponent,
-  TrophyIconComponent,
-  UmbrellaIconComponent,
 } from '@eagami/ui';
 
-import { NgComponentOutlet } from '@angular/common';
 import {
   Component,
   ElementRef,
+  HostListener,
   type OnInit,
   type QueryList,
   ViewChild,
@@ -90,71 +34,17 @@ import {
 } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 
-import { LoadingComponent } from '@app/components/loading/loading.component';
+import {
+  BetGraphicComponent,
+  GRAPHICS,
+  graphicBySlug,
+  isColorableGraphic,
+} from '@app/graphics';
+import { type CanComponentDeactivate } from '@app/guards/unsaved-changes.guard';
 import { type BetResult, type BetWithOpponent } from '@app/models';
 import { BetsService } from '@app/services/bets.service';
 import { FriendsService } from '@app/services/friends.service';
 import { UserService } from '@app/services/user.service';
-
-const STOCK_ICONS: IconComponentType[] = [
-  AnchorIconComponent,
-  AwardIconComponent,
-  BatteryIconComponent,
-  BellIconComponent,
-  BookIconComponent,
-  BookmarkIconComponent,
-  BottleIconComponent,
-  BoxIconComponent,
-  BriefcaseIconComponent,
-  CalendarIconComponent,
-  CameraIconComponent,
-  CandleIconComponent,
-  ClipboardIconComponent,
-  ClockIconComponent,
-  CoffeeIconComponent,
-  CompassIconComponent,
-  CreditCardIconComponent,
-  DiscIconComponent,
-  FilmIconComponent,
-  FlagIconComponent,
-  FolderIconComponent,
-  GiftIconComponent,
-  GlobeIconComponent,
-  HeadphonesIconComponent,
-  HeartIconComponent,
-  HomeIconComponent,
-  InboxIconComponent,
-  KeyIconComponent,
-  LampIconComponent,
-  LockIconComponent,
-  MailIconComponent,
-  MapIconComponent,
-  MonitorIconComponent,
-  MoonIconComponent,
-  MusicIconComponent,
-  PackageIconComponent,
-  PaperclipIconComponent,
-  PenToolIconComponent,
-  PhoneIconComponent,
-  PrinterIconComponent,
-  RadioIconComponent,
-  ScissorsIconComponent,
-  ServerIconComponent,
-  ShieldIconComponent,
-  ShoppingCartIconComponent,
-  SmartphoneIconComponent,
-  SoccerBallIconComponent,
-  StarIconComponent,
-  SunIconComponent,
-  TableIconComponent,
-  TagIconComponent,
-  TargetIconComponent,
-  ThermometerIconComponent,
-  ToolIconComponent,
-  TrashIconComponent,
-  TrophyIconComponent,
-  UmbrellaIconComponent,
-];
 
 const ICON_COLORS = [
   '#e53935',
@@ -183,9 +73,9 @@ type ActionInFlight = 'submit' | 'accept' | 'settle' | 'reject' | 'delete' | nul
   templateUrl: './bet-form-page.component.html',
   styleUrl: './bet-form-page.component.scss',
   imports: [
-    NgComponentOutlet,
     AlertCircleIconComponent,
     BadgeComponent,
+    BetGraphicComponent,
     ButtonComponent,
     CardComponent,
     CheckIconComponent,
@@ -193,19 +83,19 @@ type ActionInFlight = 'submit' | 'accept' | 'settle' | 'reject' | 'delete' | nul
     DropdownComponent,
     EditIconComponent,
     InputComponent,
-    LoadingComponent,
     PlusIconComponent,
     RadioComponent,
     RadioGroupComponent,
     RouterLink,
     SearchIconComponent,
+    SkeletonComponent,
     SliderComponent,
     TextareaComponent,
     TooltipDirective,
     TrashIconComponent,
   ],
 })
-export class BetFormPageComponent implements OnInit {
+export class BetFormPageComponent implements OnInit, CanComponentDeactivate {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly betsService = inject(BetsService);
@@ -220,8 +110,9 @@ export class BetFormPageComponent implements OnInit {
   @ViewChildren('outcomeInputRef', { read: ElementRef })
   private outcomeInputRefs?: QueryList<ElementRef<HTMLElement>>;
 
-  readonly stockIcons = STOCK_ICONS;
+  readonly graphics = GRAPHICS;
   readonly iconColors = ICON_COLORS;
+  readonly skeletonFields = Array.from({ length: 4 });
   readonly maxBrewskiCount = MAX_BREWSKI_COUNT;
   readonly maxOutcomes = MAX_OUTCOMES;
   readonly titleMaxLength = TITLE_MAX_LENGTH;
@@ -235,6 +126,14 @@ export class BetFormPageComponent implements OnInit {
   readonly actionInFlight = signal<ActionInFlight>(null);
   readonly deleteDialogOpen = signal(false);
   readonly settleDialogOpen = signal(false);
+  readonly leaveDialogOpen = signal(false);
+
+  // Snapshot of the form taken once it loads; `formSnapshot` diverging from it
+  // means there are unsaved edits. `allowNavigation` is flipped on right before
+  // a save/delete navigates away so the deactivate guard lets it through.
+  private initialSnapshot = '';
+  private allowNavigation = false;
+  private leaveResolver: ((leave: boolean) => void) | null = null;
 
   readonly title = signal('');
   readonly description = signal('');
@@ -244,12 +143,11 @@ export class BetFormPageComponent implements OnInit {
   readonly iconEditing = signal(true);
   readonly selectedFriendId = signal('');
   readonly outcomes = signal<BetResult[]>([
-    { name: '', brewskiCount: 0, assignedTo: null },
+    { name: '', brewskiCount: MAX_BREWSKI_COUNT, assignedTo: 'user1' },
   ]);
   readonly settleIndex = signal('');
 
   readonly titleTouched = signal(false);
-  readonly descriptionTouched = signal(false);
   readonly friendTouched = signal(false);
   readonly iconTouched = signal(false);
   readonly outcomeDescriptionTouched = signal<Set<number>>(new Set());
@@ -263,17 +161,6 @@ export class BetFormPageComponent implements OnInit {
     }
     if (this.titleTouched() || this.submitAttempted()) {
       return 'Title is required';
-    }
-    return '';
-  });
-
-  readonly descriptionError = computed(() => {
-    const empty = !this.description().trim();
-    if (!empty) {
-      return '';
-    }
-    if (this.descriptionTouched() || this.submitAttempted()) {
-      return 'Description is required';
     }
     return '';
   });
@@ -296,7 +183,7 @@ export class BetFormPageComponent implements OnInit {
       return '';
     }
     if (this.iconTouched() || this.submitAttempted()) {
-      return 'Icon is required';
+      return 'Graphic is required';
     }
     return '';
   });
@@ -315,20 +202,20 @@ export class BetFormPageComponent implements OnInit {
 
   readonly isBusy = computed(() => this.actionInFlight() !== null);
 
-  readonly filteredIcons = computed(() => {
+  readonly filteredGraphics = computed(() => {
     const filter = this.iconFilter().trim().toLowerCase();
     if (!filter) {
-      return this.stockIcons;
+      return this.graphics;
     }
     const tokens = filter.split(/\s+/).filter(Boolean);
-    return this.stockIcons.filter(icon =>
-      tokens.every(token => icon.tags.some(tag => tag.toLowerCase().includes(token))),
+    return this.graphics.filter(graphic =>
+      tokens.every(token => graphic.tags.some(tag => tag.toLowerCase().includes(token))),
     );
   });
 
-  readonly selectedIcon = computed(() =>
-    this.stockIcons.find(icon => icon.slug === this.iconSlug()),
-  );
+  readonly selectedGraphic = computed(() => graphicBySlug(this.iconSlug()));
+
+  readonly selectedColorable = computed(() => isColorableGraphic(this.iconSlug()));
 
   readonly myPosition = computed((): 'user1' | 'user2' | null => {
     if (!this.bet) {
@@ -406,6 +293,15 @@ export class BetFormPageComponent implements OnInit {
       !this.settlementProposed(),
   );
 
+  readonly canEditFromView = computed(
+    () =>
+      this.mode() === 'edit' &&
+      this.readonlyView() &&
+      !this.isSettled() &&
+      !this.settlementProposed() &&
+      (this.isMyTurn() || this.activeResting()),
+  );
+
   readonly isWaiting = computed(
     () =>
       this.mode() === 'edit' &&
@@ -457,9 +353,6 @@ export class BetFormPageComponent implements OnInit {
     if (!this.title().trim()) {
       return false;
     }
-    if (!this.description().trim()) {
-      return false;
-    }
     if (this.mode() === 'create' && !this.selectedFriendId()) {
       return false;
     }
@@ -478,13 +371,23 @@ export class BetFormPageComponent implements OnInit {
     return true;
   });
 
+  readonly formSnapshot = computed(() =>
+    JSON.stringify({
+      title: this.title(),
+      description: this.description(),
+      iconSlug: this.iconSlug(),
+      iconColor: this.iconColor(),
+      selectedFriendId: this.selectedFriendId(),
+      outcomes: this.outcomes(),
+    }),
+  );
+
+  readonly isDirty = computed(() => this.formSnapshot() !== this.initialSnapshot);
+
   readonly absFormat = (value: number): string => `${Math.abs(value)}`;
 
-  iconName(slug: string): string {
-    return slug
-      .split('-')
-      .map(part => part.charAt(0).toUpperCase() + part.slice(1))
-      .join(' ');
+  graphicName(slug: string): string {
+    return graphicBySlug(slug)?.label ?? slug;
   }
 
   signedBrewskiCount(outcome: BetResult): number {
@@ -501,19 +404,21 @@ export class BetFormPageComponent implements OnInit {
       try {
         this.bet = await this.betsService.getBet(id);
         this.title.set(this.bet.title);
-        this.description.set(this.bet.description);
+        this.description.set(this.bet.description ?? '');
         this.iconSlug.set(this.bet.iconSlug);
         this.iconColor.set(this.bet.iconColor ?? DEFAULT_ICON_COLOR);
         this.iconEditing.set(!this.bet.iconSlug);
         this.outcomes.set(this.bet.results.filter(outcome => !outcome.isSpecial));
       } catch {
         this.toast.error('Failed to load bet');
+        this.allowNavigation = true;
         await this.router.navigate(['/bets']);
         return;
       }
     }
 
     await this.friendsService.loadFriends();
+    this.initialSnapshot = this.formSnapshot();
     this.loading.set(false);
   }
 
@@ -541,9 +446,10 @@ export class BetFormPageComponent implements OnInit {
     if (this.outcomes().length >= MAX_OUTCOMES) {
       return;
     }
+    const me = (this.bet ? this.myPosition() : 'user1') ?? 'user1';
     this.outcomes.update(outcomes => [
       ...outcomes,
-      { name: '', brewskiCount: 1, assignedTo: 'user2' },
+      { name: '', brewskiCount: MAX_BREWSKI_COUNT, assignedTo: me },
     ]);
   }
 
@@ -661,9 +567,6 @@ export class BetFormPageComponent implements OnInit {
     if (!this.title().trim()) {
       return false;
     }
-    if (!this.description().trim()) {
-      return false;
-    }
     if (this.mode() === 'create' && !this.selectedFriendId()) {
       return false;
     }
@@ -695,7 +598,7 @@ export class BetFormPageComponent implements OnInit {
           title: this.title(),
           description: this.description(),
           iconSlug: this.iconSlug(),
-          iconColor: this.iconSlug() ? this.iconColor() : null,
+          iconColor: this.selectedColorable() ? this.iconColor() : null,
           user2Id: this.selectedFriendId(),
           results: this.outcomes().map(outcome => ({
             name: outcome.name,
@@ -709,7 +612,7 @@ export class BetFormPageComponent implements OnInit {
           title: this.title(),
           description: this.description(),
           iconSlug: this.iconSlug(),
-          iconColor: this.iconSlug() ? this.iconColor() : null,
+          iconColor: this.selectedColorable() ? this.iconColor() : null,
           results: this.outcomes().map(outcome => ({
             name: outcome.name,
             brewskiCount: outcome.brewskiCount,
@@ -719,6 +622,7 @@ export class BetFormPageComponent implements OnInit {
         });
         this.toast.success('Changes submitted for review');
       }
+      this.allowNavigation = true;
       await this.router.navigate(['/bets']);
     } catch {
       this.toast.error('Failed to submit bet');
@@ -736,6 +640,7 @@ export class BetFormPageComponent implements OnInit {
     try {
       await this.betsService.updateBet(this.bet.id, { action: 'accept' });
       this.toast.success(this.settlementProposed() ? 'Bet settled' : 'Bet accepted');
+      this.allowNavigation = true;
       await this.router.navigate(['/bets']);
     } catch {
       this.toast.error('Failed to accept bet');
@@ -744,18 +649,30 @@ export class BetFormPageComponent implements OnInit {
     }
   }
 
+  onEditFromView(): void {
+    if (!this.bet) {
+      return;
+    }
+    this.readonlyView.set(false);
+    void this.router.navigate(['/bets', this.bet.id]);
+  }
+
   async onReject(): Promise<void> {
     if (!this.bet) {
       return;
     }
+    const rejectingSettlement = this.settlementProposed();
     this.actionInFlight.set('reject');
 
     try {
       await this.betsService.updateBet(this.bet.id, { action: 'reject' });
-      this.toast.success('Settlement rejected');
+      this.toast.success(
+        rejectingSettlement ? 'Settlement rejected' : 'Changes rejected',
+      );
+      this.allowNavigation = true;
       await this.router.navigate(['/bets']);
     } catch {
-      this.toast.error('Failed to reject settlement');
+      this.toast.error('Failed to reject');
     } finally {
       this.actionInFlight.set(null);
     }
@@ -783,6 +700,7 @@ export class BetFormPageComponent implements OnInit {
       });
       this.settleDialogOpen.set(false);
       this.toast.success('Settlement proposed');
+      this.allowNavigation = true;
       await this.router.navigate(['/bets']);
     } catch {
       this.toast.error('Failed to propose settlement');
@@ -809,11 +727,48 @@ export class BetFormPageComponent implements OnInit {
       await this.betsService.deleteBet(this.bet.id);
       this.deleteDialogOpen.set(false);
       this.toast.success('Bet deleted');
+      this.allowNavigation = true;
       await this.router.navigate(['/bets']);
     } catch {
       this.toast.error('Failed to delete bet');
     } finally {
       this.actionInFlight.set(null);
+    }
+  }
+
+  confirmLeave(): boolean | Promise<boolean> {
+    if (this.allowNavigation || !this.isDirty()) {
+      return true;
+    }
+    this.leaveDialogOpen.set(true);
+    return new Promise<boolean>(resolve => {
+      this.leaveResolver = resolve;
+    });
+  }
+
+  onLeaveDialogOpenChange(open: boolean): void {
+    this.leaveDialogOpen.set(open);
+    if (!open && this.leaveResolver) {
+      this.leaveResolver(false);
+      this.leaveResolver = null;
+    }
+  }
+
+  confirmDiscard(): void {
+    this.leaveResolver?.(true);
+    this.leaveResolver = null;
+    this.leaveDialogOpen.set(false);
+  }
+
+  cancelLeave(): void {
+    this.leaveDialogOpen.set(false);
+  }
+
+  @HostListener('window:beforeunload', ['$event'])
+  onBeforeUnload(event: BeforeUnloadEvent): void {
+    if (this.isDirty() && !this.allowNavigation) {
+      event.preventDefault();
+      event.returnValue = '';
     }
   }
 }

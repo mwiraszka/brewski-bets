@@ -3,7 +3,13 @@ import { and, eq, or, sql } from 'drizzle-orm';
 import { Hono } from 'hono';
 import { z } from 'zod';
 
-import { type BetResult, bets, friendships, users } from '../db/schema.js';
+import {
+  type BetResult,
+  type BetSnapshot,
+  bets,
+  friendships,
+  users,
+} from '../db/schema.js';
 import type { AppContext } from '../types/index.js';
 
 const betResultSchema = z.object({
@@ -24,9 +30,11 @@ const iconColorSchema = z
   .nullable()
   .optional();
 
+const descriptionSchema = z.string().max(1000).nullable().optional();
+
 const createBetSchema = z.object({
   title: z.string().min(1),
-  description: z.string().min(1),
+  description: descriptionSchema,
   iconSlug: iconSlugSchema,
   iconColor: iconColorSchema,
   user2Id: z.string().uuid(),
@@ -35,13 +43,33 @@ const createBetSchema = z.object({
 
 const updateBetSchema = z.object({
   title: z.string().min(1).optional(),
-  description: z.string().min(1).optional(),
+  description: descriptionSchema,
   iconSlug: iconSlugSchema,
   iconColor: iconColorSchema,
   results: z.array(betResultSchema).min(1).max(20).optional(),
   selectedResultIndex: z.number().int().min(0).optional(),
   action: z.enum(['submit', 'accept', 'settle', 'reject']),
 });
+
+function normalizeDescription(value: string | null | undefined): string | null {
+  const trimmed = value?.trim();
+  return trimmed ? trimmed : null;
+}
+
+function snapshotState(bet: typeof bets.$inferSelect): BetSnapshot {
+  return {
+    title: bet.title,
+    description: bet.description,
+    iconSlug: bet.iconSlug,
+    iconColor: bet.iconColor,
+    results: bet.results,
+    status: bet.status,
+    outcome: bet.outcome,
+    pendingAction: bet.pendingAction,
+    settlementProposed: bet.settlementProposed,
+    selectedResultIndex: bet.selectedResultIndex,
+  };
+}
 
 function appendVoidOption(results: BetResult[]): BetResult[] {
   return [
@@ -92,7 +120,7 @@ export const betRoutes = new Hono<AppContext>()
       .insert(bets)
       .values({
         title: body.title,
-        description: body.description,
+        description: normalizeDescription(body.description),
         iconSlug: body.iconSlug ?? null,
         iconColor: body.iconColor ?? null,
         user1Id: userId,
@@ -253,11 +281,12 @@ export const betRoutes = new Hono<AppContext>()
     };
 
     if (body.action === 'submit') {
+      updates.previousState = snapshotState(existing);
       if (body.title !== undefined) {
         updates.title = body.title;
       }
       if (body.description !== undefined) {
-        updates.description = body.description;
+        updates.description = normalizeDescription(body.description);
       }
       if (body.iconSlug !== undefined) {
         updates.iconSlug = body.iconSlug;
@@ -284,6 +313,9 @@ export const betRoutes = new Hono<AppContext>()
       updates.settlementProposed = true;
       updates.pendingAction = otherPosition;
     } else if (body.action === 'accept') {
+      // Accepting makes the current terms the agreed version, so the undo
+      // snapshot is no longer meaningful.
+      updates.previousState = null;
       if (existing.settlementProposed) {
         const currentResults = existing.results as BetResult[];
         const index = existing.selectedResultIndex;
@@ -301,13 +333,29 @@ export const betRoutes = new Hono<AppContext>()
       } else {
         updates.pendingAction = null;
       }
-    } else {
-      if (!existing.settlementProposed) {
-        return c.json({ error: 'There is nothing to reject' }, 409);
-      }
+    } else if (existing.settlementProposed) {
       updates.settlementProposed = false;
       updates.selectedResultIndex = null;
       updates.pendingAction = null;
+      updates.previousState = null;
+    } else if (existing.previousState) {
+      const snap = existing.previousState;
+      updates.title = snap.title;
+      updates.description = snap.description;
+      updates.iconSlug = snap.iconSlug;
+      updates.iconColor = snap.iconColor;
+      updates.results = snap.results;
+      updates.status = snap.status;
+      updates.outcome = snap.outcome;
+      updates.pendingAction = snap.pendingAction;
+      updates.settlementProposed = snap.settlementProposed;
+      updates.selectedResultIndex = snap.selectedResultIndex;
+      updates.previousState = null;
+    } else {
+      // A never-edited bet has no prior terms to revert to, so rejecting it
+      // declines the bet outright.
+      await db.delete(bets).where(eq(bets.id, id));
+      return c.json({ deleted: true });
     }
 
     const [bet] = await db.update(bets).set(updates).where(eq(bets.id, id)).returning();

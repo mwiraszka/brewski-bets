@@ -3,7 +3,61 @@
     <h2 slot="header">Account</h2>
 
     @if (loading()) {
-      <bb-loading label="Loading your account" />
+      <div class="avatar-section">
+        <div class="avatar-skeleton">
+          <ea-skeleton
+            variant="circle"
+            width="200px"
+            height="200px" />
+          <ea-skeleton
+            variant="rect"
+            width="256px"
+            height="28px" />
+        </div>
+      </div>
+
+      <div class="email-skeleton">
+        <ea-skeleton
+          variant="text"
+          width="220px"
+          height="20px" />
+      </div>
+
+      <div class="fields">
+        <div class="field-skeleton">
+          <ea-skeleton
+            variant="text"
+            width="80px"
+            height="18px" />
+          <ea-skeleton
+            variant="rect"
+            height="40px" />
+        </div>
+        <div class="field-skeleton">
+          <ea-skeleton
+            variant="text"
+            width="80px"
+            height="18px" />
+          <ea-skeleton
+            variant="rect"
+            height="40px" />
+        </div>
+      </div>
+
+      <div class="actions">
+        <ea-skeleton
+          variant="rect"
+          height="40px" />
+      </div>
+
+      <div class="delete-section">
+        <ea-skeleton
+          variant="rect"
+          height="1px" />
+        <ea-skeleton
+          variant="rect"
+          height="40px" />
+      </div>
     } @else {
       <div class="avatar-section">
         <ea-avatar-editor

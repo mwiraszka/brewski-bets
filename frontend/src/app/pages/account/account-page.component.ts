@@ -6,6 +6,7 @@ import {
   DialogComponent,
   DividerComponent,
   InputComponent,
+  SkeletonComponent,
   ToastService,
 } from '@eagami/ui';
 
@@ -20,7 +21,6 @@ import {
 } from '@angular/core';
 import { Router } from '@angular/router';
 
-import { LoadingComponent } from '@app/components/loading/loading.component';
 import { ApiService } from '@app/services/api.service';
 import { ClerkService } from '@app/services/clerk.service';
 import { type UserRecord, UserService } from '@app/services/user.service';
@@ -36,7 +36,7 @@ import { type UserRecord, UserService } from '@app/services/user.service';
     DialogComponent,
     DividerComponent,
     InputComponent,
-    LoadingComponent,
+    SkeletonComponent,
   ],
 })
 export class AccountPageComponent implements OnInit {

@@ -19,6 +19,7 @@
 
 ea-card {
   --text-label-md-size: 16px;
+  position: relative;
   display: block;
   width: 100%;
 }
@@ -53,34 +54,43 @@ fieldset[disabled] {
   color: var(--bb-color-danger);
 }
 
-.icon-grid {
-  display: flex;
-  flex-wrap: nowrap;
-  overflow-x: auto;
+.field-label__optional {
+  font-weight: 400;
+  font-style: italic;
+  color: var(--bb-color-textSecondary);
+}
+
+.graphics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, 40px);
+  justify-content: space-between;
+  // ~3 rows of 40px options plus the two 8px gaps between them, scroll for more
+  max-height: 136px;
+  overflow-y: auto;
   width: 100%;
   min-width: 0;
   gap: 8px;
-  padding-bottom: 8px;
+  padding: 4px;
   margin-top: 12px;
   scrollbar-width: thin;
   scrollbar-color: var(--bb-color-borderDivider) transparent;
 }
 
-.icon-grid::-webkit-scrollbar {
-  height: 6px;
+.graphics-grid::-webkit-scrollbar {
+  width: 6px;
 }
 
-.icon-grid::-webkit-scrollbar-track {
+.graphics-grid::-webkit-scrollbar-track {
   background-color: transparent;
 }
 
-.icon-grid::-webkit-scrollbar-thumb {
+.graphics-grid::-webkit-scrollbar-thumb {
   border-radius: 3px;
   background-color: var(--bb-color-borderDivider);
 }
 
-.icon-grid__empty {
-  width: 100%;
+.graphics-grid__empty {
+  grid-column: 1 / -1;
   padding: 0;
   margin: 0;
   font-size: 16px;
@@ -89,15 +99,13 @@ fieldset[disabled] {
   color: var(--bb-color-textSecondary);
 }
 
-.icon-option {
-  flex-shrink: 0;
+.graphic-option {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 36px;
-  height: 36px;
+  width: 40px;
+  height: 40px;
   padding: 0;
-  font-size: 20px;
   border: 2px solid var(--bb-color-borderDefault);
   border-radius: 8px;
   background-color: var(--bb-color-surfaceMuted);
@@ -109,11 +117,11 @@ fieldset[disabled] {
     color 0.15s;
 }
 
-.icon-option:hover {
+.graphic-option:hover {
   border-color: var(--bb-color-primary);
 }
 
-.icon-option--selected {
+.graphic-option--selected {
   border-color: var(--bb-color-primary);
   background-color: var(--bb-color-surfacePrimaryTint);
 }
@@ -209,31 +217,20 @@ fieldset[disabled] {
   justify-content: center;
   width: 52px;
   height: 52px;
+  padding: 0;
   font-size: 36px;
   border: 1px solid var(--bb-color-borderDefault);
   border-radius: 8px;
   background-color: var(--bb-color-surfaceMuted);
-}
-
-.icon-preview__edit {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 32px;
-  height: 32px;
-  padding: 0;
-  margin-left: auto;
-  font-size: 18px;
-  border: none;
-  border-radius: 6px;
-  background-color: transparent;
-  color: var(--bb-color-textBody);
   cursor: pointer;
-  transition: background-color 0.15s;
+  transition:
+    border-color 0.15s,
+    background-color 0.15s;
 }
 
-.icon-preview__edit:hover {
-  background-color: var(--bb-color-surfaceHover);
+.icon-preview__container:hover {
+  border-color: var(--bb-color-primary);
+  background-color: var(--bb-color-surfacePrimaryTint);
 }
 
 .field-error {
@@ -249,52 +246,25 @@ fieldset[disabled] {
   margin-bottom: 12px;
 }
 
-.outcomes-list__header {
-  display: grid;
-  grid-template-columns: 1fr 360px 40px;
-  gap: 12px;
-  padding: 0 4px 4px;
-  font-size: 12px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  color: var(--bb-color-textSecondary);
-}
-
-.outcomes-list__header--editable {
-  grid-template-columns: 28px 1fr 360px 40px;
-}
-
-.outcomes-list__col--description {
-  text-align: left;
-}
-
-.outcomes-list__col--brewskis {
-  text-align: left;
-}
-
 .outcome-row {
-  display: grid;
-  grid-template-columns: 1fr 360px 40px;
-  align-items: start;
-  gap: 12px;
-}
-
-.outcome-row--editable {
-  grid-template-columns: 28px 1fr 360px 40px;
-}
-
-.outcome-row__main {
-  display: contents;
-}
-
-.outcome-row__radio {
   display: flex;
-  justify-content: center;
-  padding-top: 8px;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+  padding: 12px;
+  border: 1px solid var(--bb-color-borderSubtle);
+  border-radius: 8px;
 }
 
-.outcome-row__description {
+.outcome-row__name {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  min-width: 0;
+}
+
+.outcome-row__name ea-input {
+  flex: 1;
   min-width: 0;
 }
 
@@ -309,7 +279,6 @@ fieldset[disabled] {
   display: flex;
   align-items: center;
   gap: 16px;
-  padding-top: 8px;
 }
 
 .outcome-row__slider {
@@ -399,57 +368,8 @@ fieldset[disabled] {
 }
 
 @include respond-to('lt-md') {
-  .outcomes-list__header {
-    display: none;
-  }
-
-  .outcome-row {
-    display: flex;
-    align-items: stretch;
-    gap: 0;
-  }
-
-  .outcome-row--editable {
-    grid-template-columns: none;
-  }
-
-  .outcome-row__main {
-    flex: 1;
-    min-width: 0;
-    display: grid;
-    grid-template-columns: 1fr;
-    grid-template-areas:
-      'name'
-      'beers';
-    align-items: start;
+  .outcome-row__slider-row {
     gap: 8px;
-    padding: 12px;
-    border: 1px solid var(--bb-color-borderSubtle);
-    border-radius: 8px;
-  }
-
-  .outcome-row--editable .outcome-row__main {
-    grid-template-columns: 28px 1fr;
-    grid-template-areas:
-      'radio name'
-      'radio beers';
-  }
-
-  .outcome-row__radio {
-    grid-area: radio;
-    padding-top: 12px;
-  }
-
-  .outcome-row__description {
-    grid-area: name;
-  }
-
-  .outcome-row__brewskis {
-    grid-area: beers;
-  }
-
-  .outcome-row > .remove-icon-btn {
-    align-self: center;
   }
 }
 
@@ -465,14 +385,52 @@ fieldset[disabled] {
 
 .card-header {
   display: flex;
-  flex-wrap: wrap;
+  flex-direction: column;
   align-items: center;
-  justify-content: center;
-  gap: 32px;
+  gap: 8px;
+}
+
+.form-skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.form-skeleton__field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
 .card-header__title {
   margin: 0;
+}
+
+.delete-corner {
+  z-index: 1;
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  font-size: 18px;
+  border: none;
+  border-radius: 6px;
+  background-color: transparent;
+  color: var(--bb-color-textSecondary);
+  cursor: pointer;
+  transition:
+    background-color 0.15s,
+    color 0.15s;
+
+  &:hover {
+    background-color: var(--bb-color-surfaceHover);
+    color: var(--bb-color-danger);
+  }
 }
 
 .status-tags {
@@ -503,6 +461,11 @@ fieldset[disabled] {
   color: var(--color-text-primary);
 }
 
+.readonly-description--empty {
+  font-style: italic;
+  color: var(--bb-color-textSecondary);
+}
+
 .settle-options {
   display: flex;
   flex-direction: column;
@@ -510,6 +473,7 @@ fieldset[disabled] {
 }
 
 .back-link {
+  align-self: stretch;
   display: block;
   padding-top: 16px;
   font-size: 14px;
@@ -527,22 +491,48 @@ fieldset[disabled] {
 .actions {
   display: flex;
   flex-direction: column;
+  align-items: center;
   gap: 16px;
   margin-top: 24px;
 }
 
-.action-primary {
+// A row of equal-width inline action buttons (e.g. Accept / Reject / Request edits).
+.action-row {
   display: flex;
-  flex-direction: column;
+  align-self: stretch;
   gap: 8px;
 }
 
-.action-danger {
-  display: flex;
-  justify-content: center;
-  gap: 16px;
-  padding-top: 8px;
-  border-top: 1px solid var(--bb-color-borderSubtle);
+.action-row ea-button {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+.action-row ::ng-deep .ea-button {
+  width: 100%;
+}
+
+.btn-reject {
+  --ea-button-color: var(--bb-color-danger);
+  --ea-button-border-color: var(--bb-color-danger);
+}
+
+@include respond-to('lt-md') {
+  .action-row {
+    flex-direction: column;
+  }
+
+  .action-row ea-button {
+    flex: none;
+  }
+
+  .actions > ea-button {
+    align-self: stretch;
+  }
+
+  .actions ::ng-deep .ea-button {
+    width: 100%;
+  }
 }
 
 .dialog-actions {

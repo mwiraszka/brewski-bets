@@ -6,6 +6,7 @@
 @forward 'variables';
 @forward 'typography';
 @forward 'link';
+@forward 'tooltip';
 
 // Apply the brewski → @eagami/ui token bridge globally so every embedded
 // library component (buttons outside cards, dropdowns in dialogs, etc.) picks

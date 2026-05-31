@@ -1,0 +1,10 @@
+// @eagami/ui hard-codes the tooltip to a fixed dark slate, which collides with
+// dark card surfaces (and could blend into any similarly toned surface). Flip it
+// to the inverse of the active theme so it always contrasts with whatever it
+// floats over, in either mode.
+.ea-tooltip {
+  border: 1px solid var(--bb-color-borderDivider);
+  box-shadow: var(--bb-boxShadow);
+  background-color: var(--bb-color-textStrong);
+  color: var(--bb-color-textInverse);
+}
