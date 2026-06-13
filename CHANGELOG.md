@@ -5,6 +5,26 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.0] - 2026-06-13
+
+### Added
+
+- Add a home dashboard that greets you by name and surfaces your running beer standing, active bet count, and the bets needing your attention above a grid of bet cards
+- Add an optional resolution date when creating or editing a bet, after which the bet is flagged as awaiting its outcome until you settle it
+- Give each bet a streamlined, elegant view page in place of the old read-only form, with the opponent, stakes, and result laid out clearly
+
+### Changed
+
+- Name the opponent throughout a bet: the view and edit pages, the stake sliders, and the dashboard cards now show who the bet is against instead of a generic label
+- Load the bets list and dashboard from already-fetched data so they appear instantly after logging in and refresh in the background
+- Keep the active tab on the Bets and Friends pages in the URL so refreshing returns you to the same tab, and add a "Find a friend" shortcut on the Friends empty state that jumps straight to the Find Friends tab
+- Left-align bet titles in the bets list so they line up regardless of each graphic's width
+
+### Fixed
+
+- Show a friend's initials instead of a blank grey circle when they have no profile photo
+- Resolve all known dependency security advisories
+
 ## [1.1.0] - 2026-06-01
 
 ### Added
@@ -581,6 +601,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - PWA manifest and service worker configuration
 - GitHub issue templates
 
+[1.2.0]: https://github.com/mwiraszka/brewski-bets/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/mwiraszka/brewski-bets/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/mwiraszka/brewski-bets/compare/v0.30.0...v1.0.0
 [0.30.0]: https://github.com/mwiraszka/brewski-bets/compare/v0.29.0...v0.30.0
