@@ -1,3 +1,15 @@
+// Canonical inline text link: coloured, no underline at rest, underline on
+// hover. Layout and font-size stay with the consuming element.
+.bb-text-link {
+  color: var(--bb-color-primaryLink);
+  cursor: pointer;
+
+  &:hover {
+    color: var(--bb-color-primary);
+    text-decoration: underline;
+  }
+}
+
 .bb-link {
   position: relative;
   padding-bottom: 2px;

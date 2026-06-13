@@ -35,7 +35,7 @@
             <ea-icon-users slot="media" />
             <a
               slot="actions"
-              class="find-friend-link"
+              class="find-friend-link bb-text-link"
               role="button"
               tabindex="0"
               (click)="activeTab.set('find')"
@@ -50,22 +50,21 @@
               <li class="friend-item">
                 <div class="friend-info">
                   <ea-avatar
-                    [src]="getAvatarSrc(friend.clerkImageUrl)"
+                    [src]="getAvatarSrc(friend.avatarUrl)"
                     [initials]="getInitials(friend.firstName, friend.lastName)"
                     size="sm" />
                   <span class="friend-name">
                     {{ friend.firstName }} {{ friend.lastName }}
                   </span>
                 </div>
-                <ea-button
+                <button
+                  type="button"
                   class="remove-friend-button"
-                  variant="ghost"
-                  size="sm"
                   eaTooltip="Remove friend"
                   aria-label="Remove friend"
-                  (clicked)="confirmRemoveFriend(friend)">
+                  (click)="confirmRemoveFriend(friend)">
                   <ea-icon-trash />
-                </ea-button>
+                </button>
               </li>
             }
           </ul>
@@ -110,7 +109,7 @@
                 <li class="friend-item">
                   <div class="friend-info">
                     <ea-avatar
-                      [src]="getAvatarSrc(request.requester.clerkImageUrl)"
+                      [src]="getAvatarSrc(request.requester.avatarUrl)"
                       [initials]="
                         getInitials(
                           request.requester.firstName,
@@ -151,7 +150,7 @@
                 <li class="friend-item">
                   <div class="friend-info">
                     <ea-avatar
-                      [src]="getAvatarSrc(request.addressee.clerkImageUrl)"
+                      [src]="getAvatarSrc(request.addressee.avatarUrl)"
                       [initials]="
                         getInitials(
                           request.addressee.firstName,
@@ -212,7 +211,7 @@
               <li class="friend-item">
                 <div class="friend-info">
                   <ea-avatar
-                    [src]="getAvatarSrc(user.clerkImageUrl)"
+                    [src]="getAvatarSrc(user.avatarUrl)"
                     [initials]="getInitials(user.firstName, user.lastName)"
                     size="sm" />
                   <span class="friend-name">
