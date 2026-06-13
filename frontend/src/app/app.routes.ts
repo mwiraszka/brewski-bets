@@ -40,6 +40,14 @@ export const routes: Routes = [
   {
     path: 'bets/:id',
     loadComponent: () =>
+      import('./pages/bet-detail/bet-detail-page.component').then(
+        c => c.BetDetailPageComponent,
+      ),
+    canActivate: [authGuard],
+  },
+  {
+    path: 'bets/:id/edit',
+    loadComponent: () =>
       import('./pages/bet-form/bet-form-page.component').then(
         c => c.BetFormPageComponent,
       ),

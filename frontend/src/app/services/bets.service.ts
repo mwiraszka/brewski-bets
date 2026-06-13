@@ -9,6 +9,7 @@ export interface CreateBetPayload {
   description: string | null;
   iconSlug: string | null;
   iconColor: string | null;
+  resolutionDate: string | null;
   user2Id: string;
   results: Omit<BetResult, 'isSpecial'>[];
 }
@@ -18,6 +19,7 @@ export interface UpdateBetPayload {
   description?: string | null;
   iconSlug?: string | null;
   iconColor?: string | null;
+  resolutionDate?: string | null;
   results?: Omit<BetResult, 'isSpecial'>[];
   selectedResultIndex?: number;
   action: 'submit' | 'accept' | 'settle' | 'reject';
@@ -33,9 +35,14 @@ export class BetsService {
 
   private readonly _bets = signal<BetWithOpponent[]>([]);
   private readonly _pendingCount = signal(0);
+  private readonly _loaded = signal(false);
 
   readonly bets = this._bets.asReadonly();
   readonly pendingCount = this._pendingCount.asReadonly();
+
+  // True once bets have been fetched at least this session, so pages can
+  // render cached data immediately and refresh in the background
+  readonly loaded = this._loaded.asReadonly();
 
   private pollIntervalId: ReturnType<typeof setInterval> | null = null;
   private visibilityHandler: (() => void) | null = null;
@@ -43,6 +50,7 @@ export class BetsService {
   async loadBets(): Promise<void> {
     const bets = await this.api.get<BetWithOpponent[]>('/bets');
     this._bets.set(bets);
+    this._loaded.set(true);
   }
 
   async loadPendingCount(): Promise<void> {
@@ -61,6 +69,9 @@ export class BetsService {
         void this.loadPendingCount();
       }
     };
+
+    // Fetch immediately so data is already cached when a page first needs it
+    refresh();
 
     this.pollIntervalId = setInterval(refresh, POLL_INTERVAL_MS);
 

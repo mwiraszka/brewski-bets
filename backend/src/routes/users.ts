@@ -251,7 +251,9 @@ export const userRoutes = new Hono<AppContext>()
     const clerk = createClerkClient({ secretKey: c.env.CLERK_SECRET_KEY });
     await clerk.users.deleteUserProfileImage(clerkId);
     const clerkUser = await clerk.users.getUser(clerkId);
-    const clerkImageUrl = clerkUser.imageUrl;
+    // Without a photo, Clerk reports a placeholder imageUrl; store null so
+    // clients fall back to initials
+    const clerkImageUrl = clerkUser.hasImage ? clerkUser.imageUrl : null;
 
     const [user] = await db
       .update(users)

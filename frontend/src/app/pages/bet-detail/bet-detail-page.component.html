@@ -1,0 +1,134 @@
+@if (loading()) {
+  <div class="bet-detail-page">
+    <ea-card variant="outlined">
+      <div class="detail-skeleton">
+        <ea-skeleton
+          variant="rect"
+          width="56px"
+          height="56px" />
+        <ea-skeleton
+          variant="text"
+          width="60%"
+          height="28px" />
+        <ea-skeleton
+          variant="text"
+          width="40%"
+          height="18px" />
+        <ea-skeleton
+          variant="rect"
+          height="120px" />
+      </div>
+    </ea-card>
+  </div>
+} @else if (bet(); as bet) {
+  <div class="bet-detail-page">
+    <ea-card variant="outlined">
+      <div class="detail-header">
+        <div class="detail-header__icon">
+          <bb-bet-graphic
+            [slug]="bet.iconSlug"
+            [color]="bet.iconColor"
+            [size]="48" />
+        </div>
+        <div class="detail-header__main">
+          <h1 class="detail-header__title">{{ bet.title }}</h1>
+          <div class="status-tags">
+            @if (bet.status === 'active') {
+              <ea-badge variant="success">active</ea-badge>
+            }
+            @if (bet.status === 'inactive') {
+              <ea-badge variant="default">awaiting acceptance</ea-badge>
+            }
+            @if (isSettled()) {
+              <ea-badge variant="default">settled</ea-badge>
+            }
+            @if (changesPending()) {
+              <ea-badge variant="warning">changes pending</ea-badge>
+            }
+            @if (awaitingOutcome()) {
+              <ea-badge variant="warning">awaiting outcome</ea-badge>
+            }
+          </div>
+        </div>
+      </div>
+
+      <div class="opponent-line">
+        <span class="opponent-line__label">Bet against</span>
+        <span class="opponent-line__person">
+          <ea-avatar
+            [src]="opponentAvatar()"
+            [initials]="opponentInitials()"
+            size="xs" />
+          <span class="opponent-line__name">{{ opponentName() }}</span>
+        </span>
+      </div>
+
+      @if (bet.description) {
+        <p class="detail-description">{{ bet.description }}</p>
+      }
+
+      @if (bet.resolutionDate) {
+        <div class="detail-meta">
+          <ea-icon-calendar class="detail-meta__icon" />
+          <span>Resolves {{ bet.resolutionDate | date: 'longDate' }}</span>
+        </div>
+      }
+
+      @if (awaitingOutcome()) {
+        <div class="outcome-notice">
+          The resolution date has passed. Settle the bet to record the outcome.
+        </div>
+      }
+
+      @if (settlementProposed() || isSettled()) {
+        <div class="winner-banner">
+          <ea-icon-trophy class="winner-banner__icon" />
+          <span>
+            {{ resultBannerLabel() }}:
+            <strong>{{ winnerLabel() }}</strong>
+          </span>
+        </div>
+      }
+
+      <section class="outcomes">
+        <h2 class="outcomes__title">Outcomes</h2>
+        <ul class="outcomes__list">
+          @for (outcome of outcomes(); track $index) {
+            <li
+              class="outcome"
+              [class.outcome--winner]="outcome.isWinner">
+              <span class="outcome__name">{{ outcome.name }}</span>
+              <span
+                class="outcome__stake"
+                [class.outcome__stake--owe]="outcome.iOwe">
+                <span class="outcome__sign">{{ outcome.stakeLabel }}</span>
+                <span class="outcome__beers">
+                  {{ outcome.beers }}
+                  <ea-icon-bottle class="outcome__beer-icon" />
+                </span>
+              </span>
+            </li>
+          }
+        </ul>
+      </section>
+
+      <div class="actions">
+        @if (canAct()) {
+          <ea-button [routerLink]="['/bets', bet.id, 'edit']">
+            <span class="btn-content">
+              <ea-icon-edit />
+              {{ actionLabel() }}
+            </span>
+          </ea-button>
+        } @else if (waitingForOpponent()) {
+          <p class="waiting-note">Waiting for {{ opponentName() }} to respond</p>
+        }
+        <a
+          class="back-link"
+          routerLink="/bets">
+          Back to bets
+        </a>
+      </div>
+    </ea-card>
+  </div>
+}

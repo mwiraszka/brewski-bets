@@ -59,7 +59,9 @@ export const webhookRoutes = new Hono<AppContext>().post('/clerk', async c => {
           email: event.data.email_addresses[0]?.email_address ?? '',
           firstName: event.data.first_name ?? '',
           lastName: event.data.last_name ?? '',
-          clerkImageUrl: event.data.image_url,
+          // Clerk's image_url is a placeholder graphic when the user has no
+          // photo; storing null instead lets clients fall back to initials
+          clerkImageUrl: event.data.has_image ? event.data.image_url : null,
         })
         .returning();
 
@@ -89,13 +91,14 @@ export const webhookRoutes = new Hono<AppContext>().post('/clerk', async c => {
       .limit(1);
 
     if (user) {
-      const imageChanged = event.data.image_url !== user.clerkImageUrl;
+      const clerkImageUrl = event.data.has_image ? event.data.image_url : null;
+      const imageChanged = clerkImageUrl !== user.clerkImageUrl;
 
       const profileFields = {
         email: event.data.email_addresses[0]?.email_address ?? '',
         firstName: event.data.first_name ?? '',
         lastName: event.data.last_name ?? '',
-        clerkImageUrl: event.data.image_url,
+        clerkImageUrl,
         lastModifiedDate: new Date(),
       };
 

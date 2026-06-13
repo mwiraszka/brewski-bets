@@ -11,6 +11,7 @@ import {
 } from '@eagami/ui';
 
 import {
+  ChangeDetectionStrategy,
   Component,
   DestroyRef,
   type OnInit,
@@ -29,6 +30,7 @@ import { type UserRecord, UserService } from '@app/services/user.service';
   selector: 'bb-account-page',
   templateUrl: './account-page.component.html',
   styleUrl: './account-page.component.scss',
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
     AvatarEditorComponent,
     ButtonComponent,

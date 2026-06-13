@@ -21,20 +21,23 @@ import {
 } from '@eagami/ui';
 
 import {
+  ChangeDetectionStrategy,
   Component,
   type OnInit,
   type TemplateRef,
   computed,
+  effect,
   inject,
   signal,
   viewChild,
 } from '@angular/core';
-import { Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 
 import { BetGraphicComponent } from '@app/graphics';
 import { type BetWithOpponent } from '@app/models';
 import { BetsService } from '@app/services/bets.service';
 import { UserService } from '@app/services/user.service';
+import { avatarImageUrl, initialsOf, isAwaitingOutcome } from '@app/util';
 
 import { StandingsComponent } from './standings.component';
 
@@ -42,6 +45,7 @@ import { StandingsComponent } from './standings.component';
   selector: 'bb-bets-page',
   templateUrl: './bets-page.component.html',
   styleUrl: './bets-page.component.scss',
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
     RouterLink,
     AvatarComponent,
@@ -68,12 +72,15 @@ export class BetsPageComponent implements OnInit {
   private readonly betsService = inject(BetsService);
   private readonly userService = inject(UserService);
   private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
 
   readonly skeletonRows = Array.from({ length: 4 });
   private readonly toast = inject(ToastService);
 
+  private static readonly validTabs = ['bets', 'standings'];
+
   readonly loading = signal(true);
-  readonly activeTab = signal('bets');
+  readonly activeTab = signal(this.initialTab());
   readonly allBets = this.betsService.bets;
   readonly filterText = signal('');
   readonly filterStatus = signal('all');
@@ -146,11 +153,31 @@ export class BetsPageComponent implements OnInit {
 
   readonly currentUserId = computed(() => this.userService.user()?.id);
 
+  constructor() {
+    effect(() => {
+      void this.router.navigate([], {
+        relativeTo: this.route,
+        queryParams: { tab: this.activeTab() },
+        queryParamsHandling: 'merge',
+        replaceUrl: true,
+      });
+    });
+  }
+
+  private initialTab(): string {
+    const queryTab = this.route.snapshot.queryParamMap.get('tab');
+    return queryTab && BetsPageComponent.validTabs.includes(queryTab) ? queryTab : 'bets';
+  }
+
   async ngOnInit(): Promise<void> {
+    // Render cached bets immediately and refresh in the background
+    this.loading.set(!this.betsService.loaded());
     try {
       await this.betsService.loadBets();
     } catch {
-      this.toast.error('Failed to load bets');
+      if (!this.betsService.loaded()) {
+        this.toast.error('Failed to load bets');
+      }
     } finally {
       this.loading.set(false);
     }
@@ -165,12 +192,12 @@ export class BetsPageComponent implements OnInit {
     const betId = target.closest('tr')?.querySelector<HTMLElement>('[data-bet-id]')
       ?.dataset['betId'];
     if (betId) {
-      void this.router.navigate(['/bets', betId], { queryParams: { mode: 'view' } });
+      void this.router.navigate(['/bets', betId]);
     }
   }
 
   onEdit(bet: BetWithOpponent): void {
-    void this.router.navigate(['/bets', bet.id]);
+    void this.router.navigate(['/bets', bet.id, 'edit']);
   }
 
   openDeleteDialog(bet: BetWithOpponent): void {
@@ -218,6 +245,10 @@ export class BetsPageComponent implements OnInit {
     return bet.pendingAction != null && bet.status !== 'settled';
   }
 
+  isAwaitingOutcome(bet: BetWithOpponent): boolean {
+    return isAwaitingOutcome(bet);
+  }
+
   canAct(bet: BetWithOpponent): boolean {
     if (bet.status === 'settled') {
       return false;
@@ -230,11 +261,10 @@ export class BetsPageComponent implements OnInit {
   }
 
   getAvatarSrc(clerkImageUrl: string | null): string | undefined {
-    return clerkImageUrl ?? undefined;
+    return avatarImageUrl(clerkImageUrl);
   }
 
   getInitials(firstName: string, lastName: string): string | undefined {
-    const initials = ((firstName?.[0] ?? '') + (lastName?.[0] ?? '')).toUpperCase();
-    return initials || undefined;
+    return initialsOf(firstName, lastName);
   }
 }

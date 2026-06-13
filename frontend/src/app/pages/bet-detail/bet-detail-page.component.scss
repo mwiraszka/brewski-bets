@@ -1,0 +1,246 @@
+@use '../../../styles/mixins' as *;
+
+:host {
+  display: block;
+  width: 100%;
+  min-width: 0;
+}
+
+.bet-detail-page {
+  width: 100%;
+  max-width: 640px;
+  padding: 24px;
+  margin: 0 auto;
+  box-sizing: border-box;
+}
+
+ea-card {
+  display: block;
+  width: 100%;
+}
+
+.detail-skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.detail-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.detail-header__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: 64px;
+  height: 64px;
+  border-radius: 16px;
+  background-color: var(--bb-color-surfaceSubtle);
+}
+
+.detail-header__main {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+.detail-header__title {
+  font-size: 26px;
+  line-height: 1.2;
+  color: var(--bb-color-textStrong);
+  word-break: break-word;
+}
+
+.status-tags {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+}
+
+.opponent-line {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  margin-bottom: 16px;
+  border-radius: 12px;
+  background-color: var(--bb-color-surfaceSubtle);
+}
+
+.opponent-line__label {
+  font-size: 14px;
+  color: var(--bb-color-textSecondary);
+}
+
+.opponent-line__person {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.opponent-line__name {
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--bb-color-textStrong);
+}
+
+.detail-description {
+  margin-bottom: 16px;
+  font-size: 16px;
+  line-height: 1.5;
+  color: var(--bb-color-textBody);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.detail-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+  font-size: 15px;
+  color: var(--bb-color-textBody);
+}
+
+.detail-meta__icon {
+  font-size: 18px;
+  color: var(--bb-color-textSecondary);
+}
+
+.outcome-notice {
+  padding: 12px 16px;
+  margin-bottom: 16px;
+  font-size: 14px;
+  border-radius: 12px;
+  border: 1px solid var(--bb-color-borderDefault);
+  background-color: var(--bb-color-surfaceWarningTint);
+  color: var(--bb-color-textWarning);
+}
+
+.winner-banner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  margin-bottom: 16px;
+  font-size: 16px;
+  border-radius: 12px;
+  background-color: var(--bb-color-surfacePrimaryTint);
+  color: var(--bb-color-textStrong);
+}
+
+.winner-banner__icon {
+  font-size: 20px;
+  color: var(--bb-color-primary);
+}
+
+.outcomes {
+  margin-bottom: 24px;
+}
+
+.outcomes__title {
+  margin-bottom: 12px;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--bb-color-textStrong);
+}
+
+.outcomes__list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  list-style: none;
+}
+
+.outcome {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 16px;
+  border-radius: 12px;
+  border: 1px solid var(--bb-color-borderDefault);
+  background-color: var(--bb-color-surfaceRaised);
+}
+
+.outcome--winner {
+  border-color: var(--bb-color-primary);
+  background-color: var(--bb-color-surfacePrimaryTint);
+}
+
+.outcome__name {
+  font-size: 15px;
+  color: var(--bb-color-textStrong);
+  word-break: break-word;
+}
+
+.outcome__stake {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: none;
+  font-size: 14px;
+  color: var(--bb-color-positive);
+}
+
+.outcome__stake--owe {
+  color: var(--bb-color-danger);
+}
+
+.outcome__sign {
+  font-weight: 500;
+}
+
+.outcome__beers {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-weight: 600;
+}
+
+.outcome__beer-icon {
+  font-size: 16px;
+}
+
+.actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.btn-content {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.waiting-note {
+  font-size: 15px;
+  font-style: italic;
+  color: var(--bb-color-textSecondary);
+}
+
+.back-link {
+  font-size: 15px;
+  color: var(--bb-color-primaryLink);
+}
+
+@include respond-to('lt-sm') {
+  .bet-detail-page {
+    padding: 16px;
+  }
+
+  .outcome {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+}

@@ -44,14 +44,11 @@
         slot="header"
         class="card-header">
         <h2 class="card-header__title">
-          {{
-            readonlyView()
-              ? 'View bet'
-              : mode() === 'create'
-                ? 'Create a bet'
-                : 'Edit bet'
-          }}
+          {{ mode() === 'create' ? 'Create a bet' : 'Edit bet' }}
         </h2>
+        @if (mode() === 'edit' && opponentName()) {
+          <p class="card-header__opponent">vs {{ opponentName() }}</p>
+        }
         @if (mode() === 'edit') {
           <div class="status-tags">
             @if (betStatus() === 'active') {
@@ -135,6 +132,33 @@
               [maxlength]="descriptionMaxLength"
               [maxHeight]="200"
               [(value)]="description" />
+          }
+        </div>
+
+        <div class="form-field">
+          @if (isViewing()) {
+            <span class="field-label">Resolution date</span>
+            @if (resolutionDate()) {
+              <p class="readonly-description">
+                {{ resolutionDate() | date: 'longDate' }}
+              </p>
+            } @else {
+              <p class="readonly-description readonly-description--empty">
+                No resolution date
+              </p>
+            }
+          } @else {
+            <label
+              class="field-label"
+              for="bet-resolution-date">
+              Resolution date
+              <span class="field-label__optional">(optional)</span>
+            </label>
+            <ea-date-picker
+              id="bet-resolution-date"
+              hint="When the outcome will be known"
+              [minDate]="minResolutionDate"
+              [(value)]="resolutionDate" />
           }
         </div>
 
@@ -256,8 +280,6 @@
                         [min]="-maxBrewskiCount"
                         [max]="maxBrewskiCount"
                         [step]="1"
-                        [showValue]="true"
-                        [formatValue]="absFormat"
                         [value]="signedBrewskiCount(outcome)"
                         (changed)="updateOutcomeSigned(rowIndex, $event)" />
                       <div
@@ -274,7 +296,7 @@
                         }
                       </div>
                     </div>
-                    <span class="outcome-row__user">Them</span>
+                    <span class="outcome-row__user">{{ opponentFirstName() }}</span>
                   </div>
                   @if (outcomeAmountError(outcome, rowIndex)) {
                     <p class="outcome-row__error">
@@ -315,16 +337,6 @@
             Back to bets
           </a>
         } @else {
-          @if (canEditFromView()) {
-            <ea-button
-              [disabled]="isBusy()"
-              (clicked)="onEditFromView()">
-              <span class="btn-content">
-                <ea-icon-edit />
-                Edit bet
-              </span>
-            </ea-button>
-          }
           @if (canApproveSettlement()) {
             <div class="action-row">
               <ea-button
@@ -399,7 +411,7 @@
   </div>
 
   <ea-dialog
-    size="sm"
+    width="sm"
     aria-label="Confirm delete bet"
     [(open)]="deleteDialogOpen">
     <h3 slot="header">Delete this bet?</h3>
@@ -426,7 +438,7 @@
   </ea-dialog>
 
   <ea-dialog
-    size="sm"
+    width="sm"
     aria-label="Unsaved changes"
     [open]="leaveDialogOpen()"
     (openChange)="onLeaveDialogOpenChange($event)">
@@ -449,7 +461,7 @@
   </ea-dialog>
 
   <ea-dialog
-    size="sm"
+    width="sm"
     aria-label="Settle bet"
     [(open)]="settleDialogOpen">
     <h3 slot="header">Settle this bet</h3>

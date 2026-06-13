@@ -30,6 +30,7 @@ export interface BetSnapshot {
   description: string | null;
   iconSlug: string | null;
   iconColor: string | null;
+  resolutionDate: string | null;
   results: BetResult[];
   status: 'inactive' | 'active' | 'settled';
   outcome: 'open' | 'resolved' | 'void';
@@ -89,6 +90,7 @@ export const bets = pgTable('bets', {
   user2Id: uuid('user2_id')
     .notNull()
     .references(() => users.id),
+  resolutionDate: timestamp('resolution_date', { withTimezone: true }),
   results: jsonb('results').notNull().$type<BetResult[]>(),
   selectedResultIndex: integer('selected_result_index'),
   status: betStatusEnum('status').notNull().default('inactive'),

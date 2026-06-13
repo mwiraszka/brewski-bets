@@ -1,0 +1,1 @@
+ALTER TABLE "bets" ADD COLUMN "resolution_date" timestamp with time zone;

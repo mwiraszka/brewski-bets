@@ -1,12 +1,99 @@
 <div class="home-page">
-  <div class="content">
-    <img
-      src="assets/bb.svg"
-      alt="Brewski Bets"
-      class="logo" />
-    <div class="branding">
-      <h1 class="brand-name">brewski bets</h1>
-      <p class="subtitle">because broskis bet brewskis</p>
-    </div>
+  <div class="dashboard">
+    <header class="dashboard__header">
+      <div class="dashboard__intro">
+        <h1 class="dashboard__greeting">
+          @if (firstName()) {
+            Welcome back, {{ firstName() }}
+          } @else {
+            Welcome back
+          }
+        </h1>
+      </div>
+      <ea-button routerLink="/bets/new">Create a bet</ea-button>
+    </header>
+
+    @if (loading()) {
+      <div class="card-grid">
+        @for (_ of skeletonCards; track $index) {
+          <ea-skeleton
+            variant="rect"
+            height="148px" />
+        }
+      </div>
+    } @else if (hasBets()) {
+      <div class="stat-tiles">
+        <div class="stat-tile">
+          <span class="stat-tile__value">
+            {{ standingValue() }}
+            <ea-icon-bottle class="stat-tile__unit" />
+          </span>
+          <span class="stat-tile__label">{{ standingLabel() }}</span>
+        </div>
+        <div class="stat-tile">
+          <span class="stat-tile__value">{{ activeBetsCount() }}</span>
+          <span class="stat-tile__label">active bets</span>
+        </div>
+        <div class="stat-tile">
+          <span
+            class="stat-tile__value"
+            [class.stat-tile__value--accent]="attentionCount() > 0">
+            {{ attentionCount() }}
+          </span>
+          <span class="stat-tile__label">need your attention</span>
+        </div>
+      </div>
+
+      @if (attentionBets().length) {
+        <section class="dashboard__section">
+          <h2 class="dashboard__section-title">Needs your attention</h2>
+          <div class="card-grid">
+            @for (bet of attentionBets(); track bet.id) {
+              <bb-bet-card
+                [bet]="bet"
+                [currentUserId]="currentUserId()" />
+            }
+          </div>
+        </section>
+      }
+
+      <section class="dashboard__section">
+        <div class="dashboard__section-head">
+          <h2 class="dashboard__section-title">Open bets</h2>
+          <a
+            class="dashboard__see-all"
+            routerLink="/bets">
+            See all bets
+          </a>
+        </div>
+        @if (openBets().length) {
+          <div class="card-grid">
+            @for (bet of openBets(); track bet.id) {
+              <bb-bet-card
+                [bet]="bet"
+                [currentUserId]="currentUserId()" />
+            }
+          </div>
+        } @else {
+          <p class="dashboard__empty-note">
+            No open bets right now. Your settled bets live in
+            <a routerLink="/bets">all bets</a>.
+          </p>
+        }
+      </section>
+    } @else {
+      <ea-empty-state
+        size="md"
+        headingLevel="h2"
+        title="No bets yet"
+        description="Kick things off with your first wager">
+        <ea-icon-bottle slot="media" />
+        <ea-button
+          slot="actions"
+          routerLink="/bets/new">
+          Create a bet
+        </ea-button>
+      </ea-empty-state>
+    }
   </div>
 </div>

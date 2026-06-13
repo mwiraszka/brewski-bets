@@ -1,6 +1,12 @@
 import { ButtonComponent, CardComponent, InputComponent } from '@eagami/ui';
 
-import { Component, type OnDestroy, inject, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  type OnDestroy,
+  inject,
+  signal,
+} from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 
@@ -12,6 +18,7 @@ const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
   selector: 'bb-forgot-password-page',
   templateUrl: './forgot-password-page.component.html',
   styleUrl: './forgot-password-page.component.scss',
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [FormsModule, RouterLink, ButtonComponent, CardComponent, InputComponent],
 })
 export class ForgotPasswordPageComponent implements OnDestroy {

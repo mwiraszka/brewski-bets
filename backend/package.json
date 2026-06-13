@@ -1,6 +1,6 @@
 {
   "name": "brewski-bets-backend",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Backend API for brewski bets",
   "author": "Michal Wiraszka",
   "private": true,
@@ -16,33 +16,36 @@
     "db:studio": "drizzle-kit studio"
   },
   "dependencies": {
-    "@aws-sdk/client-s3": "3.1057.0",
-    "@clerk/backend": "3.4.14",
+    "@aws-sdk/client-s3": "3.1068.0",
+    "@clerk/backend": "3.7.0",
     "@hono/node-server": "2.0.4",
     "@hono/zod-validator": "0.8.0",
     "@neondatabase/serverless": "1.1.0",
     "drizzle-orm": "0.45.2",
-    "hono": "4.12.23",
-    "svix": "1.95.1",
+    "hono": "4.12.25",
+    "svix": "1.95.2",
     "zod": "4.4.3"
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",
     "@trivago/prettier-plugin-sort-imports": "6.0.2",
-    "@types/node": "25.9.1",
+    "@types/node": "25.9.3",
     "drizzle-kit": "0.31.10",
-    "eslint": "10.4.1",
+    "eslint": "10.5.0",
     "eslint-plugin-import-x": "4.16.2",
     "globals": "17.6.0",
-    "prettier": "3.8.3",
-    "tsx": "4.22.3",
+    "prettier": "3.8.4",
+    "tsx": "4.22.4",
     "typescript": "6.0.3",
-    "typescript-eslint": "8.60.0"
+    "typescript-eslint": "8.61.0"
+  },
+  "engines": {
+    "node": "^22.22.3 || ^24.15.0 || >=26.0.0"
   },
   "packageManager": "pnpm@10.32.1",
   "pnpm": {
     "overrides": {
-      "esbuild": ">=0.25.0",
+      "esbuild": ">=0.28.1",
       "fast-xml-parser": ">=5.7.0",
       "fast-xml-builder": ">=1.1.7",
       "lodash-es": ">=4.18.0",

@@ -79,3 +79,14 @@
   --ea-button-color: var(--bb-color-danger);
   --ea-button-background-color-hover: var(--bb-color-dangerSubtle);
 }
+
+.find-friend-link {
+  font-size: 16px;
+  text-decoration: underline;
+  color: var(--bb-color-primaryLink);
+  cursor: pointer;
+
+  &:hover {
+    color: var(--bb-color-primary);
+  }
+}

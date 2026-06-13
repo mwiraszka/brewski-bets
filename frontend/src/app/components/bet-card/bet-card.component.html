@@ -1,0 +1,49 @@
+<a
+  class="bet-card"
+  [class.bet-card--attention]="myTurn() || awaitingOutcome()"
+  [routerLink]="['/bets', bet().id]">
+  <div class="bet-card__top">
+    <span class="bet-card__icon">
+      <bb-bet-graphic
+        [slug]="bet().iconSlug"
+        [color]="bet().iconColor"
+        [size]="28" />
+    </span>
+    <span class="bet-card__status">
+      @if (bet().status === 'active') {
+        <ea-badge variant="success">active</ea-badge>
+      }
+      @if (bet().status === 'inactive') {
+        <ea-badge variant="default">pending</ea-badge>
+      }
+      @if (bet().status === 'settled') {
+        <ea-badge variant="default">settled</ea-badge>
+      }
+    </span>
+  </div>
+
+  <h3 class="bet-card__title">{{ bet().title }}</h3>
+
+  <div class="bet-card__opponent">
+    <ea-avatar
+      [src]="opponentAvatar()"
+      [initials]="opponentInitials()"
+      size="xs" />
+    <span class="bet-card__opponent-name">vs {{ opponentName() }}</span>
+  </div>
+
+  <div class="bet-card__footer">
+    @if (myTurn()) {
+      <span class="bet-card__flag bet-card__flag--action">Your turn</span>
+    } @else if (awaitingOutcome()) {
+      <span class="bet-card__flag bet-card__flag--action">Awaiting outcome</span>
+    } @else if (changesPending()) {
+      <span class="bet-card__flag">Changes pending</span>
+    } @else if (bet().resolutionDate) {
+      <span class="bet-card__flag">
+        <ea-icon-calendar class="bet-card__flag-icon" />
+        {{ bet().resolutionDate | date: 'mediumDate' }}
+      </span>
+    }
+  </div>
+</a>

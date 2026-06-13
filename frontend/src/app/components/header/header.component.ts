@@ -11,6 +11,7 @@ import {
 import { filter, map } from 'rxjs';
 
 import {
+  ChangeDetectionStrategy,
   Component,
   DestroyRef,
   type OnInit,
@@ -34,6 +35,7 @@ import { environment } from '@env';
   selector: 'bb-header',
   templateUrl: './header.component.html',
   styleUrl: './header.component.scss',
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
     RouterLink,
     AvatarComponent,
