@@ -7,6 +7,7 @@ import {
 } from '@eagami/ui';
 
 import {
+  ChangeDetectionStrategy,
   Component,
   type ElementRef,
   type OnDestroy,
@@ -26,6 +27,7 @@ const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
   selector: 'bb-create-account-page',
   templateUrl: './create-account-page.component.html',
   styleUrl: './create-account-page.component.scss',
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
     FormsModule,
     RouterLink,

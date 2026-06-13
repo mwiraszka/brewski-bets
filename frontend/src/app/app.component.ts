@@ -2,6 +2,7 @@ import { ToastComponent, ToastService } from '@eagami/ui';
 
 import {
   type AfterViewInit,
+  ChangeDetectionStrategy,
   Component,
   DestroyRef,
   type ElementRef,
@@ -20,6 +21,7 @@ import { ClerkService } from '@app/services/clerk.service';
   selector: 'bb-root',
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss',
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [RouterOutlet, HeaderComponent, FooterComponent, ToastComponent],
 })
 export class AppComponent implements AfterViewInit {

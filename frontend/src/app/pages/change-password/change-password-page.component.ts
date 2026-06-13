@@ -1,6 +1,12 @@
 import { ButtonComponent, CardComponent, InputComponent } from '@eagami/ui';
 
-import { Component, type OnDestroy, inject, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  type OnDestroy,
+  inject,
+  signal,
+} from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 
@@ -10,6 +16,7 @@ import { ClerkService } from '@app/services/clerk.service';
   selector: 'bb-change-password-page',
   templateUrl: './change-password-page.component.html',
   styleUrl: './change-password-page.component.scss',
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [FormsModule, RouterLink, ButtonComponent, CardComponent, InputComponent],
 })
 export class ChangePasswordPageComponent implements OnDestroy {

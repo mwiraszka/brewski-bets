@@ -1,6 +1,6 @@
 import { EagamiWordmarkComponent } from '@eagami/ui';
 
-import { Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { RouterLink } from '@angular/router';
 
 import packageJson from '../../../../package.json';
@@ -9,6 +9,7 @@ import packageJson from '../../../../package.json';
   selector: 'bb-footer',
   templateUrl: './footer.component.html',
   styleUrl: './footer.component.scss',
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [RouterLink, EagamiWordmarkComponent],
 })
 export class FooterComponent {
