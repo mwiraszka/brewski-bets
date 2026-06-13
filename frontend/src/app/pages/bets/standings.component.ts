@@ -1,9 +1,10 @@
 import { AvatarComponent, BottleIconComponent, EmptyStateComponent } from '@eagami/ui';
 
-import { Component, computed, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
 
 import { BetGraphicComponent } from '@app/graphics';
 import { type BetWithOpponent } from '@app/models';
+import { avatarImageUrl } from '@app/util';
 
 interface StandingBreakdownItem {
   title: string;
@@ -25,6 +26,7 @@ interface OpponentStanding {
   selector: 'bb-standings',
   templateUrl: './standings.component.html',
   styleUrl: './standings.component.scss',
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
     AvatarComponent,
     BetGraphicComponent,
@@ -99,7 +101,7 @@ export class StandingsComponent {
   }
 
   getAvatarSrc(clerkImageUrl: string | null): string | undefined {
-    return clerkImageUrl ?? undefined;
+    return avatarImageUrl(clerkImageUrl);
   }
 
   getInitials(name: string): string | undefined {
