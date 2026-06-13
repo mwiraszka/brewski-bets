@@ -34,7 +34,7 @@ import {
   type UserSearchResult,
 } from '@app/models';
 import { FriendsService } from '@app/services/friends.service';
-import { avatarImageUrl, initialsOf } from '@app/util';
+import { avatarSrc, initialsOf } from '@app/util';
 
 const ACTIVE_TAB_STORAGE_KEY = 'bb-friends-active-tab';
 const VALID_TABS = ['friends', 'requests', 'find'] as const;
@@ -291,8 +291,8 @@ export class FriendsPageComponent implements OnInit {
     );
   }
 
-  getAvatarSrc(clerkImageUrl: string | null): string | undefined {
-    return avatarImageUrl(clerkImageUrl);
+  getAvatarSrc(avatarUrl: string | null): string | undefined {
+    return avatarSrc(avatarUrl);
   }
 
   getInitials(firstName: string, lastName: string): string | undefined {

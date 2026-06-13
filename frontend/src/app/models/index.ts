@@ -8,7 +8,7 @@ export interface Friend {
   id: string;
   firstName: string;
   lastName: string;
-  clerkImageUrl: string | null;
+  avatarUrl: string | null;
   friendshipId: string;
 }
 
@@ -20,7 +20,7 @@ export interface FriendRequest {
     id: string;
     firstName: string;
     lastName: string;
-    clerkImageUrl: string | null;
+    avatarUrl: string | null;
   };
 }
 
@@ -32,7 +32,7 @@ export interface SentFriendRequest {
     id: string;
     firstName: string;
     lastName: string;
-    clerkImageUrl: string | null;
+    avatarUrl: string | null;
   };
 }
 
@@ -40,7 +40,7 @@ export interface UserSearchResult {
   id: string;
   firstName: string;
   lastName: string;
-  clerkImageUrl: string | null;
+  avatarUrl: string | null;
 }
 
 export interface FriendsOverview {

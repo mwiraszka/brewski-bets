@@ -13,14 +13,21 @@ function createClient(env: AppBindings): S3Client {
   });
 }
 
+export type AvatarVariant = 'original' | 'cropped';
+
+function avatarKey(userId: string, variant: AvatarVariant): string {
+  return `avatars/${userId}/${variant}`;
+}
+
 export async function uploadAvatar(
   env: AppBindings,
   userId: string,
   file: ArrayBuffer,
   contentType: string,
+  variant: AvatarVariant = 'original',
 ): Promise<string> {
   const s3 = createClient(env);
-  const key = `avatars/${userId}/original`;
+  const key = avatarKey(userId, variant);
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Vercel's TS build cannot resolve S3Client.send()
   await (s3 as any).send(
@@ -38,11 +45,15 @@ export async function uploadAvatar(
 export async function deleteAvatar(env: AppBindings, userId: string): Promise<void> {
   const s3 = createClient(env);
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Vercel's TS build cannot resolve S3Client.send()
-  await (s3 as any).send(
-    new DeleteObjectCommand({
-      Bucket: env.R2_BUCKET_NAME,
-      Key: `avatars/${userId}/original`,
-    }),
+  await Promise.all(
+    (['original', 'cropped'] as const).map(variant =>
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Vercel's TS build cannot resolve S3Client.send()
+      (s3 as any).send(
+        new DeleteObjectCommand({
+          Bucket: env.R2_BUCKET_NAME,
+          Key: avatarKey(userId, variant),
+        }),
+      ),
+    ),
   );
 }

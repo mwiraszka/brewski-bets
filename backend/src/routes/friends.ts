@@ -35,7 +35,9 @@ async function fetchFriends(db: Db, userId: string) {
       id: users.id,
       firstName: users.firstName,
       lastName: users.lastName,
-      clerkImageUrl: users.clerkImageUrl,
+      avatarUrl: sql<
+        string | null
+      >`coalesce(${users.avatarUrl}, ${users.avatarOriginalUrl})`,
     })
     .from(users)
     .where(or(...friendIds.map(id => eq(users.id, id))));
@@ -57,7 +59,9 @@ async function fetchIncomingRequests(db: Db, userId: string) {
       requesterId: friendships.requesterId,
       requesterFirstName: users.firstName,
       requesterLastName: users.lastName,
-      requesterClerkImageUrl: users.clerkImageUrl,
+      requesterAvatarUrl: sql<
+        string | null
+      >`coalesce(${users.avatarUrl}, ${users.avatarOriginalUrl})`,
     })
     .from(friendships)
     .innerJoin(users, eq(friendships.requesterId, users.id))
@@ -71,7 +75,7 @@ async function fetchIncomingRequests(db: Db, userId: string) {
       id: r.requesterId,
       firstName: r.requesterFirstName,
       lastName: r.requesterLastName,
-      clerkImageUrl: r.requesterClerkImageUrl,
+      avatarUrl: r.requesterAvatarUrl,
     },
   }));
 }
@@ -85,7 +89,9 @@ async function fetchSentRequests(db: Db, userId: string) {
       addresseeId: friendships.addresseeId,
       addresseeFirstName: users.firstName,
       addresseeLastName: users.lastName,
-      addresseeClerkImageUrl: users.clerkImageUrl,
+      addresseeAvatarUrl: sql<
+        string | null
+      >`coalesce(${users.avatarUrl}, ${users.avatarOriginalUrl})`,
     })
     .from(friendships)
     .innerJoin(users, eq(friendships.addresseeId, users.id))
@@ -99,7 +105,7 @@ async function fetchSentRequests(db: Db, userId: string) {
       id: r.addresseeId,
       firstName: r.addresseeFirstName,
       lastName: r.addresseeLastName,
-      clerkImageUrl: r.addresseeClerkImageUrl,
+      avatarUrl: r.addresseeAvatarUrl,
     },
   }));
 }

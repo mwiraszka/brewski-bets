@@ -37,7 +37,7 @@ import { BetGraphicComponent } from '@app/graphics';
 import { type BetWithOpponent } from '@app/models';
 import { BetsService } from '@app/services/bets.service';
 import { UserService } from '@app/services/user.service';
-import { avatarImageUrl, initialsOf, isAwaitingOutcome } from '@app/util';
+import { avatarSrc, initialsOf, isAwaitingOutcome } from '@app/util';
 
 import { StandingsComponent } from './standings.component';
 
@@ -260,8 +260,8 @@ export class BetsPageComponent implements OnInit {
     return bet.status !== 'settled' && !bet.settlementProposed;
   }
 
-  getAvatarSrc(clerkImageUrl: string | null): string | undefined {
-    return avatarImageUrl(clerkImageUrl);
+  getAvatarSrc(avatarUrl: string | null): string | undefined {
+    return avatarSrc(avatarUrl);
   }
 
   getInitials(firstName: string, lastName: string): string | undefined {

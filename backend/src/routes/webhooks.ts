@@ -74,7 +74,7 @@ export const webhookRoutes = new Hono<AppContext>().post('/clerk', async c => {
 
           await db
             .update(users)
-            .set({ avatarOriginalUrl: url })
+            .set({ avatarUrl: url, avatarOriginalUrl: url })
             .where(eq(users.id, newUser.id));
         } catch {
           // account still works without R2 avatar
@@ -114,6 +114,7 @@ export const webhookRoutes = new Hono<AppContext>().post('/clerk', async c => {
             .update(users)
             .set({
               ...profileFields,
+              avatarUrl: url,
               avatarOriginalUrl: url,
               avatarCropState: { zoom: 1, offsetX: 0, offsetY: 0 },
             })
@@ -132,6 +133,7 @@ export const webhookRoutes = new Hono<AppContext>().post('/clerk', async c => {
           .update(users)
           .set({
             ...profileFields,
+            avatarUrl: null,
             avatarOriginalUrl: null,
             avatarCropState: null,
             avatarManagedByApp: false,

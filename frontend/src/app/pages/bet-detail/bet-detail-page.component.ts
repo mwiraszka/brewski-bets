@@ -21,7 +21,7 @@ import { BetsService } from '@app/services/bets.service';
 import { UserService } from '@app/services/user.service';
 import {
   type BetPosition,
-  avatarImageUrl,
+  avatarSrc,
   initialsOf,
   isAwaitingOutcome,
   isMyTurn,
@@ -77,9 +77,7 @@ export class BetDetailPageComponent implements OnInit {
     return opponent ? `${opponent.firstName} ${opponent.lastName}` : '';
   });
 
-  readonly opponentAvatar = computed(() =>
-    avatarImageUrl(this.bet()?.opponent?.clerkImageUrl),
-  );
+  readonly opponentAvatar = computed(() => avatarSrc(this.bet()?.opponent?.avatarUrl));
 
   readonly opponentInitials = computed(() =>
     initialsOf(this.bet()?.opponent?.firstName, this.bet()?.opponent?.lastName),
