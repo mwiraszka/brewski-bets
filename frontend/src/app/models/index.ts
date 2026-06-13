@@ -64,6 +64,7 @@ export interface Bet {
   description: string | null;
   iconSlug: string | null;
   iconColor: string | null;
+  resolutionDate: string | null;
   user1Id: string;
   user2Id: string;
   results: BetResult[];

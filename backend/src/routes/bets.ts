@@ -32,11 +32,14 @@ const iconColorSchema = z
 
 const descriptionSchema = z.string().max(1000).nullable().optional();
 
+const resolutionDateSchema = z.iso.datetime({ offset: true }).nullable().optional();
+
 const createBetSchema = z.object({
   title: z.string().min(1),
   description: descriptionSchema,
   iconSlug: iconSlugSchema,
   iconColor: iconColorSchema,
+  resolutionDate: resolutionDateSchema,
   user2Id: z.string().uuid(),
   results: z.array(betResultSchema).min(1).max(20),
 });
@@ -46,6 +49,7 @@ const updateBetSchema = z.object({
   description: descriptionSchema,
   iconSlug: iconSlugSchema,
   iconColor: iconColorSchema,
+  resolutionDate: resolutionDateSchema,
   results: z.array(betResultSchema).min(1).max(20).optional(),
   selectedResultIndex: z.number().int().min(0).optional(),
   action: z.enum(['submit', 'accept', 'settle', 'reject']),
@@ -62,6 +66,7 @@ function snapshotState(bet: typeof bets.$inferSelect): BetSnapshot {
     description: bet.description,
     iconSlug: bet.iconSlug,
     iconColor: bet.iconColor,
+    resolutionDate: bet.resolutionDate?.toISOString() ?? null,
     results: bet.results,
     status: bet.status,
     outcome: bet.outcome,
@@ -123,6 +128,7 @@ export const betRoutes = new Hono<AppContext>()
         description: normalizeDescription(body.description),
         iconSlug: body.iconSlug ?? null,
         iconColor: body.iconColor ?? null,
+        resolutionDate: body.resolutionDate ? new Date(body.resolutionDate) : null,
         user1Id: userId,
         user2Id: body.user2Id,
         results: appendVoidOption(body.results),
@@ -294,6 +300,11 @@ export const betRoutes = new Hono<AppContext>()
       if (body.iconColor !== undefined) {
         updates.iconColor = body.iconColor;
       }
+      if (body.resolutionDate !== undefined) {
+        updates.resolutionDate = body.resolutionDate
+          ? new Date(body.resolutionDate)
+          : null;
+      }
       if (body.results !== undefined) {
         updates.results = appendVoidOption(body.results);
       }
@@ -344,6 +355,7 @@ export const betRoutes = new Hono<AppContext>()
       updates.description = snap.description;
       updates.iconSlug = snap.iconSlug;
       updates.iconColor = snap.iconColor;
+      updates.resolutionDate = snap.resolutionDate ? new Date(snap.resolutionDate) : null;
       updates.results = snap.results;
       updates.status = snap.status;
       updates.outcome = snap.outcome;
