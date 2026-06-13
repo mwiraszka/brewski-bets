@@ -33,6 +33,13 @@
   display: flex;
   align-items: center;
   gap: 8px;
+
+  // Fixed-width slot so titles line up regardless of each icon's natural width
+  bb-bet-graphic {
+    flex: none;
+    justify-content: center;
+    width: 24px;
+  }
 }
 
 .bets-skeleton {

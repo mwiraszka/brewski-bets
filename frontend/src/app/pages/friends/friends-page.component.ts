@@ -16,8 +16,16 @@ import {
   UsersIconComponent,
 } from '@eagami/ui';
 
-import { Component, type OnInit, computed, effect, inject, signal } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  type OnInit,
+  computed,
+  effect,
+  inject,
+  signal,
+} from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
 
 import {
   type Friend,
@@ -26,6 +34,7 @@ import {
   type UserSearchResult,
 } from '@app/models';
 import { FriendsService } from '@app/services/friends.service';
+import { avatarImageUrl, initialsOf } from '@app/util';
 
 const ACTIVE_TAB_STORAGE_KEY = 'bb-friends-active-tab';
 const VALID_TABS = ['friends', 'requests', 'find'] as const;
@@ -41,6 +50,7 @@ function readStoredTab(): FriendsTab {
   selector: 'bb-friends-page',
   templateUrl: './friends-page.component.html',
   styleUrl: './friends-page.component.scss',
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
     AvatarComponent,
     ButtonComponent,
@@ -64,6 +74,7 @@ export class FriendsPageComponent implements OnInit {
   private readonly friendsService = inject(FriendsService);
   private readonly toast = inject(ToastService);
   private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
 
   readonly activeTab = signal<FriendsTab>(
     (() => {
@@ -78,7 +89,14 @@ export class FriendsPageComponent implements OnInit {
 
   constructor() {
     effect(() => {
-      localStorage.setItem(ACTIVE_TAB_STORAGE_KEY, this.activeTab());
+      const tab = this.activeTab();
+      localStorage.setItem(ACTIVE_TAB_STORAGE_KEY, tab);
+      void this.router.navigate([], {
+        relativeTo: this.route,
+        queryParams: { tab },
+        queryParamsHandling: 'merge',
+        replaceUrl: true,
+      });
     });
   }
 
@@ -274,11 +292,10 @@ export class FriendsPageComponent implements OnInit {
   }
 
   getAvatarSrc(clerkImageUrl: string | null): string | undefined {
-    return clerkImageUrl ?? undefined;
+    return avatarImageUrl(clerkImageUrl);
   }
 
   getInitials(firstName: string, lastName: string): string | undefined {
-    const initials = ((firstName?.[0] ?? '') + (lastName?.[0] ?? '')).toUpperCase();
-    return initials || undefined;
+    return initialsOf(firstName, lastName);
   }
 }

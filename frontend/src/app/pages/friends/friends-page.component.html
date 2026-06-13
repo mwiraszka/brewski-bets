@@ -31,9 +31,18 @@
           <ea-empty-state
             size="sm"
             headingLevel="h3"
-            title="No friends yet"
-            description="Find someone to add!">
+            title="No friends yet">
             <ea-icon-users slot="media" />
+            <a
+              slot="actions"
+              class="find-friend-link"
+              role="button"
+              tabindex="0"
+              (click)="activeTab.set('find')"
+              (keydown.enter)="activeTab.set('find')"
+              (keydown.space)="activeTab.set('find')">
+              Find a friend
+            </a>
           </ea-empty-state>
         } @else {
           <ul class="friend-list">
@@ -234,7 +243,7 @@
 
 <ea-dialog
   [(open)]="removeDialogOpen"
-  size="sm">
+  width="sm">
   <span slot="header">Remove friend</span>
   <p>Are you sure you want to remove this friend?</p>
   <div slot="footer">

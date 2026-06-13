@@ -159,6 +159,13 @@
     @if (isChangesPending(bet)) {
       <ea-badge variant="warning">changes pending</ea-badge>
     }
+    @if (isAwaitingOutcome(bet)) {
+      <ea-badge
+        variant="warning"
+        [eaTooltip]="'The resolution date has passed; settle the bet'">
+        awaiting outcome
+      </ea-badge>
+    }
   </div>
 </ng-template>
 
@@ -192,7 +199,7 @@
 </ng-template>
 
 <ea-dialog
-  size="sm"
+  width="sm"
   aria-label="Confirm delete bet"
   [(open)]="deleteDialogOpen">
   <h3 slot="header">Delete this bet?</h3>
