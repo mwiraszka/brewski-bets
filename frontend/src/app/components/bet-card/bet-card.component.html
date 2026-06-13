@@ -28,8 +28,11 @@
     <ea-avatar
       [src]="opponentAvatar()"
       [initials]="opponentInitials()"
-      size="xs" />
-    <span class="bet-card__opponent-name">vs {{ opponentName() }}</span>
+      size="sm" />
+    <span class="bet-card__opponent-detail">
+      <span class="bet-card__opponent-label">Opponent</span>
+      <span class="bet-card__opponent-name">{{ opponentName() }}</span>
+    </span>
   </div>
 
   <div class="bet-card__footer">

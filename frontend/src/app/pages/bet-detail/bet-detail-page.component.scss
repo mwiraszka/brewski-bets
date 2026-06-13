@@ -74,15 +74,18 @@ ea-card {
   background-color: var(--bb-color-surfaceSubtle);
 }
 
-.opponent-line__label {
-  font-size: 14px;
-  color: var(--bb-color-textSecondary);
+.opponent-line__detail {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
 }
 
-.opponent-line__person {
-  display: flex;
-  align-items: center;
-  gap: 8px;
+.opponent-line__label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--bb-color-textFaint);
 }
 
 .opponent-line__name {
@@ -230,7 +233,6 @@ ea-card {
 
 .back-link {
   font-size: 15px;
-  color: var(--bb-color-primaryLink);
 }
 
 @include respond-to('lt-sm') {
