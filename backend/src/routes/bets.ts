@@ -167,7 +167,9 @@ export const betRoutes = new Hono<AppContext>()
         id: users.id,
         firstName: users.firstName,
         lastName: users.lastName,
-        clerkImageUrl: users.clerkImageUrl,
+        avatarUrl: sql<
+          string | null
+        >`coalesce(${users.avatarUrl}, ${users.avatarOriginalUrl})`,
       })
       .from(users)
       .where(or(...opponentIds.map(id => eq(users.id, id))));
@@ -226,7 +228,9 @@ export const betRoutes = new Hono<AppContext>()
         id: users.id,
         firstName: users.firstName,
         lastName: users.lastName,
-        clerkImageUrl: users.clerkImageUrl,
+        avatarUrl: sql<
+          string | null
+        >`coalesce(${users.avatarUrl}, ${users.avatarOriginalUrl})`,
       })
       .from(users)
       .where(eq(users.id, opponentId))

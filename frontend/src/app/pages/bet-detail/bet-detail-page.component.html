@@ -53,12 +53,12 @@
       </div>
 
       <div class="opponent-line">
-        <span class="opponent-line__label">Bet against</span>
-        <span class="opponent-line__person">
-          <ea-avatar
-            [src]="opponentAvatar()"
-            [initials]="opponentInitials()"
-            size="xs" />
+        <ea-avatar
+          [src]="opponentAvatar()"
+          [initials]="opponentInitials()"
+          size="md" />
+        <span class="opponent-line__detail">
+          <span class="opponent-line__label">Bet against</span>
           <span class="opponent-line__name">{{ opponentName() }}</span>
         </span>
       </div>
@@ -124,7 +124,7 @@
           <p class="waiting-note">Waiting for {{ opponentName() }} to respond</p>
         }
         <a
-          class="back-link"
+          class="back-link bb-text-link"
           routerLink="/bets">
           Back to bets
         </a>

@@ -61,7 +61,7 @@
         <div class="dashboard__section-head">
           <h2 class="dashboard__section-title">Open bets</h2>
           <a
-            class="dashboard__see-all"
+            class="dashboard__see-all bb-text-link"
             routerLink="/bets">
             See all bets
           </a>
@@ -77,7 +77,11 @@
         } @else {
           <p class="dashboard__empty-note">
             No open bets right now. Your settled bets live in
-            <a routerLink="/bets">all bets</a>.
+            <a
+              class="bb-text-link"
+              routerLink="/bets"
+              >all bets</a
+            >.
           </p>
         }
       </section>

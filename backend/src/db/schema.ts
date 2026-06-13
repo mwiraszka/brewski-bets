@@ -46,6 +46,10 @@ export const users = pgTable('users', {
   firstName: text('first_name').notNull(),
   lastName: text('last_name').notNull(),
   clerkImageUrl: text('clerk_image_url'),
+  // Cropped, display-ready avatar stored in the app's own R2 bucket. This is
+  // the canonical source for showing a user's avatar anywhere in the app;
+  // Clerk's image_url is volatile and only kept for change detection.
+  avatarUrl: text('avatar_url'),
   avatarOriginalUrl: text('avatar_original_url'),
   avatarManagedByApp: boolean('avatar_managed_by_app').notNull().default(false),
   avatarCropState: jsonb('avatar_crop_state').$type<{

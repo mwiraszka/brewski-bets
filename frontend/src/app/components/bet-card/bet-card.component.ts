@@ -6,7 +6,7 @@ import { RouterLink } from '@angular/router';
 
 import { BetGraphicComponent } from '@app/graphics';
 import { type BetWithOpponent } from '@app/models';
-import { avatarImageUrl, initialsOf, isAwaitingOutcome, isMyTurn } from '@app/util';
+import { avatarSrc, initialsOf, isAwaitingOutcome, isMyTurn } from '@app/util';
 
 @Component({
   selector: 'bb-bet-card',
@@ -30,9 +30,7 @@ export class BetCardComponent {
     return opponent ? `${opponent.firstName} ${opponent.lastName}` : '';
   });
 
-  readonly opponentAvatar = computed(() =>
-    avatarImageUrl(this.bet().opponent?.clerkImageUrl),
-  );
+  readonly opponentAvatar = computed(() => avatarSrc(this.bet().opponent?.avatarUrl));
 
   readonly opponentInitials = computed(() =>
     initialsOf(this.bet().opponent?.firstName, this.bet().opponent?.lastName),

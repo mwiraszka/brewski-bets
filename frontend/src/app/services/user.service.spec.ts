@@ -29,6 +29,7 @@ const MOCK_USER_RECORD: UserRecord = {
   firstName: 'John',
   lastName: 'Doe',
   clerkImageUrl: 'https://img.clerk.com/abc',
+  avatarUrl: 'https://s3.example.com/avatar-cropped.jpg',
   avatarOriginalUrl: 'https://s3.example.com/avatar.jpg',
   avatarCropState: { zoom: 1.5, offsetX: 10, offsetY: 5 },
   lastModifiedDate: '2026-04-01T00:00:00.000Z',
@@ -100,9 +101,7 @@ describe('UserService', () => {
       const url = service.fullSizeAvatarUrl();
       const expectedTimestamp = new Date(MOCK_USER_RECORD.lastModifiedDate).getTime();
 
-      expect(url).toBe(
-        `http://localhost:3000/api/users/user-1/avatar?t=${expectedTimestamp}`,
-      );
+      expect(url).toBe(`https://s3.example.com/avatar.jpg?t=${expectedTimestamp}`);
     });
 
     it('returns undefined when user has no original avatar', async () => {
@@ -131,9 +130,7 @@ describe('UserService', () => {
       const url = service.avatarUrl();
       const expectedTimestamp = new Date(MOCK_USER_RECORD.lastModifiedDate).getTime();
 
-      expect(url).toBe(
-        `http://localhost:3000/api/users/user-1/avatar?t=${expectedTimestamp}`,
-      );
+      expect(url).toBe(`https://s3.example.com/avatar.jpg?t=${expectedTimestamp}`);
     });
 
     it('returns the clerk image URL when user has no original avatar but clerk has one', async () => {

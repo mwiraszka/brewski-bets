@@ -124,7 +124,7 @@ export class FriendsService {
           id: request.requester.id,
           firstName: request.requester.firstName,
           lastName: request.requester.lastName,
-          clerkImageUrl: request.requester.clerkImageUrl,
+          avatarUrl: request.requester.avatarUrl,
           friendshipId: request.id,
         },
       ];

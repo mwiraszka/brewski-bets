@@ -129,6 +129,7 @@ describe('AccountPageComponent', () => {
       post: jest.fn().mockResolvedValue({
         id: 'user-1',
         clerkImageUrl: 'https://img.clerk.com/updated',
+        avatarUrl: 'https://s3.example.com/cropped',
         avatarOriginalUrl: null,
         avatarCropState: null,
         lastModifiedDate: '2026-04-02T00:00:00.000Z',
@@ -707,6 +708,7 @@ describe('AccountPageComponent', () => {
       mockApi.patch.mockResolvedValue({
         id: 'u1',
         clerkImageUrl: 'https://img.clerk.com/updated',
+        avatarUrl: 'https://s3.example.com/cropped',
         avatarCropState: { zoom: 2, offsetX: 10, offsetY: 5 },
         lastModifiedDate: '2026-04-02T00:00:00.000Z',
       });
@@ -728,6 +730,7 @@ describe('AccountPageComponent', () => {
       mockApi.patch.mockResolvedValue({
         id: 'u1',
         clerkImageUrl: 'https://img.clerk.com/updated',
+        avatarUrl: 'https://s3.example.com/cropped',
         avatarCropState: { zoom: 2, offsetX: 10, offsetY: 5 },
         lastModifiedDate: '2026-04-02T00:00:00.000Z',
       });
@@ -741,6 +744,7 @@ describe('AccountPageComponent', () => {
       mockApi.patch.mockResolvedValue({
         id: 'u1',
         clerkImageUrl: 'https://img.clerk.com/updated',
+        avatarUrl: 'https://s3.example.com/cropped',
         avatarCropState: { zoom: 2, offsetX: 10, offsetY: 5 },
         lastModifiedDate: '2026-04-02T00:00:00.000Z',
       });
@@ -754,6 +758,7 @@ describe('AccountPageComponent', () => {
       mockApi.patch.mockResolvedValue({
         id: 'u1',
         clerkImageUrl: 'https://img.clerk.com/updated',
+        avatarUrl: 'https://s3.example.com/cropped',
         avatarCropState: { zoom: 2, offsetX: 10, offsetY: 5 },
         lastModifiedDate: '2026-04-02T00:00:00.000Z',
       });

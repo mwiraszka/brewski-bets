@@ -138,7 +138,7 @@
   @if (bet.opponent) {
     <div class="opponent-cell">
       <ea-avatar
-        [src]="getAvatarSrc(bet.opponent.clerkImageUrl)"
+        [src]="getAvatarSrc(bet.opponent.avatarUrl)"
         [initials]="getInitials(bet.opponent.firstName, bet.opponent.lastName)"
         size="xs" />
       <span>{{ bet.opponent.firstName }} {{ bet.opponent.lastName }}</span>

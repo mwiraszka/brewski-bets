@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.1] - 2026-06-13
+
+### Changed
+
+- Show the opponent on a bet card and the bet view as a clearly labelled avatar and name instead of the previous cramped "vs" layout
+- Make text links across the app share one consistent style that underlines on hover
+
+### Fixed
+
+- Serve user avatars from the app's own storage so a friend's photo loads reliably everywhere instead of sometimes showing a blank grey circle
+- Match the remove-friend trash icon to the size of the other action icons
+
 ## [1.2.0] - 2026-06-13
 
 ### Added
@@ -601,6 +613,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - PWA manifest and service worker configuration
 - GitHub issue templates
 
+[1.2.1]: https://github.com/mwiraszka/brewski-bets/compare/v1.2.0...v1.2.1
 [1.2.0]: https://github.com/mwiraszka/brewski-bets/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/mwiraszka/brewski-bets/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/mwiraszka/brewski-bets/compare/v0.30.0...v1.0.0

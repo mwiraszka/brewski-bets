@@ -4,7 +4,7 @@ import { ChangeDetectionStrategy, Component, computed, input } from '@angular/co
 
 import { BetGraphicComponent } from '@app/graphics';
 import { type BetWithOpponent } from '@app/models';
-import { avatarImageUrl } from '@app/util';
+import { avatarSrc } from '@app/util';
 
 interface StandingBreakdownItem {
   title: string;
@@ -17,7 +17,7 @@ interface StandingBreakdownItem {
 interface OpponentStanding {
   opponentId: string;
   name: string;
-  clerkImageUrl: string | null;
+  avatarUrl: string | null;
   net: number;
   breakdown: StandingBreakdownItem[];
 }
@@ -62,7 +62,7 @@ export class StandingsComponent {
         standing = {
           opponentId: bet.opponent.id,
           name: `${bet.opponent.firstName} ${bet.opponent.lastName}`,
-          clerkImageUrl: bet.opponent.clerkImageUrl,
+          avatarUrl: bet.opponent.avatarUrl,
           net: 0,
           breakdown: [],
         };
@@ -100,8 +100,8 @@ export class StandingsComponent {
     return 'All square';
   }
 
-  getAvatarSrc(clerkImageUrl: string | null): string | undefined {
-    return avatarImageUrl(clerkImageUrl);
+  getAvatarSrc(avatarUrl: string | null): string | undefined {
+    return avatarSrc(avatarUrl);
   }
 
   getInitials(name: string): string | undefined {

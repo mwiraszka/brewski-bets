@@ -1,6 +1,6 @@
 import { createClerkClient } from '@clerk/backend';
 import { zValidator } from '@hono/zod-validator';
-import { and, eq, ilike, ne, or } from 'drizzle-orm';
+import { and, eq, ilike, ne, or, sql } from 'drizzle-orm';
 import { Hono } from 'hono';
 import { z } from 'zod';
 
@@ -65,7 +65,9 @@ export const userRoutes = new Hono<AppContext>()
         id: users.id,
         firstName: users.firstName,
         lastName: users.lastName,
-        clerkImageUrl: users.clerkImageUrl,
+        avatarUrl: sql<
+          string | null
+        >`coalesce(${users.avatarUrl}, ${users.avatarOriginalUrl})`,
       })
       .from(users)
       .where(and(ne(users.id, userId), ...tokenConditions))
@@ -140,7 +142,10 @@ export const userRoutes = new Hono<AppContext>()
 
     const cropState = parseCropState(body['cropState']);
 
-    const url = await uploadAvatar(c.env, userId, await file.arrayBuffer(), file.type);
+    const [originalUrl, croppedUrl] = await Promise.all([
+      uploadAvatar(c.env, userId, await file.arrayBuffer(), file.type, 'original'),
+      uploadAvatar(c.env, userId, await cropped.arrayBuffer(), cropped.type, 'cropped'),
+    ]);
 
     const clerk = createClerkClient({ secretKey: c.env.CLERK_SECRET_KEY });
     const clerkUser = await clerk.users.updateUserProfileImage(clerkId, {
@@ -151,7 +156,8 @@ export const userRoutes = new Hono<AppContext>()
     const [user] = await db
       .update(users)
       .set({
-        avatarOriginalUrl: url,
+        avatarUrl: croppedUrl,
+        avatarOriginalUrl: originalUrl,
         avatarCropState: cropState,
         avatarManagedByApp: true,
         clerkImageUrl,
@@ -183,6 +189,14 @@ export const userRoutes = new Hono<AppContext>()
 
     const cropState = parseCropState(body['cropState']);
 
+    const croppedUrl = await uploadAvatar(
+      c.env,
+      userId,
+      await cropped.arrayBuffer(),
+      cropped.type,
+      'cropped',
+    );
+
     const clerk = createClerkClient({ secretKey: c.env.CLERK_SECRET_KEY });
     const clerkUser = await clerk.users.updateUserProfileImage(clerkId, {
       file: cropped,
@@ -192,6 +206,7 @@ export const userRoutes = new Hono<AppContext>()
     const [user] = await db
       .update(users)
       .set({
+        avatarUrl: croppedUrl,
         avatarCropState: cropState,
         clerkImageUrl,
         lastModifiedDate: new Date(),
@@ -258,6 +273,7 @@ export const userRoutes = new Hono<AppContext>()
     const [user] = await db
       .update(users)
       .set({
+        avatarUrl: null,
         avatarOriginalUrl: null,
         avatarCropState: null,
         avatarManagedByApp: false,
@@ -283,6 +299,7 @@ export const userRoutes = new Hono<AppContext>()
         id: users.id,
         firstName: users.firstName,
         lastName: users.lastName,
+        avatarUrl: users.avatarUrl,
         avatarOriginalUrl: users.avatarOriginalUrl,
       })
       .from(users)
