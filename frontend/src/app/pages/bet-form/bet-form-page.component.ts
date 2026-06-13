@@ -4,9 +4,9 @@ import {
   ButtonComponent,
   CardComponent,
   CheckIconComponent,
+  DatePickerComponent,
   DialogComponent,
   DropdownComponent,
-  EditIconComponent,
   InputComponent,
   PlusIconComponent,
   RadioComponent,
@@ -20,7 +20,9 @@ import {
   TrashIconComponent,
 } from '@eagami/ui';
 
+import { DatePipe } from '@angular/common';
 import {
+  ChangeDetectionStrategy,
   Component,
   ElementRef,
   HostListener,
@@ -72,16 +74,18 @@ type ActionInFlight = 'submit' | 'accept' | 'settle' | 'reject' | 'delete' | nul
   selector: 'bb-bet-form-page',
   templateUrl: './bet-form-page.component.html',
   styleUrl: './bet-form-page.component.scss',
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
+    DatePipe,
     AlertCircleIconComponent,
     BadgeComponent,
     BetGraphicComponent,
     ButtonComponent,
     CardComponent,
     CheckIconComponent,
+    DatePickerComponent,
     DialogComponent,
     DropdownComponent,
-    EditIconComponent,
     InputComponent,
     PlusIconComponent,
     RadioComponent,
@@ -121,7 +125,6 @@ export class BetFormPageComponent implements OnInit, CanComponentDeactivate {
   readonly sliderTicks = NOTCH_VALUES;
 
   readonly mode = signal<'create' | 'edit'>('create');
-  readonly readonlyView = signal(false);
   readonly loading = signal(true);
   readonly actionInFlight = signal<ActionInFlight>(null);
   readonly deleteDialogOpen = signal(false);
@@ -142,6 +145,7 @@ export class BetFormPageComponent implements OnInit, CanComponentDeactivate {
   readonly iconFilter = signal('');
   readonly iconEditing = signal(true);
   readonly selectedFriendId = signal('');
+  readonly resolutionDate = signal<Date | null>(null);
   readonly outcomes = signal<BetResult[]>([
     { name: '', brewskiCount: MAX_BREWSKI_COUNT, assignedTo: 'user1' },
   ]);
@@ -247,7 +251,7 @@ export class BetFormPageComponent implements OnInit, CanComponentDeactivate {
     if (this.mode() === 'create') {
       return true;
     }
-    if (this.readonlyView() || this.isSettled() || this.settlementProposed()) {
+    if (this.isSettled() || this.settlementProposed()) {
       return false;
     }
     return this.isMyTurn() || this.activeResting();
@@ -258,20 +262,18 @@ export class BetFormPageComponent implements OnInit, CanComponentDeactivate {
   readonly canApproveTerms = computed(
     () =>
       this.mode() === 'edit' &&
-      !this.readonlyView() &&
       !this.isSettled() &&
       !this.settlementProposed() &&
       this.isMyTurn(),
   );
 
   readonly canApproveSettlement = computed(
-    () => !this.readonlyView() && this.settlementProposed() && this.isMyTurn(),
+    () => this.settlementProposed() && this.isMyTurn(),
   );
 
   readonly canSubmitChanges = computed(
     () =>
       this.mode() === 'edit' &&
-      !this.readonlyView() &&
       !this.isSettled() &&
       !this.settlementProposed() &&
       (this.isMyTurn() || this.activeResting()),
@@ -279,33 +281,18 @@ export class BetFormPageComponent implements OnInit, CanComponentDeactivate {
 
   readonly canSettle = computed(
     () =>
-      !this.readonlyView() &&
       this.betStatus() === 'active' &&
       !this.settlementProposed() &&
       (this.isMyTurn() || this.activeResting()),
   );
 
   readonly canDelete = computed(
-    () =>
-      this.mode() === 'edit' &&
-      !this.readonlyView() &&
-      !this.isSettled() &&
-      !this.settlementProposed(),
-  );
-
-  readonly canEditFromView = computed(
-    () =>
-      this.mode() === 'edit' &&
-      this.readonlyView() &&
-      !this.isSettled() &&
-      !this.settlementProposed() &&
-      (this.isMyTurn() || this.activeResting()),
+    () => this.mode() === 'edit' && !this.isSettled() && !this.settlementProposed(),
   );
 
   readonly isWaiting = computed(
     () =>
       this.mode() === 'edit' &&
-      !this.readonlyView() &&
       !this.isSettled() &&
       !this.isMyTurn() &&
       !this.activeResting(),
@@ -346,7 +333,16 @@ export class BetFormPageComponent implements OnInit, CanComponentDeactivate {
     if (this.bet?.opponent) {
       return `${this.bet.opponent.firstName} ${this.bet.opponent.lastName}`;
     }
-    return '';
+    const friend = this.friends().find(f => f.id === this.selectedFriendId());
+    return friend ? `${friend.firstName} ${friend.lastName}` : '';
+  });
+
+  readonly opponentFirstName = computed(() => {
+    if (this.bet?.opponent) {
+      return this.bet.opponent.firstName;
+    }
+    const friend = this.friends().find(f => f.id === this.selectedFriendId());
+    return friend?.firstName ?? 'Them';
   });
 
   readonly isFormValid = computed(() => {
@@ -377,6 +373,7 @@ export class BetFormPageComponent implements OnInit, CanComponentDeactivate {
       description: this.description(),
       iconSlug: this.iconSlug(),
       iconColor: this.iconColor(),
+      resolutionDate: this.resolutionDate()?.toISOString() ?? null,
       selectedFriendId: this.selectedFriendId(),
       outcomes: this.outcomes(),
     }),
@@ -384,7 +381,7 @@ export class BetFormPageComponent implements OnInit, CanComponentDeactivate {
 
   readonly isDirty = computed(() => this.formSnapshot() !== this.initialSnapshot);
 
-  readonly absFormat = (value: number): string => `${Math.abs(value)}`;
+  readonly minResolutionDate = new Date();
 
   graphicName(slug: string): string {
     return graphicBySlug(slug)?.label ?? slug;
@@ -397,7 +394,6 @@ export class BetFormPageComponent implements OnInit, CanComponentDeactivate {
 
   async ngOnInit(): Promise<void> {
     const id = this.route.snapshot.paramMap.get('id');
-    this.readonlyView.set(this.route.snapshot.queryParamMap.get('mode') === 'view');
 
     if (id) {
       this.mode.set('edit');
@@ -408,6 +404,9 @@ export class BetFormPageComponent implements OnInit, CanComponentDeactivate {
         this.iconSlug.set(this.bet.iconSlug);
         this.iconColor.set(this.bet.iconColor ?? DEFAULT_ICON_COLOR);
         this.iconEditing.set(!this.bet.iconSlug);
+        this.resolutionDate.set(
+          this.bet.resolutionDate ? new Date(this.bet.resolutionDate) : null,
+        );
         this.outcomes.set(this.bet.results.filter(outcome => !outcome.isSpecial));
       } catch {
         this.toast.error('Failed to load bet');
@@ -599,6 +598,7 @@ export class BetFormPageComponent implements OnInit, CanComponentDeactivate {
           description: this.description(),
           iconSlug: this.iconSlug(),
           iconColor: this.selectedColorable() ? this.iconColor() : null,
+          resolutionDate: this.resolutionDate()?.toISOString() ?? null,
           user2Id: this.selectedFriendId(),
           results: this.outcomes().map(outcome => ({
             name: outcome.name,
@@ -613,6 +613,7 @@ export class BetFormPageComponent implements OnInit, CanComponentDeactivate {
           description: this.description(),
           iconSlug: this.iconSlug(),
           iconColor: this.selectedColorable() ? this.iconColor() : null,
+          resolutionDate: this.resolutionDate()?.toISOString() ?? null,
           results: this.outcomes().map(outcome => ({
             name: outcome.name,
             brewskiCount: outcome.brewskiCount,
@@ -647,14 +648,6 @@ export class BetFormPageComponent implements OnInit, CanComponentDeactivate {
     } finally {
       this.actionInFlight.set(null);
     }
-  }
-
-  onEditFromView(): void {
-    if (!this.bet) {
-      return;
-    }
-    this.readonlyView.set(false);
-    void this.router.navigate(['/bets', this.bet.id]);
   }
 
   async onReject(): Promise<void> {

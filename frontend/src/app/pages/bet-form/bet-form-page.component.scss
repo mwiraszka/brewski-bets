@@ -406,6 +406,12 @@ fieldset[disabled] {
   margin: 0;
 }
 
+.card-header__opponent {
+  margin: 0;
+  font-size: 15px;
+  color: var(--bb-color-textSecondary);
+}
+
 .delete-corner {
   z-index: 1;
   position: absolute;
