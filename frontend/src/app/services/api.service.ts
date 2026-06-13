@@ -4,8 +4,9 @@ import { environment } from '@env';
 
 import { ClerkService } from './clerk.service';
 
-// Dev-only latency to preview loading states. Set to 0 to disable.
-const DEV_ARTIFICIAL_DELAY_MS = 2000;
+// Dev-only latency to preview loading states. Set to a value like 2000 to
+// simulate a slow network.
+const DEV_ARTIFICIAL_DELAY_MS = 0;
 
 export class ApiError extends Error {
   constructor(
