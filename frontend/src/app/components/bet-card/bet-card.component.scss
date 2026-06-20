@@ -65,7 +65,9 @@
 }
 
 .bet-card__status {
+  display: flex;
   flex: none;
+  align-items: center;
 }
 
 .bet-card__opponent {

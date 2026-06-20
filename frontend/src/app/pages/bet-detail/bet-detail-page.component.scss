@@ -59,22 +59,22 @@ ea-card {
 
 .detail-header__meta-row {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  justify-content: space-between;
-  gap: 12px;
+  gap: 8px 12px;
 }
 
 .status-tags {
   display: flex;
-  flex: none;
   flex-wrap: wrap;
   align-items: center;
   gap: 4px;
+  margin-left: auto;
 }
 
 .opponent-line {
   display: flex;
-  flex: 1;
+  flex: 1 0 12rem;
   align-items: center;
   gap: 8px;
   min-width: 0;
