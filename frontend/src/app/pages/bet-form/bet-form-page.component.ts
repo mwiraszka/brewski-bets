@@ -267,7 +267,7 @@ export class BetFormPageComponent implements OnInit, CanComponentDeactivate {
     if (this.isSettled() || this.settlementProposed()) {
       return false;
     }
-    return this.isMyTurn() || this.activeResting();
+    return this.isMyTurn() || this.activeResting() || this.counterProposing();
   });
 
   readonly isViewing = computed(() => !this.canEditTerms());
@@ -284,10 +284,22 @@ export class BetFormPageComponent implements OnInit, CanComponentDeactivate {
     () => this.settlementProposed() && this.isMyTurn(),
   );
 
-  // The reviewer sees the bet read-only with proposed terms highlighted until
-  // they choose to counter-propose, which reopens the editable form.
+  // The party who proposed a still-pending change can review it read-only too,
+  // and either re-edit or withdraw it while it waits on the other side.
+  readonly isPendingRequester = computed(
+    () =>
+      this.mode() === 'edit' &&
+      !this.isSettled() &&
+      !this.settlementProposed() &&
+      !this.isMyTurn() &&
+      this.hasPreviousState(),
+  );
+
+  // Both parties see the bet read-only with proposed terms highlighted until
+  // they choose to edit/counter-propose, which reopens the editable form.
   readonly isReviewing = computed(
-    () => this.canApproveTerms() && !this.counterProposing(),
+    () =>
+      (this.canApproveTerms() || this.isPendingRequester()) && !this.counterProposing(),
   );
 
   readonly hasPreviousState = computed(() => this.previousSnapshot() != null);
@@ -759,6 +771,24 @@ export class BetFormPageComponent implements OnInit, CanComponentDeactivate {
       await this.router.navigate(['/bets']);
     } catch {
       this.toast.error('Failed to accept bet');
+    } finally {
+      this.actionInFlight.set(null);
+    }
+  }
+
+  async onWithdraw(): Promise<void> {
+    if (!this.bet) {
+      return;
+    }
+    this.actionInFlight.set('reject');
+
+    try {
+      await this.betsService.updateBet(this.bet.id, { action: 'reject' });
+      this.toast.success('Changes withdrawn');
+      this.allowNavigation = true;
+      await this.router.navigate(['/bets']);
+    } catch {
+      this.toast.error('Failed to withdraw changes');
     } finally {
       this.actionInFlight.set(null);
     }

@@ -169,7 +169,7 @@ export const betRoutes = new Hono<AppContext>()
         lastName: users.lastName,
         avatarUrl: sql<
           string | null
-        >`coalesce(${users.avatarUrl}, ${users.avatarOriginalUrl})`,
+        >`coalesce(${users.avatarUrl}, ${users.avatarOriginalUrl}, ${users.clerkImageUrl})`,
       })
       .from(users)
       .where(or(...opponentIds.map(id => eq(users.id, id))));
@@ -230,7 +230,7 @@ export const betRoutes = new Hono<AppContext>()
         lastName: users.lastName,
         avatarUrl: sql<
           string | null
-        >`coalesce(${users.avatarUrl}, ${users.avatarOriginalUrl})`,
+        >`coalesce(${users.avatarUrl}, ${users.avatarOriginalUrl}, ${users.clerkImageUrl})`,
       })
       .from(users)
       .where(eq(users.id, opponentId))
@@ -267,9 +267,23 @@ export const betRoutes = new Hono<AppContext>()
     const otherPosition = userPosition === 'user1' ? 'user2' : 'user1';
     const isMyTurn = existing.pendingAction === userPosition;
     const isResting = existing.pendingAction === null;
+    // The party who proposed a still-pending terms change (it now awaits the
+    // other side) can re-edit or withdraw it.
+    const iAmRequester =
+      existing.previousState != null &&
+      !existing.settlementProposed &&
+      existing.pendingAction === otherPosition;
 
-    if (body.action === 'accept' || body.action === 'reject') {
+    if (body.action === 'accept') {
       if (!isMyTurn) {
+        return c.json({ error: 'It is not your turn to act on this bet' }, 403);
+      }
+    } else if (body.action === 'reject') {
+      if (!isMyTurn && !iAmRequester) {
+        return c.json({ error: 'It is not your turn to act on this bet' }, 403);
+      }
+    } else if (body.action === 'submit') {
+      if (!isMyTurn && !isResting && !iAmRequester) {
         return c.json({ error: 'It is not your turn to act on this bet' }, 403);
       }
     } else if (!isMyTurn && !isResting) {
@@ -291,7 +305,11 @@ export const betRoutes = new Hono<AppContext>()
     };
 
     if (body.action === 'submit') {
-      updates.previousState = snapshotState(existing);
+      // Re-editing a still-pending proposal keeps the original agreed snapshot;
+      // a fresh proposal snapshots the current agreed state so it can be undone.
+      if (!iAmRequester) {
+        updates.previousState = snapshotState(existing);
+      }
       if (body.title !== undefined) {
         updates.title = body.title;
       }
