@@ -48,11 +48,20 @@ export class BetCardComponent {
     initialsOf(this.bet().opponent?.firstName, this.bet().opponent?.lastName),
   );
 
+  // Pending edits live on the bet's main fields while the prior agreed terms sit
+  // in previousState; the dashboard must show the agreed terms until both parties
+  // accept, so proposed-but-unaccepted changes never leak here.
+  private readonly displayTerms = computed(() => this.bet().previousState ?? this.bet());
+
+  readonly displayTitle = computed(() => this.displayTerms().title);
+  readonly displayIconSlug = computed(() => this.displayTerms().iconSlug);
+  readonly displayIconColor = computed(() => this.displayTerms().iconColor);
+  readonly displayResolutionDate = computed(() => this.displayTerms().resolutionDate);
+
   readonly outcomes = computed(() => {
-    const bet = this.bet();
-    const me = positionOf(bet, this.currentUserId());
-    return bet.results
-      .filter(result => result.isSpecial !== 'void')
+    const me = positionOf(this.bet(), this.currentUserId());
+    return this.displayTerms()
+      .results.filter(result => result.isSpecial !== 'void')
       .map(result => {
         const iWin = result.assignedTo === me;
         return {

@@ -22,6 +22,14 @@ interface OpponentStanding {
   breakdown: StandingBreakdownItem[];
 }
 
+interface VoidBet {
+  id: string;
+  title: string;
+  iconSlug: string | null;
+  iconColor: string | null;
+  opponentName: string;
+}
+
 @Component({
   selector: 'bb-standings',
   templateUrl: './standings.component.html',
@@ -81,6 +89,23 @@ export class StandingsComponent {
 
     return [...byOpponent.values()].sort((a, b) => b.net - a.net);
   });
+
+  // Voided bets settle to no beers, so they carry no net but are still shown,
+  // struck through, so a resolved bet board does not look empty when the only
+  // settled bets were voided
+  readonly voidBets = computed<VoidBet[]>(() =>
+    this.bets()
+      .filter(bet => bet.status === 'settled' && bet.outcome === 'void')
+      .map(bet => ({
+        id: bet.id,
+        title: bet.title,
+        iconSlug: bet.iconSlug,
+        iconColor: bet.iconColor,
+        opponentName: bet.opponent
+          ? `${bet.opponent.firstName} ${bet.opponent.lastName}`
+          : '',
+      })),
+  );
 
   private readonly maxAbsNet = computed(() =>
     Math.max(1, ...this.standings().map(s => Math.abs(s.net))),

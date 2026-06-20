@@ -75,7 +75,7 @@
         }
       </div>
 
-      @if (isWaiting()) {
+      @if (isWaiting() && !counterProposing()) {
         <div class="waiting-banner">Waiting for {{ opponentName() }} to respond</div>
       }
 
@@ -480,7 +480,22 @@
             Back to bets
           </a>
         } @else {
-          @if (canApproveSettlement()) {
+          @if (counterProposing()) {
+            <div class="action-row">
+              <ea-button
+                [loading]="actionInFlight() === 'submit'"
+                [disabled]="isBusy() || !isFormValid()"
+                (clicked)="onSubmitForReview()">
+                Send request
+              </ea-button>
+              <ea-button
+                variant="secondary"
+                [disabled]="isBusy()"
+                (clicked)="cancelCounter()">
+                Cancel
+              </ea-button>
+            </div>
+          } @else if (canApproveSettlement()) {
             <div class="action-row">
               <ea-button
                 [loading]="actionInFlight() === 'accept'"
@@ -498,45 +513,45 @@
               </ea-button>
             </div>
           } @else if (canApproveTerms()) {
-            @if (counterProposing()) {
-              <div class="action-row">
-                <ea-button
-                  [loading]="actionInFlight() === 'submit'"
-                  [disabled]="isBusy() || !isFormValid()"
-                  (clicked)="onSubmitForReview()">
-                  Send request
-                </ea-button>
-                <ea-button
-                  variant="secondary"
-                  [disabled]="isBusy()"
-                  (clicked)="cancelCounter()">
-                  Cancel
-                </ea-button>
-              </div>
-            } @else {
-              <div class="action-row">
-                <ea-button
-                  [loading]="actionInFlight() === 'accept'"
-                  [disabled]="isBusy() || !isFormValid()"
-                  (clicked)="onAccept()">
-                  Accept changes
-                </ea-button>
-                <ea-button
-                  variant="secondary"
-                  [disabled]="isBusy()"
-                  (clicked)="startCounter()">
-                  Send request
-                </ea-button>
-                <ea-button
-                  class="btn-reject"
-                  variant="secondary"
-                  [loading]="actionInFlight() === 'reject'"
-                  [disabled]="isBusy()"
-                  (clicked)="onReject()">
-                  Reject changes
-                </ea-button>
-              </div>
-            }
+            <div class="action-row">
+              <ea-button
+                [loading]="actionInFlight() === 'accept'"
+                [disabled]="isBusy() || !isFormValid()"
+                (clicked)="onAccept()">
+                Accept changes
+              </ea-button>
+              <ea-button
+                variant="secondary"
+                [disabled]="isBusy()"
+                (clicked)="startCounter()">
+                Send request
+              </ea-button>
+              <ea-button
+                class="btn-reject"
+                variant="secondary"
+                [loading]="actionInFlight() === 'reject'"
+                [disabled]="isBusy()"
+                (clicked)="onReject()">
+                Reject changes
+              </ea-button>
+            </div>
+          } @else if (isPendingRequester()) {
+            <div class="action-row">
+              <ea-button
+                variant="secondary"
+                [disabled]="isBusy()"
+                (clicked)="startCounter()">
+                Edit
+              </ea-button>
+              <ea-button
+                class="btn-reject"
+                variant="secondary"
+                [loading]="actionInFlight() === 'reject'"
+                [disabled]="isBusy()"
+                (clicked)="onWithdraw()">
+                Cancel changes
+              </ea-button>
+            </div>
           } @else if (canSubmitChanges() || canSettle()) {
             <div class="action-row">
               @if (canSubmitChanges()) {

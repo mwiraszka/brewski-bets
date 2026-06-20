@@ -51,6 +51,12 @@
   color: var(--bb-color-textStrong);
 }
 
+.bet-card__heading {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
 .bet-card__opponent {
   display: flex;
   align-items: center;
@@ -65,7 +71,7 @@
 .bet-card__opponent-name {
   overflow: hidden;
   min-width: 0;
-  font-size: 15px;
+  font-size: 13px;
   font-weight: 500;
   white-space: nowrap;
   text-overflow: ellipsis;

@@ -4,8 +4,8 @@
   <div class="bet-card__top">
     <span class="bet-card__icon">
       <bb-bet-graphic
-        [slug]="bet().iconSlug"
-        [color]="bet().iconColor"
+        [slug]="displayIconSlug()"
+        [color]="displayIconColor()"
         [size]="28" />
     </span>
     <span class="bet-card__status">
@@ -21,14 +21,15 @@
     </span>
   </div>
 
-  <h3 class="bet-card__title">{{ bet().title }}</h3>
-
-  <div class="bet-card__opponent">
-    <span class="bet-card__opponent-name">vs {{ opponentName() }}</span>
-    <ea-avatar
-      [src]="opponentAvatar()"
-      [initials]="opponentInitials()"
-      size="xs" />
+  <div class="bet-card__heading">
+    <h3 class="bet-card__title">{{ displayTitle() }}</h3>
+    <div class="bet-card__opponent">
+      <span class="bet-card__opponent-name">vs {{ opponentName() }}</span>
+      <ea-avatar
+        [src]="opponentAvatar()"
+        [initials]="opponentInitials()"
+        size="xs" />
+    </div>
   </div>
 
   @if (outcomes().length) {
@@ -50,18 +51,20 @@
     </ul>
   }
 
-  <div class="bet-card__footer">
-    @if (myTurn()) {
-      <span class="bet-card__flag bet-card__flag--action">Awaiting your review</span>
-    } @else if (awaitingOutcome()) {
-      <span class="bet-card__flag bet-card__flag--action">Awaiting outcome</span>
-    } @else if (changesPending()) {
-      <span class="bet-card__flag">Changes pending</span>
-    } @else if (bet().resolutionDate) {
-      <span class="bet-card__flag">
-        <ea-icon-calendar class="bet-card__flag-icon" />
-        {{ bet().resolutionDate | date: 'mediumDate' }}
-      </span>
-    }
-  </div>
+  @if (myTurn() || awaitingOutcome() || changesPending() || displayResolutionDate()) {
+    <div class="bet-card__footer">
+      @if (myTurn()) {
+        <span class="bet-card__flag bet-card__flag--action">Awaiting your review</span>
+      } @else if (awaitingOutcome()) {
+        <span class="bet-card__flag bet-card__flag--action">Awaiting outcome</span>
+      } @else if (changesPending()) {
+        <span class="bet-card__flag">Changes pending</span>
+      } @else if (displayResolutionDate()) {
+        <span class="bet-card__flag">
+          <ea-icon-calendar class="bet-card__flag-icon" />
+          {{ displayResolutionDate() | date: 'mediumDate' }}
+        </span>
+      }
+    </div>
+  }
 </a>

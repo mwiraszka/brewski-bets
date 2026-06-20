@@ -1,4 +1,4 @@
-@if (standings().length) {
+@if (standings().length || voidBets().length) {
   <div class="standings">
     @for (standing of standings(); track standing.opponentId) {
       <div class="standing">
@@ -73,6 +73,21 @@
             </li>
           }
         </ul>
+      </div>
+    }
+
+    @for (voidBet of voidBets(); track voidBet.id) {
+      <div class="void-bet">
+        <span class="void-bet__icon">
+          <bb-bet-graphic
+            [slug]="voidBet.iconSlug"
+            [color]="voidBet.iconColor"
+            [size]="20" />
+        </span>
+        <span class="void-bet__info">
+          <span class="void-bet__title">{{ voidBet.title }}</span>
+          <span class="void-bet__opponent">vs {{ voidBet.opponentName }}</span>
+        </span>
       </div>
     }
   </div>
