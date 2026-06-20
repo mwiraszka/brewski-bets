@@ -46,6 +46,25 @@ $breakpoints: (
   --color-neutral-400: var(--bb-color-textBody);
 }
 
+/// Diagonal hand-drawn strike line across an element, as if crossed out in pen.
+/// @param {Length} $overhang - how far the line extends past each horizontal edge
+@mixin pen-strike($overhang: 0) {
+  position: relative;
+
+  &::after {
+    z-index: 1;
+    position: absolute;
+    top: 50%;
+    right: -$overhang;
+    left: -$overhang;
+    height: 3px;
+    background-color: var(--bb-color-strikethrough);
+    pointer-events: none;
+    transform: translateY(-50%) rotate(-2deg);
+    content: '';
+  }
+}
+
 /// Responsive breakpoint manager
 /// @access public
 /// @param {String} $breakpoint - Breakpoint

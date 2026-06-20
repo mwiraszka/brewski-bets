@@ -17,6 +17,38 @@ export function isMyTurn(bet: Bet, userId: string | undefined): boolean {
   return position != null && bet.pendingAction === position;
 }
 
+// True when the user proposed a change that now awaits the other side, so they
+// can re-edit or withdraw it rather than just wait.
+export function isPendingRequester(bet: Bet, userId: string | undefined): boolean {
+  return (
+    bet.status !== 'settled' &&
+    !bet.settlementProposed &&
+    bet.previousState != null &&
+    bet.pendingAction != null &&
+    !isMyTurn(bet, userId)
+  );
+}
+
+// The agreed view of a bet for display. While a change is pending, the bet's main
+// fields hold the unaccepted proposal and previousState holds the agreed terms,
+// so swap them back. Lifecycle fields (status, pendingAction, outcome) stay live.
+// Settled bets and bets with no pending change are returned unchanged.
+export function withAgreedTerms<T extends Bet>(bet: T): T {
+  const prev = bet.previousState;
+  if (prev == null) {
+    return bet;
+  }
+  return {
+    ...bet,
+    title: prev.title,
+    description: prev.description,
+    iconSlug: prev.iconSlug,
+    iconColor: prev.iconColor,
+    resolutionDate: prev.resolutionDate,
+    results: prev.results,
+  };
+}
+
 export function isAwaitingOutcome(bet: Bet, now: Date = new Date()): boolean {
   return (
     bet.status === 'active' &&
