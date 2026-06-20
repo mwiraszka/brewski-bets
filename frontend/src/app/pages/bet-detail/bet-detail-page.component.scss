@@ -27,9 +27,15 @@ ea-card {
 
 .detail-header {
   display: flex;
-  align-items: flex-start;
-  gap: 16px;
+  flex-direction: column;
+  gap: 8px;
   margin-bottom: 16px;
+}
+
+.detail-header__title-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
 .detail-header__icon {
@@ -37,28 +43,30 @@ ea-card {
   align-items: center;
   justify-content: center;
   flex: none;
-  width: 64px;
-  height: 64px;
-  border-radius: 16px;
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
   background-color: var(--bb-color-surfaceSubtle);
 }
 
-.detail-header__main {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  min-width: 0;
-}
-
 .detail-header__title {
+  min-width: 0;
   font-size: 26px;
   line-height: 1.2;
-  color: var(--bb-color-textStrong);
   word-break: break-word;
+  color: var(--bb-color-textStrong);
+}
+
+.detail-header__meta-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
 }
 
 .status-tags {
   display: flex;
+  flex: none;
   flex-wrap: wrap;
   align-items: center;
   gap: 4px;
@@ -66,9 +74,10 @@ ea-card {
 
 .opponent-line {
   display: flex;
+  flex: 1;
   align-items: center;
   gap: 8px;
-  margin-bottom: 16px;
+  min-width: 0;
 }
 
 .opponent-line ea-avatar {
@@ -76,8 +85,12 @@ ea-card {
 }
 
 .opponent-line__name {
+  overflow: hidden;
+  min-width: 0;
   font-size: 16px;
   font-weight: 500;
+  white-space: nowrap;
+  text-overflow: ellipsis;
   color: var(--bb-color-textStrong);
 }
 
@@ -163,6 +176,10 @@ ea-card {
 .outcome--winner {
   border-color: var(--bb-color-primary);
   background-color: var(--bb-color-surfacePrimaryTint);
+}
+
+.outcome--void {
+  @include pen-strike;
 }
 
 .outcome__name {
