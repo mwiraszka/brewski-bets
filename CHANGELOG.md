@@ -5,6 +5,24 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.0] - 2026-06-20
+
+### Added
+
+- Review proposed changes to a bet beside the current terms in a single card, with only the changed fields highlighted and the option to counter-propose
+
+### Changed
+
+- Always label the stake sliders YOU and THEM instead of the opponent's first name
+- Show the opponent's avatar beside their name in the edit bet header
+- List each bet's outcomes with your win or owe stake on the home dashboard cards
+- Streamline the home dashboard cards with a single-line "vs" opponent row and no gold highlight border, leaving just the hover lift
+
+### Fixed
+
+- Correct reversed bet outcomes so the bet view, standings, and home dashboard agree with the edit form on who wins and who owes beers
+- Resolve all known dependency security advisories
+
 ## [1.2.1] - 2026-06-13
 
 ### Changed
@@ -613,6 +631,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - PWA manifest and service worker configuration
 - GitHub issue templates
 
+[1.3.0]: https://github.com/mwiraszka/brewski-bets/compare/v1.2.1...v1.3.0
 [1.2.1]: https://github.com/mwiraszka/brewski-bets/compare/v1.2.0...v1.2.1
 [1.2.0]: https://github.com/mwiraszka/brewski-bets/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/mwiraszka/brewski-bets/compare/v1.0.0...v1.1.0
