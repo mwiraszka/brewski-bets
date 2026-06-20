@@ -1,6 +1,6 @@
 {
   "name": "brewski-bets-backend",
-  "version": "1.3.2",
+  "version": "1.3.3",
   "description": "Backend API for brewski bets",
   "author": "Michal Wiraszka",
   "private": true,
