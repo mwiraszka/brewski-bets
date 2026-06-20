@@ -1,34 +1,35 @@
 <a
   class="bet-card"
   [routerLink]="['/bets', bet().id]">
-  <div class="bet-card__top">
-    <span class="bet-card__icon">
-      <bb-bet-graphic
-        [slug]="displayIconSlug()"
-        [color]="displayIconColor()"
-        [size]="28" />
-    </span>
-    <span class="bet-card__status">
-      @if (bet().status === 'active') {
-        <ea-badge variant="success">active</ea-badge>
-      }
-      @if (bet().status === 'inactive') {
-        <ea-badge variant="default">pending</ea-badge>
-      }
-      @if (bet().status === 'settled') {
-        <ea-badge variant="default">settled</ea-badge>
-      }
-    </span>
-  </div>
-
   <div class="bet-card__heading">
-    <h3 class="bet-card__title">{{ displayTitle() }}</h3>
-    <div class="bet-card__opponent">
-      <span class="bet-card__opponent-name">vs {{ opponentName() }}</span>
-      <ea-avatar
-        [src]="opponentAvatar()"
-        [initials]="opponentInitials()"
-        size="xs" />
+    <div class="bet-card__title-row">
+      <span class="bet-card__icon">
+        <bb-bet-graphic
+          [slug]="displayIconSlug()"
+          [color]="displayIconColor()"
+          [size]="20" />
+      </span>
+      <h3 class="bet-card__title">{{ displayTitle() }}</h3>
+    </div>
+    <div class="bet-card__meta-row">
+      <div class="bet-card__opponent">
+        <span class="bet-card__opponent-name">vs {{ opponentName() }}</span>
+        <ea-avatar
+          [src]="opponentAvatar()"
+          [initials]="opponentInitials()"
+          size="xs" />
+      </div>
+      <span class="bet-card__status">
+        @if (bet().status === 'active') {
+          <ea-badge variant="success">active</ea-badge>
+        }
+        @if (bet().status === 'inactive') {
+          <ea-badge variant="default">pending</ea-badge>
+        }
+        @if (bet().status === 'settled') {
+          <ea-badge variant="default">settled</ea-badge>
+        }
+      </span>
     </div>
   </div>
 

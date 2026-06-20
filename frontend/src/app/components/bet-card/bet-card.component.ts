@@ -17,6 +17,7 @@ import {
   isAwaitingOutcome,
   isMyTurn,
   positionOf,
+  withAgreedTerms,
 } from '@app/util';
 
 @Component({
@@ -48,10 +49,9 @@ export class BetCardComponent {
     initialsOf(this.bet().opponent?.firstName, this.bet().opponent?.lastName),
   );
 
-  // Pending edits live on the bet's main fields while the prior agreed terms sit
-  // in previousState; the dashboard must show the agreed terms until both parties
-  // accept, so proposed-but-unaccepted changes never leak here.
-  private readonly displayTerms = computed(() => this.bet().previousState ?? this.bet());
+  // The dashboard must show the agreed terms until both parties accept, so
+  // proposed-but-unaccepted changes never leak here.
+  private readonly displayTerms = computed(() => withAgreedTerms(this.bet()));
 
   readonly displayTitle = computed(() => this.displayTerms().title);
   readonly displayIconSlug = computed(() => this.displayTerms().iconSlug);
@@ -68,7 +68,7 @@ export class BetCardComponent {
           name: result.name,
           beers: result.brewskiCount,
           iWin,
-          stakeLabel: iWin ? 'You win' : 'You owe',
+          stakeLabel: iWin ? 'Win' : 'Lose',
         };
       });
   });
