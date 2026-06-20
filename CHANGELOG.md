@@ -5,6 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.2] - 2026-06-20
+
+### Added
+
+- Show voided bets in the standings tab, struck through like a crossed-out note, so a board with only voided settlements is no longer empty
+- Let whoever proposed a bet change review it read-only and then edit or withdraw it while it waits for the other player
+
+### Changed
+
+- Present the opponent the same way everywhere ("vs name" with a small avatar) across the bet view, dashboard cards, and edit header
+- Remove the reserved empty footer space on dashboard cards that have nothing to flag
+
+### Fixed
+
+- Keep a bet's agreed terms on the dashboard until a proposed change is accepted, instead of revealing the unapproved edit
+- Display a friend's Clerk profile photo when they set it outside the app, instead of falling back to their initials
+
 ## [1.3.1] - 2026-06-20
 
 ### Changed
@@ -644,6 +661,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - PWA manifest and service worker configuration
 - GitHub issue templates
 
+[1.3.2]: https://github.com/mwiraszka/brewski-bets/compare/v1.3.1...v1.3.2
 [1.3.1]: https://github.com/mwiraszka/brewski-bets/compare/v1.3.0...v1.3.1
 [1.3.0]: https://github.com/mwiraszka/brewski-bets/compare/v1.2.1...v1.3.0
 [1.2.1]: https://github.com/mwiraszka/brewski-bets/compare/v1.2.0...v1.2.1
