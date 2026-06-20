@@ -34,7 +34,7 @@ const updateUserSchema = z.object({
   firstName: z.string().min(1).optional(),
   lastName: z.string().min(1).optional(),
   avatarCropState: avatarCropStateSchema.optional(),
-  clerkImageUrl: z.string().optional(),
+  clerkImageUrl: z.string().nullable().optional(),
 });
 
 export const userRoutes = new Hono<AppContext>()
