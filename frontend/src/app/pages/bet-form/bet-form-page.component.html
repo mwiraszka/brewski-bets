@@ -48,7 +48,7 @@
         </h2>
         @if (mode() === 'edit' && opponentName()) {
           <div class="card-header__opponent">
-            <span>vs {{ opponentName() }}</span>
+            <span>vs. {{ opponentName() }}</span>
             <ea-avatar
               [src]="opponentAvatar()"
               [initials]="opponentInitials()"

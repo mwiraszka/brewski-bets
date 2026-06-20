@@ -5,7 +5,7 @@
 .bet-card {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 16px;
   padding: 16px;
   border-radius: 16px;
   border: 1px solid var(--bb-color-borderDefault);
@@ -65,7 +65,9 @@
 }
 
 .bet-card__status {
+  display: flex;
   flex: none;
+  align-items: center;
 }
 
 .bet-card__opponent {
@@ -93,7 +95,7 @@
 .bet-card__outcomes {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 2px;
   padding: 0;
   margin: 0;
   list-style: none;

@@ -1,6 +1,6 @@
 {
   "name": "brewski-bets",
-  "version": "1.3.3",
+  "version": "1.3.4",
   "description": "Frontend for brewski bets, built with Angular",
   "author": "Michal Wiraszka",
   "private": true,

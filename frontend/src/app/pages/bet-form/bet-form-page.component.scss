@@ -600,11 +600,12 @@ fieldset[disabled] {
 }
 
 .review-graphic--old {
-  opacity: 0.5;
+  @include pen-strike;
 }
 
 .review-graphic--new {
   padding: 4px;
+  border: 1px solid var(--bb-color-primary);
   border-radius: 8px;
   background-color: var(--bb-color-surfacePrimaryTint);
 }
