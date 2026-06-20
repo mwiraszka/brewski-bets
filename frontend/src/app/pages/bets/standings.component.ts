@@ -54,7 +54,7 @@ export class StandingsComponent {
       }
 
       const myPosition = bet.user1Id === userId ? 'user1' : 'user2';
-      const iOwe = winner.assignedTo === myPosition;
+      const iOwe = winner.assignedTo !== myPosition;
       const beers = winner.brewskiCount;
 
       let standing = byOpponent.get(bet.opponent.id);
