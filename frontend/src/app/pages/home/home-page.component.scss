@@ -117,10 +117,17 @@
   color: var(--bb-color-textSecondary);
 }
 
+// Masonry layout so a card with many outcomes only grows its own column instead
+// of stretching every other card on a shared grid row
 .card-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 16px;
+  column-width: 220px;
+  column-gap: 16px;
+}
+
+.card-grid > * {
+  display: block;
+  margin-bottom: 16px;
+  break-inside: avoid;
 }
 
 @include respond-to('lt-md') {

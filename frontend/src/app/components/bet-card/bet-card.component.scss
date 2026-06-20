@@ -6,7 +6,6 @@
   display: flex;
   flex-direction: column;
   gap: 12px;
-  height: 100%;
   padding: 16px;
   border-radius: 16px;
   border: 1px solid var(--bb-color-borderDefault);
@@ -44,14 +43,12 @@
 }
 
 .bet-card__title {
+  margin: 0;
   font-size: 17px;
   font-weight: 600;
   line-height: 1.3;
+  word-break: break-word;
   color: var(--bb-color-textStrong);
-  display: -webkit-box;
-  overflow: hidden;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
 }
 
 .bet-card__opponent {
@@ -86,17 +83,15 @@
 
 .bet-card__outcome {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
+  align-items: flex-start;
   gap: 8px;
 }
 
 .bet-card__outcome-name {
-  overflow: hidden;
+  flex: 1;
   min-width: 0;
   font-size: 14px;
-  white-space: nowrap;
-  text-overflow: ellipsis;
+  word-break: break-word;
   color: var(--bb-color-textBody);
 }
 
