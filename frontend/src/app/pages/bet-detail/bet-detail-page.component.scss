@@ -67,25 +67,12 @@ ea-card {
 .opponent-line {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 12px 16px;
+  gap: 8px;
   margin-bottom: 16px;
-  border-radius: 12px;
-  background-color: var(--bb-color-surfaceSubtle);
 }
 
-.opponent-line__detail {
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-}
-
-.opponent-line__label {
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  color: var(--bb-color-textFaint);
+.opponent-line ea-avatar {
+  flex: none;
 }
 
 .opponent-line__name {
