@@ -28,7 +28,7 @@
     <ea-avatar
       [src]="opponentAvatar()"
       [initials]="opponentInitials()"
-      size="sm" />
+      size="xs" />
   </div>
 
   @if (outcomes().length) {
@@ -52,7 +52,7 @@
 
   <div class="bet-card__footer">
     @if (myTurn()) {
-      <span class="bet-card__flag bet-card__flag--action">Your turn</span>
+      <span class="bet-card__flag bet-card__flag--action">Awaiting your review</span>
     } @else if (awaitingOutcome()) {
       <span class="bet-card__flag bet-card__flag--action">Awaiting outcome</span>
     } @else if (changesPending()) {
