@@ -1,3 +1,5 @@
+@use '../../../styles/mixins' as *;
+
 .standings {
   display: flex;
   flex-direction: column;
@@ -152,8 +154,9 @@
   }
 }
 
+// The diagonal line runs past both edges, like a bet crossed out by hand
 .void-bet {
-  position: relative;
+  @include pen-strike(8px);
   display: flex;
   align-items: center;
   gap: 12px;
@@ -161,21 +164,14 @@
   border: 1px solid var(--bb-color-borderDefault);
   border-radius: 12px;
   background-color: var(--bb-color-surfaceRaised);
-}
+  color: inherit;
+  text-decoration: none;
+  cursor: pointer;
+  transition: box-shadow 0.15s ease;
 
-// A slightly diagonal 3px line that runs past both edges, like a bet crossed out
-// by hand to mark it voided
-.void-bet::after {
-  z-index: 1;
-  position: absolute;
-  top: 50%;
-  right: -8px;
-  left: -8px;
-  height: 3px;
-  background-color: var(--bb-color-textStrong);
-  pointer-events: none;
-  transform: translateY(-50%) rotate(-2deg);
-  content: '';
+  &:hover {
+    box-shadow: var(--bb-boxShadow);
+  }
 }
 
 .void-bet__icon {
@@ -191,8 +187,17 @@
 
 .void-bet__info {
   display: flex;
+  flex: 1;
   flex-direction: column;
   min-width: 0;
+}
+
+.void-bet__stamp {
+  flex: none;
+  font-size: 28px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  color: var(--bb-color-textMuted);
 }
 
 .void-bet__title {
