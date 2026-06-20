@@ -42,7 +42,9 @@ export async function authMiddleware(c: Context<AppContext>, next: Next) {
           email,
           firstName: clerkUser.firstName ?? '',
           lastName: clerkUser.lastName ?? '',
-          clerkImageUrl: clerkUser.imageUrl,
+          // Clerk returns a placeholder graphic URL when the user has no photo;
+          // store null so clients fall back to initials
+          clerkImageUrl: clerkUser.hasImage ? clerkUser.imageUrl : null,
         })
         .onConflictDoNothing({ target: users.clerkId })
         .returning();

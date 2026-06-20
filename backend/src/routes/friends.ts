@@ -37,7 +37,7 @@ async function fetchFriends(db: Db, userId: string) {
       lastName: users.lastName,
       avatarUrl: sql<
         string | null
-      >`coalesce(${users.avatarUrl}, ${users.avatarOriginalUrl})`,
+      >`coalesce(${users.avatarUrl}, ${users.avatarOriginalUrl}, ${users.clerkImageUrl})`,
     })
     .from(users)
     .where(or(...friendIds.map(id => eq(users.id, id))));
@@ -61,7 +61,7 @@ async function fetchIncomingRequests(db: Db, userId: string) {
       requesterLastName: users.lastName,
       requesterAvatarUrl: sql<
         string | null
-      >`coalesce(${users.avatarUrl}, ${users.avatarOriginalUrl})`,
+      >`coalesce(${users.avatarUrl}, ${users.avatarOriginalUrl}, ${users.clerkImageUrl})`,
     })
     .from(friendships)
     .innerJoin(users, eq(friendships.requesterId, users.id))
@@ -91,7 +91,7 @@ async function fetchSentRequests(db: Db, userId: string) {
       addresseeLastName: users.lastName,
       addresseeAvatarUrl: sql<
         string | null
-      >`coalesce(${users.avatarUrl}, ${users.avatarOriginalUrl})`,
+      >`coalesce(${users.avatarUrl}, ${users.avatarOriginalUrl}, ${users.clerkImageUrl})`,
     })
     .from(friendships)
     .innerJoin(users, eq(friendships.addresseeId, users.id))
