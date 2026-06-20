@@ -1,4 +1,9 @@
-import { AvatarComponent, BadgeComponent, CalendarIconComponent } from '@eagami/ui';
+import {
+  AvatarComponent,
+  BadgeComponent,
+  BottleIconComponent,
+  CalendarIconComponent,
+} from '@eagami/ui';
 
 import { DatePipe } from '@angular/common';
 import { Component, computed, input } from '@angular/core';
@@ -6,7 +11,13 @@ import { RouterLink } from '@angular/router';
 
 import { BetGraphicComponent } from '@app/graphics';
 import { type BetWithOpponent } from '@app/models';
-import { avatarSrc, initialsOf, isAwaitingOutcome, isMyTurn } from '@app/util';
+import {
+  avatarSrc,
+  initialsOf,
+  isAwaitingOutcome,
+  isMyTurn,
+  positionOf,
+} from '@app/util';
 
 @Component({
   selector: 'bb-bet-card',
@@ -18,6 +29,7 @@ import { avatarSrc, initialsOf, isAwaitingOutcome, isMyTurn } from '@app/util';
     AvatarComponent,
     BadgeComponent,
     BetGraphicComponent,
+    BottleIconComponent,
     CalendarIconComponent,
   ],
 })
@@ -35,6 +47,22 @@ export class BetCardComponent {
   readonly opponentInitials = computed(() =>
     initialsOf(this.bet().opponent?.firstName, this.bet().opponent?.lastName),
   );
+
+  readonly outcomes = computed(() => {
+    const bet = this.bet();
+    const me = positionOf(bet, this.currentUserId());
+    return bet.results
+      .filter(result => result.isSpecial !== 'void')
+      .map(result => {
+        const iWin = result.assignedTo === me;
+        return {
+          name: result.name,
+          beers: result.brewskiCount,
+          iWin,
+          stakeLabel: iWin ? 'You win' : 'You owe',
+        };
+      });
+  });
 
   readonly myTurn = computed(() => isMyTurn(this.bet(), this.currentUserId()));
   readonly awaitingOutcome = computed(() => isAwaitingOutcome(this.bet()));
