@@ -37,7 +37,13 @@ import { BetGraphicComponent } from '@app/graphics';
 import { type BetWithOpponent } from '@app/models';
 import { BetsService } from '@app/services/bets.service';
 import { UserService } from '@app/services/user.service';
-import { avatarSrc, initialsOf, isAwaitingOutcome } from '@app/util';
+import {
+  avatarSrc,
+  initialsOf,
+  isAwaitingOutcome,
+  isPendingRequester,
+  withAgreedTerms,
+} from '@app/util';
 
 import { StandingsComponent } from './standings.component';
 
@@ -132,7 +138,8 @@ export class BetsPageComponent implements OnInit {
   });
 
   readonly filteredBets = computed(() => {
-    let bets = this.betsService.bets();
+    // Show the agreed terms, not an unaccepted pending proposal
+    let bets = this.betsService.bets().map(withAgreedTerms);
 
     const text = this.filterText().toLowerCase().trim();
     if (text) {
@@ -253,7 +260,11 @@ export class BetsPageComponent implements OnInit {
     if (bet.status === 'settled') {
       return false;
     }
-    return this.isMyTurn(bet) || (bet.status === 'active' && bet.pendingAction == null);
+    return (
+      this.isMyTurn(bet) ||
+      (bet.status === 'active' && bet.pendingAction == null) ||
+      isPendingRequester(bet, this.currentUserId())
+    );
   }
 
   canDelete(bet: BetWithOpponent): boolean {
