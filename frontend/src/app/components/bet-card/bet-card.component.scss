@@ -24,10 +24,15 @@
   }
 }
 
-.bet-card__top {
+.bet-card__heading {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.bet-card__title-row {
   display: flex;
   align-items: center;
-  justify-content: space-between;
   gap: 8px;
 }
 
@@ -36,13 +41,14 @@
   align-items: center;
   justify-content: center;
   flex: none;
-  width: 44px;
-  height: 44px;
-  border-radius: 12px;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
   background-color: var(--bb-color-surfaceSubtle);
 }
 
 .bet-card__title {
+  min-width: 0;
   margin: 0;
   font-size: 17px;
   font-weight: 600;
@@ -51,14 +57,20 @@
   color: var(--bb-color-textStrong);
 }
 
-.bet-card__heading {
+.bet-card__meta-row {
   display: flex;
-  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
   gap: 8px;
+}
+
+.bet-card__status {
+  flex: none;
 }
 
 .bet-card__opponent {
   display: flex;
+  flex: 1;
   align-items: center;
   gap: 8px;
   min-width: 0;

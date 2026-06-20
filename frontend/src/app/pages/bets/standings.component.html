@@ -77,7 +77,9 @@
     }
 
     @for (voidBet of voidBets(); track voidBet.id) {
-      <div class="void-bet">
+      <a
+        class="void-bet"
+        [routerLink]="['/bets', voidBet.id]">
         <span class="void-bet__icon">
           <bb-bet-graphic
             [slug]="voidBet.iconSlug"
@@ -88,7 +90,8 @@
           <span class="void-bet__title">{{ voidBet.title }}</span>
           <span class="void-bet__opponent">vs {{ voidBet.opponentName }}</span>
         </span>
-      </div>
+        <span class="void-bet__stamp">VOID</span>
+      </a>
     }
   </div>
 } @else {

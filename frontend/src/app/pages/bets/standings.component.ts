@@ -1,6 +1,7 @@
 import { AvatarComponent, BottleIconComponent, EmptyStateComponent } from '@eagami/ui';
 
 import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
+import { RouterLink } from '@angular/router';
 
 import { BetGraphicComponent } from '@app/graphics';
 import { type BetWithOpponent } from '@app/models';
@@ -36,6 +37,7 @@ interface VoidBet {
   styleUrl: './standings.component.scss',
   changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
+    RouterLink,
     AvatarComponent,
     BetGraphicComponent,
     BottleIconComponent,

@@ -58,8 +58,30 @@ export class UserService {
     try {
       const user = await this.api.get<UserRecord>('/users/me');
       this._user.set(user);
+      await this.syncClerkImage(user);
     } catch {
       // silently ignore; app still works without user record
+    }
+  }
+
+  // Keep the user's stored Clerk image fresh so that, for users without an
+  // app-cropped avatar, opponents can fall back to it instead of seeing initials.
+  private async syncClerkImage(user: UserRecord): Promise<void> {
+    const clerkUser = this.clerk.user();
+    if (!clerkUser) {
+      return;
+    }
+    const current = clerkUser.hasImage ? clerkUser.imageUrl : null;
+    if (current === user.clerkImageUrl) {
+      return;
+    }
+    try {
+      const updated = await this.api.patch<UserRecord>('/users/me', {
+        clerkImageUrl: current,
+      });
+      this._user.set(updated);
+    } catch {
+      // non-critical; opponents fall back to initials
     }
   }
 

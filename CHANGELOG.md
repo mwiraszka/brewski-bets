@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.3] - 2026-06-20
+
+### Changed
+
+- Always display a bet's agreed terms, never an unaccepted proposed change, on the bets list, dashboard cards, and bet view
+- Lay out the top of dashboard cards and the bet view with the graphic beside the title and the opponent next to the status badge
+- Shorten dashboard card stake labels to "Win" and "Lose"
+- Mark voided bets more clearly: a faded diagonal strike with a VOID stamp on the standings card (now clickable through to the bet), and a strike through each outcome on a voided bet's view
+
+### Fixed
+
+- Let the player who proposed a change open it to edit or withdraw from the bet view and the bets list, instead of being stuck on a waiting message
+- Show an opponent's avatar set directly in Clerk instead of falling back to their initials
+
 ## [1.3.2] - 2026-06-20
 
 ### Added
@@ -661,6 +675,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - PWA manifest and service worker configuration
 - GitHub issue templates
 
+[1.3.3]: https://github.com/mwiraszka/brewski-bets/compare/v1.3.2...v1.3.3
 [1.3.2]: https://github.com/mwiraszka/brewski-bets/compare/v1.3.1...v1.3.2
 [1.3.1]: https://github.com/mwiraszka/brewski-bets/compare/v1.3.0...v1.3.1
 [1.3.0]: https://github.com/mwiraszka/brewski-bets/compare/v1.2.1...v1.3.0

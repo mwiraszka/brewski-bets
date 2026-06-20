@@ -25,7 +25,9 @@ import {
   initialsOf,
   isAwaitingOutcome,
   isMyTurn,
+  isPendingRequester,
   positionOf,
+  withAgreedTerms,
 } from '@app/util';
 
 interface OutcomeView {
@@ -83,7 +85,21 @@ export class BetDetailPageComponent implements OnInit {
     initialsOf(this.bet()?.opponent?.firstName, this.bet()?.opponent?.lastName),
   );
 
+  // Display the agreed terms; an unaccepted pending change stays hidden until
+  // both parties accept it (the diff is reviewed on the edit screen instead).
+  private readonly view = computed(() => {
+    const bet = this.bet();
+    return bet ? withAgreedTerms(bet) : null;
+  });
+
+  readonly displayTitle = computed(() => this.view()?.title ?? '');
+  readonly displayIconSlug = computed(() => this.view()?.iconSlug ?? null);
+  readonly displayIconColor = computed(() => this.view()?.iconColor ?? null);
+  readonly displayDescription = computed(() => this.view()?.description ?? null);
+  readonly displayResolutionDate = computed(() => this.view()?.resolutionDate ?? null);
+
   readonly isSettled = computed(() => this.bet()?.status === 'settled');
+  readonly isVoid = computed(() => this.bet()?.outcome === 'void');
   readonly settlementProposed = computed(() => this.bet()?.settlementProposed ?? false);
   readonly changesPending = computed(
     () => this.bet()?.pendingAction != null && !this.isSettled(),
@@ -99,7 +115,7 @@ export class BetDetailPageComponent implements OnInit {
   });
 
   readonly outcomes = computed((): OutcomeView[] => {
-    const bet = this.bet();
+    const bet = this.view();
     if (!bet) {
       return [];
     }
@@ -110,7 +126,7 @@ export class BetDetailPageComponent implements OnInit {
   });
 
   readonly winnerLabel = computed(() => {
-    const bet = this.bet();
+    const bet = this.view();
     const index = bet?.selectedResultIndex;
     if (!bet || index == null) {
       return '';
@@ -133,14 +149,22 @@ export class BetDetailPageComponent implements OnInit {
     if (!bet || this.isSettled()) {
       return false;
     }
-    return this.myTurn() || (bet.status === 'active' && bet.pendingAction == null);
+    return (
+      this.myTurn() ||
+      (bet.status === 'active' && bet.pendingAction == null) ||
+      isPendingRequester(bet, this.currentUserId())
+    );
   });
 
   readonly actionLabel = computed(() => {
+    const bet = this.bet();
     if (this.settlementProposed() && this.myTurn()) {
       return 'Review settlement';
     }
     if (this.changesPending() && this.myTurn()) {
+      return 'Review changes';
+    }
+    if (bet && isPendingRequester(bet, this.currentUserId())) {
       return 'Review changes';
     }
     return 'Edit bet';

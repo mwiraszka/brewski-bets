@@ -24,14 +24,23 @@
   <div class="bet-detail-page">
     <ea-card variant="outlined">
       <div class="detail-header">
-        <div class="detail-header__icon">
-          <bb-bet-graphic
-            [slug]="bet.iconSlug"
-            [color]="bet.iconColor"
-            [size]="48" />
+        <div class="detail-header__title-row">
+          <div class="detail-header__icon">
+            <bb-bet-graphic
+              [slug]="displayIconSlug()"
+              [color]="displayIconColor()"
+              [size]="32" />
+          </div>
+          <h1 class="detail-header__title">{{ displayTitle() }}</h1>
         </div>
-        <div class="detail-header__main">
-          <h1 class="detail-header__title">{{ bet.title }}</h1>
+        <div class="detail-header__meta-row">
+          <div class="opponent-line">
+            <span class="opponent-line__name">vs {{ opponentName() }}</span>
+            <ea-avatar
+              [src]="opponentAvatar()"
+              [initials]="opponentInitials()"
+              size="sm" />
+          </div>
           <div class="status-tags">
             @if (bet.status === 'active') {
               <ea-badge variant="success">active</ea-badge>
@@ -52,22 +61,14 @@
         </div>
       </div>
 
-      <div class="opponent-line">
-        <span class="opponent-line__name">vs {{ opponentName() }}</span>
-        <ea-avatar
-          [src]="opponentAvatar()"
-          [initials]="opponentInitials()"
-          size="xs" />
-      </div>
-
-      @if (bet.description) {
-        <p class="detail-description">{{ bet.description }}</p>
+      @if (displayDescription(); as description) {
+        <p class="detail-description">{{ description }}</p>
       }
 
-      @if (bet.resolutionDate) {
+      @if (displayResolutionDate(); as resolutionDate) {
         <div class="detail-meta">
           <ea-icon-calendar class="detail-meta__icon" />
-          <span>Resolves {{ bet.resolutionDate | date: 'longDate' }}</span>
+          <span>Resolves {{ resolutionDate | date: 'longDate' }}</span>
         </div>
       }
 
@@ -93,7 +94,8 @@
           @for (outcome of outcomes(); track $index) {
             <li
               class="outcome"
-              [class.outcome--winner]="outcome.isWinner">
+              [class.outcome--winner]="outcome.isWinner"
+              [class.outcome--void]="isVoid()">
               <span class="outcome__name">{{ outcome.name }}</span>
               <span
                 class="outcome__stake"
