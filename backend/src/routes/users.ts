@@ -67,7 +67,7 @@ export const userRoutes = new Hono<AppContext>()
         lastName: users.lastName,
         avatarUrl: sql<
           string | null
-        >`coalesce(${users.avatarUrl}, ${users.avatarOriginalUrl}, ${users.clerkImageUrl})`,
+        >`coalesce(${users.clerkImageUrl}, ${users.avatarUrl}, ${users.avatarOriginalUrl})`,
       })
       .from(users)
       .where(and(ne(users.id, userId), ...tokenConditions))
