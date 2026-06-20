@@ -1,5 +1,6 @@
 import {
   AlertCircleIconComponent,
+  AvatarComponent,
   BadgeComponent,
   ButtonComponent,
   CardComponent,
@@ -43,10 +44,11 @@ import {
   isColorableGraphic,
 } from '@app/graphics';
 import { type CanComponentDeactivate } from '@app/guards/unsaved-changes.guard';
-import { type BetResult, type BetWithOpponent } from '@app/models';
+import { type BetResult, type BetSnapshot, type BetWithOpponent } from '@app/models';
 import { BetsService } from '@app/services/bets.service';
 import { FriendsService } from '@app/services/friends.service';
 import { UserService } from '@app/services/user.service';
+import { avatarSrc, initialsOf } from '@app/util';
 
 const ICON_COLORS = [
   '#e53935',
@@ -70,6 +72,14 @@ const NOTCH_VALUES: ReadonlyArray<number> = [6, 5, 4, 3, 2, 1, 0, 1, 2, 3, 4, 5,
 
 type ActionInFlight = 'submit' | 'accept' | 'settle' | 'reject' | 'delete' | null;
 
+interface ReviewOutcome {
+  status: 'unchanged' | 'changed' | 'added' | 'removed';
+  name: string;
+  stakeLabel: string;
+  previousName?: string;
+  previousStakeLabel?: string;
+}
+
 @Component({
   selector: 'bb-bet-form-page',
   templateUrl: './bet-form-page.component.html',
@@ -78,6 +88,7 @@ type ActionInFlight = 'submit' | 'accept' | 'settle' | 'reject' | 'delete' | nul
   imports: [
     DatePipe,
     AlertCircleIconComponent,
+    AvatarComponent,
     BadgeComponent,
     BetGraphicComponent,
     ButtonComponent,
@@ -130,6 +141,8 @@ export class BetFormPageComponent implements OnInit, CanComponentDeactivate {
   readonly deleteDialogOpen = signal(false);
   readonly settleDialogOpen = signal(false);
   readonly leaveDialogOpen = signal(false);
+  readonly counterProposing = signal(false);
+  private readonly previousSnapshot = signal<BetSnapshot | null>(null);
 
   // Snapshot of the form taken once it loads; `formSnapshot` diverging from it
   // means there are unsaved edits. `allowNavigation` is flipped on right before
@@ -271,6 +284,95 @@ export class BetFormPageComponent implements OnInit, CanComponentDeactivate {
     () => this.settlementProposed() && this.isMyTurn(),
   );
 
+  // The reviewer sees the bet read-only with proposed terms highlighted until
+  // they choose to counter-propose, which reopens the editable form.
+  readonly isReviewing = computed(
+    () => this.canApproveTerms() && !this.counterProposing(),
+  );
+
+  readonly hasPreviousState = computed(() => this.previousSnapshot() != null);
+
+  readonly titleChanged = computed(() => {
+    const prev = this.previousSnapshot();
+    return prev != null && prev.title !== this.title();
+  });
+  readonly previousTitle = computed(() => this.previousSnapshot()?.title ?? '');
+
+  readonly descriptionChanged = computed(() => {
+    const prev = this.previousSnapshot();
+    return prev != null && (prev.description ?? '') !== this.description();
+  });
+  readonly previousDescription = computed(
+    () => this.previousSnapshot()?.description ?? '',
+  );
+
+  readonly resolutionChanged = computed(() => {
+    const prev = this.previousSnapshot();
+    if (!prev) {
+      return false;
+    }
+    return prev.resolutionDate !== (this.resolutionDate()?.toISOString() ?? null);
+  });
+  readonly previousResolutionDate = computed(() => {
+    const iso = this.previousSnapshot()?.resolutionDate;
+    return iso ? new Date(iso) : null;
+  });
+
+  readonly graphicChanged = computed(() => {
+    const prev = this.previousSnapshot();
+    if (!prev) {
+      return false;
+    }
+    const proposedColor = this.selectedColorable() ? this.iconColor() : null;
+    return (
+      prev.iconSlug !== this.iconSlug() || (prev.iconColor ?? null) !== proposedColor
+    );
+  });
+  readonly previousIconSlug = computed(() => this.previousSnapshot()?.iconSlug ?? null);
+  readonly previousIconColor = computed(() => this.previousSnapshot()?.iconColor ?? null);
+
+  readonly reviewOutcomes = computed<ReviewOutcome[]>(() => {
+    const me = (this.bet ? this.myPosition() : 'user1') ?? 'user1';
+    const stake = (result: BetResult): string =>
+      `${result.assignedTo === me ? 'YOU' : 'THEM'} ${result.brewskiCount}`;
+    const proposed = this.outcomes();
+    const prev = this.previousSnapshot();
+
+    if (!prev) {
+      return proposed.map(outcome => ({
+        status: 'unchanged' as const,
+        name: outcome.name,
+        stakeLabel: stake(outcome),
+      }));
+    }
+
+    const previousResults = prev.results.filter(result => !result.isSpecial);
+    const rows: ReviewOutcome[] = [];
+    const count = Math.max(proposed.length, previousResults.length);
+    for (let i = 0; i < count; i++) {
+      const next = proposed[i];
+      const before = previousResults[i];
+      if (next && before) {
+        const changed =
+          next.name !== before.name ||
+          next.brewskiCount !== before.brewskiCount ||
+          next.assignedTo !== before.assignedTo;
+        rows.push({
+          status: changed ? 'changed' : 'unchanged',
+          name: next.name,
+          stakeLabel: stake(next),
+          previousName: changed ? before.name : undefined,
+          previousStakeLabel: changed ? stake(before) : undefined,
+        });
+      } else if (next) {
+        rows.push({ status: 'added', name: next.name, stakeLabel: stake(next) });
+      } else if (before) {
+        rows.push({ status: 'removed', name: before.name, stakeLabel: stake(before) });
+      }
+    }
+    return rows;
+  });
+
   readonly canSubmitChanges = computed(
     () =>
       this.mode() === 'edit' &&
@@ -337,13 +439,11 @@ export class BetFormPageComponent implements OnInit, CanComponentDeactivate {
     return friend ? `${friend.firstName} ${friend.lastName}` : '';
   });
 
-  readonly opponentFirstName = computed(() => {
-    if (this.bet?.opponent) {
-      return this.bet.opponent.firstName;
-    }
-    const friend = this.friends().find(f => f.id === this.selectedFriendId());
-    return friend?.firstName ?? 'Them';
-  });
+  readonly opponentAvatar = computed(() => avatarSrc(this.bet?.opponent?.avatarUrl));
+
+  readonly opponentInitials = computed(() =>
+    initialsOf(this.bet?.opponent?.firstName, this.bet?.opponent?.lastName),
+  );
 
   readonly isFormValid = computed(() => {
     if (!this.title().trim()) {
@@ -399,15 +499,8 @@ export class BetFormPageComponent implements OnInit, CanComponentDeactivate {
       this.mode.set('edit');
       try {
         this.bet = await this.betsService.getBet(id);
-        this.title.set(this.bet.title);
-        this.description.set(this.bet.description ?? '');
-        this.iconSlug.set(this.bet.iconSlug);
-        this.iconColor.set(this.bet.iconColor ?? DEFAULT_ICON_COLOR);
-        this.iconEditing.set(!this.bet.iconSlug);
-        this.resolutionDate.set(
-          this.bet.resolutionDate ? new Date(this.bet.resolutionDate) : null,
-        );
-        this.outcomes.set(this.bet.results.filter(outcome => !outcome.isSpecial));
+        this.applyBetToForm(this.bet);
+        this.previousSnapshot.set(this.bet.previousState ?? null);
       } catch {
         this.toast.error('Failed to load bet');
         this.allowNavigation = true;
@@ -419,6 +512,27 @@ export class BetFormPageComponent implements OnInit, CanComponentDeactivate {
     await this.friendsService.loadFriends();
     this.initialSnapshot = this.formSnapshot();
     this.loading.set(false);
+  }
+
+  private applyBetToForm(bet: BetWithOpponent): void {
+    this.title.set(bet.title);
+    this.description.set(bet.description ?? '');
+    this.iconSlug.set(bet.iconSlug);
+    this.iconColor.set(bet.iconColor ?? DEFAULT_ICON_COLOR);
+    this.iconEditing.set(!bet.iconSlug);
+    this.resolutionDate.set(bet.resolutionDate ? new Date(bet.resolutionDate) : null);
+    this.outcomes.set(bet.results.filter(outcome => !outcome.isSpecial));
+  }
+
+  startCounter(): void {
+    this.counterProposing.set(true);
+  }
+
+  cancelCounter(): void {
+    if (this.bet) {
+      this.applyBetToForm(this.bet);
+    }
+    this.counterProposing.set(false);
   }
 
   selectIcon(slug: string): void {

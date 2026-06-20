@@ -47,7 +47,13 @@
           {{ mode() === 'create' ? 'Create a bet' : 'Edit bet' }}
         </h2>
         @if (mode() === 'edit' && opponentName()) {
-          <p class="card-header__opponent">vs {{ opponentName() }}</p>
+          <div class="card-header__opponent">
+            <span>vs {{ opponentName() }}</span>
+            <ea-avatar
+              [src]="opponentAvatar()"
+              [initials]="opponentInitials()"
+              size="sm" />
+          </div>
         }
         @if (mode() === 'edit') {
           <div class="status-tags">
@@ -73,254 +79,391 @@
         <div class="waiting-banner">Waiting for {{ opponentName() }} to respond</div>
       }
 
-      <fieldset [disabled]="!canEditTerms() || isBusy()">
-        @if (mode() === 'create') {
-          <div class="form-field">
-            @if (friends().length) {
-              <ea-dropdown
-                label="Bet against"
-                placeholder="Select a friend"
-                [options]="friendOptions()"
-                [required]="true"
-                [errorMsg]="friendError()"
-                [(value)]="selectedFriendId"
-                (changed)="friendTouched.set(true)" />
+      @if (isReviewing()) {
+        <div class="review">
+          @if (hasPreviousState()) {
+            <p class="review__hint">Highlighted rows differ from the current terms</p>
+          }
+
+          <div class="review-field">
+            <span class="field-label">Title</span>
+            @if (titleChanged()) {
+              <p class="review-line review-line--old">{{ previousTitle() }}</p>
+              <p class="review-line review-line--new">{{ title() }}</p>
             } @else {
-              <div class="find-friend-row">
-                <label class="field-label field-label--required">Bet against</label>
-                <a
-                  class="find-friend-link bb-text-link"
-                  routerLink="/friends"
-                  [queryParams]="{ tab: 'find' }">
-                  Find a friend
-                </a>
-              </div>
+              <p class="review-line">{{ title() }}</p>
             }
           </div>
-        }
 
-        <div class="form-field">
-          <ea-input
-            #titleInputRef
-            label="Title"
-            [required]="true"
-            [errorMsg]="titleError()"
-            [value]="title()"
-            (valueChange)="setTitle($event)"
-            (blurred)="titleTouched.set(true)" />
-        </div>
-
-        <div class="form-field">
-          @if (isViewing()) {
+          <div class="review-field">
             <span class="field-label">Description</span>
-            @if (description().trim()) {
-              <p class="readonly-description">{{ description() }}</p>
+            @if (descriptionChanged()) {
+              <p class="review-line review-line--old">
+                {{ previousDescription().trim() || 'No description' }}
+              </p>
+              <p class="review-line review-line--new">
+                {{ description().trim() || 'No description' }}
+              </p>
             } @else {
-              <p class="readonly-description readonly-description--empty">
-                No description
+              <p
+                class="review-line"
+                [class.review-line--empty]="!description().trim()">
+                {{ description().trim() || 'No description' }}
               </p>
             }
-          } @else {
-            <label
-              class="field-label"
-              for="bet-description">
-              Description
-              <span class="field-label__optional">(optional)</span>
-            </label>
-            <ea-textarea
-              id="bet-description"
-              [maxlength]="descriptionMaxLength"
-              [maxHeight]="200"
-              [(value)]="description" />
-          }
-        </div>
+          </div>
 
-        <div class="form-field">
-          @if (isViewing()) {
+          <div class="review-field">
             <span class="field-label">Resolution date</span>
-            @if (resolutionDate()) {
-              <p class="readonly-description">
-                {{ resolutionDate() | date: 'longDate' }}
+            @if (resolutionChanged()) {
+              <p class="review-line review-line--old">
+                {{
+                  previousResolutionDate()
+                    ? (previousResolutionDate() | date: 'longDate')
+                    : 'No resolution date'
+                }}
+              </p>
+              <p class="review-line review-line--new">
+                {{
+                  resolutionDate()
+                    ? (resolutionDate() | date: 'longDate')
+                    : 'No resolution date'
+                }}
               </p>
             } @else {
-              <p class="readonly-description readonly-description--empty">
-                No resolution date
+              <p
+                class="review-line"
+                [class.review-line--empty]="!resolutionDate()">
+                {{
+                  resolutionDate()
+                    ? (resolutionDate() | date: 'longDate')
+                    : 'No resolution date'
+                }}
               </p>
             }
-          } @else {
-            <label
-              class="field-label"
-              for="bet-resolution-date">
-              Resolution date
-              <span class="field-label__optional">(optional)</span>
-            </label>
-            <ea-date-picker
-              id="bet-resolution-date"
-              hint="When the outcome will be known"
-              [minDate]="minResolutionDate"
-              [(value)]="resolutionDate" />
-          }
-        </div>
+          </div>
 
-        <div class="form-field">
-          <label class="field-label field-label--required">Graphic</label>
-          @if (iconEditing()) {
-            <ea-input
-              #iconFilterInputRef
-              placeholder="Search graphics"
-              [value]="iconFilter()"
-              (valueChange)="setIconFilter($event)">
-              <ea-icon-search slot="prefix" />
-            </ea-input>
-            <div class="graphics-grid">
-              @for (graphic of filteredGraphics(); track graphic.slug) {
-                <button
-                  type="button"
-                  class="graphic-option"
-                  [class.graphic-option--selected]="iconSlug() === graphic.slug"
-                  [eaTooltip]="graphic.label"
-                  (click)="selectIcon(graphic.slug)">
+          <div class="review-field">
+            <span class="field-label">Graphic</span>
+            @if (graphicChanged() && previousIconSlug()) {
+              <div class="review-graphics">
+                <span class="review-graphic review-graphic--old">
                   <bb-bet-graphic
-                    [slug]="graphic.slug"
-                    [color]="iconSlug() === graphic.slug ? iconColor() : null"
-                    [size]="22" />
-                </button>
-              } @empty {
-                <p class="graphics-grid__empty">No graphics match that search</p>
+                    [slug]="previousIconSlug()"
+                    [color]="previousIconColor()"
+                    [size]="32" />
+                </span>
+                <span class="review-graphic review-graphic--new">
+                  <bb-bet-graphic
+                    [slug]="iconSlug()"
+                    [color]="selectedColorable() ? iconColor() : null"
+                    [size]="32" />
+                </span>
+              </div>
+            } @else {
+              <span class="review-graphic">
+                <bb-bet-graphic
+                  [slug]="iconSlug()"
+                  [color]="selectedColorable() ? iconColor() : null"
+                  [size]="32" />
+              </span>
+            }
+          </div>
+
+          <div class="review-field">
+            <span class="field-label">Outcomes</span>
+            <ul class="review-outcomes">
+              @for (outcome of reviewOutcomes(); track $index) {
+                <li
+                  class="review-outcome"
+                  [class.review-outcome--changed]="outcome.status === 'changed'"
+                  [class.review-outcome--added]="outcome.status === 'added'"
+                  [class.review-outcome--removed]="outcome.status === 'removed'">
+                  @if (outcome.status === 'changed') {
+                    <div class="review-outcome__line review-outcome__line--old">
+                      <span class="review-outcome__name">{{ outcome.previousName }}</span>
+                      <span class="review-outcome__stake">
+                        {{ outcome.previousStakeLabel }}
+                      </span>
+                    </div>
+                    <div class="review-outcome__line review-outcome__line--new">
+                      <span class="review-outcome__name">{{ outcome.name }}</span>
+                      <span class="review-outcome__stake">{{ outcome.stakeLabel }}</span>
+                    </div>
+                  } @else {
+                    <div class="review-outcome__line">
+                      @if (outcome.status === 'added') {
+                        <span class="review-outcome__tag review-outcome__tag--added">
+                          New
+                        </span>
+                      } @else if (outcome.status === 'removed') {
+                        <span class="review-outcome__tag review-outcome__tag--removed">
+                          Removed
+                        </span>
+                      }
+                      <span class="review-outcome__name">{{ outcome.name }}</span>
+                      <span class="review-outcome__stake">{{ outcome.stakeLabel }}</span>
+                    </div>
+                  }
+                </li>
+              }
+            </ul>
+          </div>
+        </div>
+      } @else {
+        <fieldset [disabled]="!canEditTerms() || isBusy()">
+          @if (mode() === 'create') {
+            <div class="form-field">
+              @if (friends().length) {
+                <ea-dropdown
+                  label="Bet against"
+                  placeholder="Select a friend"
+                  [options]="friendOptions()"
+                  [required]="true"
+                  [errorMsg]="friendError()"
+                  [(value)]="selectedFriendId"
+                  (changed)="friendTouched.set(true)" />
+              } @else {
+                <div class="find-friend-row">
+                  <label class="field-label field-label--required">Bet against</label>
+                  <a
+                    class="find-friend-link bb-text-link"
+                    routerLink="/friends"
+                    [queryParams]="{ tab: 'find' }">
+                    Find a friend
+                  </a>
+                </div>
               }
             </div>
-            @if (iconSlug() && selectedColorable()) {
-              <div class="color-picker">
-                <span class="color-picker__label">COLOUR</span>
-                <div class="color-picker__swatches">
-                  @for (color of iconColors; track color) {
-                    <button
-                      type="button"
-                      class="color-swatch"
-                      [class.color-swatch--selected]="iconColor() === color"
-                      [style.background-color]="color"
-                      [attr.aria-label]="'Colour ' + color"
-                      (click)="selectColor(color)">
-                    </button>
-                  }
-                </div>
-              </div>
-            }
-            <div class="icon-confirm">
-              <ea-button
-                variant="secondary"
-                [disabled]="!iconSlug()"
-                (clicked)="confirmIcon()">
-                <span class="btn-content">
-                  <ea-icon-check />
-                  {{ mode() === 'create' ? 'Set graphic' : 'Update graphic' }}
-                </span>
-              </ea-button>
-            </div>
-          } @else if (selectedGraphic(); as selected) {
-            <div class="icon-preview">
-              <button
-                type="button"
-                class="icon-preview__container"
-                aria-label="Edit graphic"
-                [eaTooltip]="'Edit graphic'"
-                tooltipPosition="right"
-                (click)="editIcon()">
-                <bb-bet-graphic
-                  [slug]="selected.slug"
-                  [color]="iconColor()"
-                  [size]="40" />
-              </button>
-            </div>
-          }
-          @if (iconError()) {
-            <p class="field-error">{{ iconError() }}</p>
-          }
-        </div>
-
-        <div class="form-field">
-          <label class="field-label field-label--required">Outcomes</label>
-
-          @if (settlementProposed() || isSettled()) {
-            <div class="winner-banner">
-              {{ isSettled() ? 'Settled result' : 'Proposed result' }}:
-              <strong>{{ winnerLabel() }}</strong>
-            </div>
           }
 
-          <div class="outcomes-list">
-            @for (outcome of outcomes(); track $index; let rowIndex = $index) {
-              <div class="outcome-row">
-                <div class="outcome-row__name">
-                  <ea-input
-                    #outcomeInputRef
-                    placeholder="e.g. Poland wins"
-                    [value]="outcome.name"
-                    [errorMsg]="outcomeDescriptionError(rowIndex, outcome.name)"
-                    (valueChange)="updateOutcomeDescription(rowIndex, $event)"
-                    (blurred)="markOutcomeDescriptionTouched(rowIndex)" />
-                  @if (canEditTerms() && outcomes().length > 1) {
-                    <button
-                      type="button"
-                      class="remove-icon-btn"
-                      aria-label="Remove outcome"
-                      [eaTooltip]="'Remove outcome'"
-                      (click)="removeOutcome(rowIndex)">
-                      <ea-icon-trash />
-                    </button>
-                  }
-                </div>
-                <div class="outcome-row__brewskis">
-                  <div class="outcome-row__slider-row">
-                    <span class="outcome-row__user">You</span>
-                    <div class="outcome-row__slider">
-                      <ea-slider
-                        size="sm"
-                        [hasError]="!!outcomeAmountError(outcome, rowIndex)"
-                        [min]="-maxBrewskiCount"
-                        [max]="maxBrewskiCount"
-                        [step]="1"
-                        [value]="signedBrewskiCount(outcome)"
-                        (changed)="updateOutcomeSigned(rowIndex, $event)" />
-                      <div
-                        class="slider-ticks"
-                        aria-hidden="true">
-                        @for (tick of sliderTicks; track $index; let tickIndex = $index) {
-                          @if (tick !== 0) {
-                            <span
-                              class="slider-ticks__tick"
-                              [style.--tick-index]="tickIndex">
-                              {{ tick }}
-                            </span>
-                          }
-                        }
-                      </div>
-                    </div>
-                    <span class="outcome-row__user">{{ opponentFirstName() }}</span>
-                  </div>
-                  @if (outcomeAmountError(outcome, rowIndex)) {
-                    <p class="outcome-row__error">
-                      <ea-icon-alert-circle class="outcome-row__error-icon" />
-                      {{ outcomeAmountError(outcome, rowIndex) }}
-                    </p>
-                  }
-                </div>
-              </div>
+          <div class="form-field">
+            <ea-input
+              #titleInputRef
+              label="Title"
+              [required]="true"
+              [errorMsg]="titleError()"
+              [value]="title()"
+              (valueChange)="setTitle($event)"
+              (blurred)="titleTouched.set(true)" />
+          </div>
+
+          <div class="form-field">
+            @if (isViewing()) {
+              <span class="field-label">Description</span>
+              @if (description().trim()) {
+                <p class="readonly-description">{{ description() }}</p>
+              } @else {
+                <p class="readonly-description readonly-description--empty">
+                  No description
+                </p>
+              }
+            } @else {
+              <label
+                class="field-label"
+                for="bet-description">
+                Description
+                <span class="field-label__optional">(optional)</span>
+              </label>
+              <ea-textarea
+                id="bet-description"
+                [maxlength]="descriptionMaxLength"
+                [maxHeight]="200"
+                [(value)]="description" />
             }
           </div>
 
-          @if (canEditTerms() && outcomes().length < maxOutcomes) {
-            <ea-button
-              variant="secondary"
-              (clicked)="addOutcome()">
-              <span class="btn-content">
-                <ea-icon-plus />
-                Add outcome
-              </span>
-            </ea-button>
-          }
-        </div>
-      </fieldset>
+          <div class="form-field">
+            @if (isViewing()) {
+              <span class="field-label">Resolution date</span>
+              @if (resolutionDate()) {
+                <p class="readonly-description">
+                  {{ resolutionDate() | date: 'longDate' }}
+                </p>
+              } @else {
+                <p class="readonly-description readonly-description--empty">
+                  No resolution date
+                </p>
+              }
+            } @else {
+              <label
+                class="field-label"
+                for="bet-resolution-date">
+                Resolution date
+                <span class="field-label__optional">(optional)</span>
+              </label>
+              <ea-date-picker
+                id="bet-resolution-date"
+                hint="When the outcome will be known"
+                [minDate]="minResolutionDate"
+                [(value)]="resolutionDate" />
+            }
+          </div>
+
+          <div class="form-field">
+            <label class="field-label field-label--required">Graphic</label>
+            @if (iconEditing()) {
+              <ea-input
+                #iconFilterInputRef
+                placeholder="Search graphics"
+                [value]="iconFilter()"
+                (valueChange)="setIconFilter($event)">
+                <ea-icon-search slot="prefix" />
+              </ea-input>
+              <div class="graphics-grid">
+                @for (graphic of filteredGraphics(); track graphic.slug) {
+                  <button
+                    type="button"
+                    class="graphic-option"
+                    [class.graphic-option--selected]="iconSlug() === graphic.slug"
+                    [eaTooltip]="graphic.label"
+                    (click)="selectIcon(graphic.slug)">
+                    <bb-bet-graphic
+                      [slug]="graphic.slug"
+                      [color]="iconSlug() === graphic.slug ? iconColor() : null"
+                      [size]="22" />
+                  </button>
+                } @empty {
+                  <p class="graphics-grid__empty">No graphics match that search</p>
+                }
+              </div>
+              @if (iconSlug() && selectedColorable()) {
+                <div class="color-picker">
+                  <span class="color-picker__label">COLOUR</span>
+                  <div class="color-picker__swatches">
+                    @for (color of iconColors; track color) {
+                      <button
+                        type="button"
+                        class="color-swatch"
+                        [class.color-swatch--selected]="iconColor() === color"
+                        [style.background-color]="color"
+                        [attr.aria-label]="'Colour ' + color"
+                        (click)="selectColor(color)">
+                      </button>
+                    }
+                  </div>
+                </div>
+              }
+              <div class="icon-confirm">
+                <ea-button
+                  variant="secondary"
+                  [disabled]="!iconSlug()"
+                  (clicked)="confirmIcon()">
+                  <span class="btn-content">
+                    <ea-icon-check />
+                    {{ mode() === 'create' ? 'Set graphic' : 'Update graphic' }}
+                  </span>
+                </ea-button>
+              </div>
+            } @else if (selectedGraphic(); as selected) {
+              <div class="icon-preview">
+                <button
+                  type="button"
+                  class="icon-preview__container"
+                  aria-label="Edit graphic"
+                  [eaTooltip]="'Edit graphic'"
+                  tooltipPosition="right"
+                  (click)="editIcon()">
+                  <bb-bet-graphic
+                    [slug]="selected.slug"
+                    [color]="iconColor()"
+                    [size]="40" />
+                </button>
+              </div>
+            }
+            @if (iconError()) {
+              <p class="field-error">{{ iconError() }}</p>
+            }
+          </div>
+
+          <div class="form-field">
+            <label class="field-label field-label--required">Outcomes</label>
+
+            @if (settlementProposed() || isSettled()) {
+              <div class="winner-banner">
+                {{ isSettled() ? 'Settled result' : 'Proposed result' }}:
+                <strong>{{ winnerLabel() }}</strong>
+              </div>
+            }
+
+            <div class="outcomes-list">
+              @for (outcome of outcomes(); track $index; let rowIndex = $index) {
+                <div class="outcome-row">
+                  <div class="outcome-row__name">
+                    <ea-input
+                      #outcomeInputRef
+                      placeholder="e.g. Poland wins"
+                      [value]="outcome.name"
+                      [errorMsg]="outcomeDescriptionError(rowIndex, outcome.name)"
+                      (valueChange)="updateOutcomeDescription(rowIndex, $event)"
+                      (blurred)="markOutcomeDescriptionTouched(rowIndex)" />
+                    @if (canEditTerms() && outcomes().length > 1) {
+                      <button
+                        type="button"
+                        class="remove-icon-btn"
+                        aria-label="Remove outcome"
+                        [eaTooltip]="'Remove outcome'"
+                        (click)="removeOutcome(rowIndex)">
+                        <ea-icon-trash />
+                      </button>
+                    }
+                  </div>
+                  <div class="outcome-row__brewskis">
+                    <div class="outcome-row__slider-row">
+                      <span class="outcome-row__user">You</span>
+                      <div class="outcome-row__slider">
+                        <ea-slider
+                          size="sm"
+                          [hasError]="!!outcomeAmountError(outcome, rowIndex)"
+                          [min]="-maxBrewskiCount"
+                          [max]="maxBrewskiCount"
+                          [step]="1"
+                          [value]="signedBrewskiCount(outcome)"
+                          (changed)="updateOutcomeSigned(rowIndex, $event)" />
+                        <div
+                          class="slider-ticks"
+                          aria-hidden="true">
+                          @for (
+                            tick of sliderTicks;
+                            track $index;
+                            let tickIndex = $index
+                          ) {
+                            @if (tick !== 0) {
+                              <span
+                                class="slider-ticks__tick"
+                                [style.--tick-index]="tickIndex">
+                                {{ tick }}
+                              </span>
+                            }
+                          }
+                        </div>
+                      </div>
+                      <span class="outcome-row__user">Them</span>
+                    </div>
+                    @if (outcomeAmountError(outcome, rowIndex)) {
+                      <p class="outcome-row__error">
+                        <ea-icon-alert-circle class="outcome-row__error-icon" />
+                        {{ outcomeAmountError(outcome, rowIndex) }}
+                      </p>
+                    }
+                  </div>
+                </div>
+              }
+            </div>
+
+            @if (canEditTerms() && outcomes().length < maxOutcomes) {
+              <ea-button
+                variant="secondary"
+                (clicked)="addOutcome()">
+                <span class="btn-content">
+                  <ea-icon-plus />
+                  Add outcome
+                </span>
+              </ea-button>
+            }
+          </div>
+        </fieldset>
+      }
 
       <div class="actions">
         @if (mode() === 'create') {
@@ -355,29 +498,45 @@
               </ea-button>
             </div>
           } @else if (canApproveTerms()) {
-            <div class="action-row">
-              <ea-button
-                [loading]="actionInFlight() === 'accept'"
-                [disabled]="isBusy() || !isFormValid()"
-                (clicked)="onAccept()">
-                Accept changes
-              </ea-button>
-              <ea-button
-                variant="secondary"
-                [loading]="actionInFlight() === 'submit'"
-                [disabled]="isBusy() || !isFormValid()"
-                (clicked)="onSubmitForReview()">
-                Send request
-              </ea-button>
-              <ea-button
-                class="btn-reject"
-                variant="secondary"
-                [loading]="actionInFlight() === 'reject'"
-                [disabled]="isBusy()"
-                (clicked)="onReject()">
-                Reject changes
-              </ea-button>
-            </div>
+            @if (counterProposing()) {
+              <div class="action-row">
+                <ea-button
+                  [loading]="actionInFlight() === 'submit'"
+                  [disabled]="isBusy() || !isFormValid()"
+                  (clicked)="onSubmitForReview()">
+                  Send request
+                </ea-button>
+                <ea-button
+                  variant="secondary"
+                  [disabled]="isBusy()"
+                  (clicked)="cancelCounter()">
+                  Cancel
+                </ea-button>
+              </div>
+            } @else {
+              <div class="action-row">
+                <ea-button
+                  [loading]="actionInFlight() === 'accept'"
+                  [disabled]="isBusy() || !isFormValid()"
+                  (clicked)="onAccept()">
+                  Accept changes
+                </ea-button>
+                <ea-button
+                  variant="secondary"
+                  [disabled]="isBusy()"
+                  (clicked)="startCounter()">
+                  Send request
+                </ea-button>
+                <ea-button
+                  class="btn-reject"
+                  variant="secondary"
+                  [loading]="actionInFlight() === 'reject'"
+                  [disabled]="isBusy()"
+                  (clicked)="onReject()">
+                  Reject changes
+                </ea-button>
+              </div>
+            }
           } @else if (canSubmitChanges() || canSettle()) {
             <div class="action-row">
               @if (canSubmitChanges()) {

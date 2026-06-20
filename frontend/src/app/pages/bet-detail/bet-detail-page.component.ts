@@ -173,12 +173,12 @@ export class BetDetailPageComponent implements OnInit {
     me: BetPosition | null,
     bet: BetWithOpponent,
   ): OutcomeView {
-    const iOwe = result.assignedTo === me;
+    const iWin = result.assignedTo === me;
     return {
       name: result.name,
       beers: result.brewskiCount,
-      iOwe,
-      stakeLabel: iOwe ? 'You owe' : 'You win',
+      iOwe: !iWin,
+      stakeLabel: iWin ? 'You win' : 'You owe',
       isWinner: bet.selectedResultIndex === index,
     };
   }

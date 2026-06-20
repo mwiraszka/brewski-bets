@@ -98,7 +98,7 @@ describe('settledNet', () => {
       status: 'settled',
       outcome: 'resolved',
       selectedResultIndex: 0,
-      results: [result({ assignedTo: 'user2', brewskiCount: 4 })],
+      results: [result({ assignedTo: 'user1', brewskiCount: 4 })],
     });
 
     expect(settledNet(bet, 'user-a')).toBe(4);
@@ -109,7 +109,7 @@ describe('settledNet', () => {
       status: 'settled',
       outcome: 'resolved',
       selectedResultIndex: 0,
-      results: [result({ assignedTo: 'user1', brewskiCount: 4 })],
+      results: [result({ assignedTo: 'user2', brewskiCount: 4 })],
     });
 
     expect(settledNet(bet, 'user-a')).toBe(-4);

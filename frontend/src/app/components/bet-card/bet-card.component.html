@@ -1,6 +1,5 @@
 <a
   class="bet-card"
-  [class.bet-card--attention]="myTurn() || awaitingOutcome()"
   [routerLink]="['/bets', bet().id]">
   <div class="bet-card__top">
     <span class="bet-card__icon">
@@ -25,15 +24,31 @@
   <h3 class="bet-card__title">{{ bet().title }}</h3>
 
   <div class="bet-card__opponent">
+    <span class="bet-card__opponent-name">vs {{ opponentName() }}</span>
     <ea-avatar
       [src]="opponentAvatar()"
       [initials]="opponentInitials()"
       size="sm" />
-    <span class="bet-card__opponent-detail">
-      <span class="bet-card__opponent-label">Opponent</span>
-      <span class="bet-card__opponent-name">{{ opponentName() }}</span>
-    </span>
   </div>
+
+  @if (outcomes().length) {
+    <ul class="bet-card__outcomes">
+      @for (outcome of outcomes(); track $index) {
+        <li class="bet-card__outcome">
+          <span class="bet-card__outcome-name">{{ outcome.name }}</span>
+          <span
+            class="bet-card__outcome-stake"
+            [class.bet-card__outcome-stake--owe]="!outcome.iWin">
+            {{ outcome.stakeLabel }}
+            <span class="bet-card__outcome-beers">
+              {{ outcome.beers }}
+              <ea-icon-bottle class="bet-card__outcome-icon" />
+            </span>
+          </span>
+        </li>
+      }
+    </ul>
+  }
 
   <div class="bet-card__footer">
     @if (myTurn()) {

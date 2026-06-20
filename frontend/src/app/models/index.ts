@@ -58,6 +58,22 @@ export interface BetResult {
 
 export type BetStatus = 'inactive' | 'active' | 'settled';
 
+// The previously agreed terms, captured when the other user submits changes, so
+// the reviewer can see what is being changed and a reject can restore them.
+export interface BetSnapshot {
+  title: string;
+  description: string | null;
+  iconSlug: string | null;
+  iconColor: string | null;
+  resolutionDate: string | null;
+  results: BetResult[];
+  status: BetStatus;
+  outcome: 'open' | 'resolved' | 'void';
+  pendingAction: 'user1' | 'user2' | null;
+  settlementProposed: boolean;
+  selectedResultIndex: number | null;
+}
+
 export interface Bet {
   id: string;
   title: string;
@@ -73,6 +89,7 @@ export interface Bet {
   outcome: 'open' | 'resolved' | 'void';
   pendingAction: 'user1' | 'user2' | null;
   settlementProposed: boolean;
+  previousState: BetSnapshot | null;
   createdBy: string;
   lastModifiedBy: string;
   createdDate: string;

@@ -27,7 +27,9 @@ export function isAwaitingOutcome(bet: Bet, now: Date = new Date()): boolean {
 }
 
 // Net brewskis for a settled bet from the user's perspective: positive means
-// the opponent owes the user, negative means the user owes the opponent
+// the opponent owes the user, negative means the user owes the opponent.
+// `assignedTo` is the winner of the outcome, so a result assigned to the user
+// means the opponent owes them.
 export function settledNet(bet: Bet, userId: string | undefined): number {
   if (bet.status !== 'settled' || bet.outcome !== 'resolved') {
     return 0;
@@ -38,5 +40,5 @@ export function settledNet(bet: Bet, userId: string | undefined): number {
     return 0;
   }
   const me = positionOf(bet, userId);
-  return winner.assignedTo === me ? -winner.brewskiCount : winner.brewskiCount;
+  return winner.assignedTo === me ? winner.brewskiCount : -winner.brewskiCount;
 }
