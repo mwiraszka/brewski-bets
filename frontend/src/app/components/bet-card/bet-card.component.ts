@@ -70,6 +70,13 @@ export class BetCardComponent {
           iWin,
           stakeLabel: iWin ? 'Win' : 'Lose',
         };
+      })
+      .sort((a, b) => {
+        // Wins first (most won to least), then losses (least lost to most)
+        if (a.iWin !== b.iWin) {
+          return a.iWin ? -1 : 1;
+        }
+        return a.iWin ? b.beers - a.beers : a.beers - b.beers;
       });
   });
 
