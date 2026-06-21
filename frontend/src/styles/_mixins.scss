@@ -40,6 +40,10 @@ $breakpoints: (
 @mixin eagami-theme {
   --color-bg-base: var(--bb-color-surfaceRaised);
   --color-bg-subtle: var(--bb-color-surfaceSubtle);
+  // Without these, floating menus/popovers and disabled fields fall back to the
+  // library's raw neutrals, which read as an off-palette slate in dark mode
+  --color-bg-elevated: var(--bb-color-surfaceRaised);
+  --color-bg-muted: var(--bb-color-surfaceMuted);
   --color-text-primary: var(--bb-color-textStrong);
   --color-text-secondary: var(--bb-color-textBody);
   --color-border-default: var(--bb-color-borderDefault);

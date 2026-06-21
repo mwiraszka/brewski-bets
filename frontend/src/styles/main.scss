@@ -10,7 +10,19 @@
 
 // Apply the brewski → @eagami/ui token bridge globally so every embedded
 // library component (buttons outside cards, dropdowns in dialogs, etc.) picks
-// up the active theme.
+// up the active theme. @eagami/ui sets its dark tokens at [data-theme='dark']
+// and :not([data-theme='light']), which outweigh a plain :root bridge, so the
+// bridge is re-applied in those same scopes to win in dark mode too.
 :root {
+  @include eagami-theme;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    @include eagami-theme;
+  }
+}
+
+:root[data-theme='dark'] {
   @include eagami-theme;
 }
