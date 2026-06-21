@@ -1,4 +1,5 @@
 import { Subject } from 'rxjs';
+import type { Mock } from 'vitest';
 
 import { NO_ERRORS_SCHEMA, type WritableSignal, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
@@ -9,7 +10,7 @@ import { type ThemeMode, ThemeService } from '@app/services/theme.service';
 
 import { HeaderComponent } from './header.component';
 
-jest.mock('@env', () => ({
+vi.mock('@env', () => ({
   environment: {
     production: false,
     clerkPublishableKey: 'test-key',
@@ -29,13 +30,13 @@ interface MockClerkService {
   isLoaded: WritableSignal<boolean>;
   isLoggedIn: WritableSignal<boolean>;
   user: WritableSignal<MockUser | null>;
-  logOut: jest.Mock<Promise<void>>;
+  logOut: Mock<() => Promise<void>>;
 }
 
 interface MockThemeService {
   mode: WritableSignal<ThemeMode>;
-  set: jest.Mock<void, [ThemeMode]>;
-  cycle: jest.Mock<void, []>;
+  set: Mock<(arg0: ThemeMode) => void>;
+  cycle: Mock<() => void>;
 }
 
 describe('HeaderComponent', () => {
@@ -49,13 +50,13 @@ describe('HeaderComponent', () => {
       isLoaded: signal(true),
       isLoggedIn: signal(false),
       user: signal<MockUser | null>(null),
-      logOut: jest.fn().mockResolvedValue(undefined),
+      logOut: vi.fn().mockResolvedValue(undefined),
     };
 
     mockTheme = {
       mode: signal<ThemeMode>('light'),
-      set: jest.fn(),
-      cycle: jest.fn(),
+      set: vi.fn(),
+      cycle: vi.fn(),
     };
 
     routerEvents$ = new Subject();

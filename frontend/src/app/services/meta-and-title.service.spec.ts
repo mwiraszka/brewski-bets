@@ -1,3 +1,5 @@
+import type { Mock } from 'vitest';
+
 import { TestBed } from '@angular/core/testing';
 import { Meta, Title } from '@angular/platform-browser';
 
@@ -5,12 +7,12 @@ import { MetaAndTitleService } from './meta-and-title.service';
 
 describe('MetaAndTitleService', () => {
   let service: MetaAndTitleService;
-  let mockMeta: { updateTag: jest.Mock };
-  let mockTitle: { setTitle: jest.Mock };
+  let mockMeta: { updateTag: Mock };
+  let mockTitle: { setTitle: Mock };
 
   beforeEach(() => {
-    mockMeta = { updateTag: jest.fn() };
-    mockTitle = { setTitle: jest.fn() };
+    mockMeta = { updateTag: vi.fn() };
+    mockTitle = { setTitle: vi.fn() };
 
     TestBed.configureTestingModule({
       providers: [

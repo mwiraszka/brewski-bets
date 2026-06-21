@@ -1,4 +1,5 @@
 import { type AvatarEditorCropState, ToastService } from '@eagami/ui';
+import type { Mock } from 'vitest';
 
 import { NO_ERRORS_SCHEMA, type WritableSignal, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
@@ -10,7 +11,7 @@ import { UserService } from '@app/services/user.service';
 
 import { AccountPageComponent } from './account-page.component';
 
-jest.mock('@env', () => ({
+vi.mock('@env', () => ({
   environment: {
     production: false,
     clerkPublishableKey: 'test-key',
@@ -29,23 +30,23 @@ interface MockUser {
 
 interface MockClerkService {
   user: WritableSignal<MockUser | null>;
-  reloadUser: jest.Mock<Promise<void>>;
-  updateProfile: jest.Mock<Promise<void>, [string, string]>;
-  setProfileImage: jest.Mock<Promise<string | undefined>, [Blob | null]>;
-  expectSessionEnd: jest.Mock<void>;
-  logOut: jest.Mock<Promise<void>>;
-  extractError: jest.Mock<string, [unknown]>;
+  reloadUser: Mock<() => Promise<void>>;
+  updateProfile: Mock<(arg0: string, arg1: string) => Promise<void>>;
+  setProfileImage: Mock<(arg0: Blob | null) => Promise<string | undefined>>;
+  expectSessionEnd: Mock<() => void>;
+  logOut: Mock<() => Promise<void>>;
+  extractError: Mock<(arg0: unknown) => string>;
 }
 
 interface MockRouter {
-  navigate: jest.Mock<Promise<boolean>, [string[]]>;
+  navigate: Mock<(arg0: string[]) => Promise<boolean>>;
 }
 
 interface MockApiService {
-  get: jest.Mock<Promise<unknown>>;
-  patch: jest.Mock<Promise<unknown>>;
-  post: jest.Mock<Promise<unknown>>;
-  delete: jest.Mock<Promise<unknown>>;
+  get: Mock<(...args: unknown[]) => Promise<unknown>>;
+  patch: Mock<(...args: unknown[]) => Promise<unknown>>;
+  post: Mock<(...args: unknown[]) => Promise<unknown>>;
+  delete: Mock<(...args: unknown[]) => Promise<unknown>>;
 }
 
 interface MockUserService {
@@ -54,14 +55,14 @@ interface MockUserService {
   avatarUrl: WritableSignal<string | undefined>;
   avatarCropState: WritableSignal<AvatarEditorCropState | null>;
   hasAvatar: WritableSignal<boolean>;
-  load: jest.Mock<Promise<void>>;
-  setUser: jest.Mock<void>;
-  clearAvatar: jest.Mock<void>;
+  load: Mock<() => Promise<void>>;
+  setUser: Mock<(...args: unknown[]) => void>;
+  clearAvatar: Mock<() => void>;
 }
 
 interface MockToastService {
-  success: jest.Mock<number, [string]>;
-  error: jest.Mock<number, [string]>;
+  success: Mock<(arg0: string) => number>;
+  error: Mock<(arg0: string) => number>;
 }
 
 const MOCK_USER: MockUser = {
@@ -111,22 +112,22 @@ describe('AccountPageComponent', () => {
   beforeEach(async () => {
     mockClerk = {
       user: signal<MockUser | null>({ ...MOCK_USER }),
-      reloadUser: jest.fn().mockResolvedValue(undefined),
-      updateProfile: jest.fn().mockResolvedValue(undefined),
-      setProfileImage: jest.fn().mockResolvedValue('https://img.clerk.com/updated'),
-      expectSessionEnd: jest.fn(),
-      logOut: jest.fn().mockResolvedValue(undefined),
-      extractError: jest.fn().mockReturnValue('Something went wrong'),
+      reloadUser: vi.fn().mockResolvedValue(undefined),
+      updateProfile: vi.fn().mockResolvedValue(undefined),
+      setProfileImage: vi.fn().mockResolvedValue('https://img.clerk.com/updated'),
+      expectSessionEnd: vi.fn(),
+      logOut: vi.fn().mockResolvedValue(undefined),
+      extractError: vi.fn().mockReturnValue('Something went wrong'),
     };
 
     mockRouter = {
-      navigate: jest.fn().mockResolvedValue(true),
+      navigate: vi.fn().mockResolvedValue(true),
     };
 
     mockApi = {
-      get: jest.fn().mockResolvedValue({}),
-      patch: jest.fn().mockResolvedValue({}),
-      post: jest.fn().mockResolvedValue({
+      get: vi.fn().mockResolvedValue({}),
+      patch: vi.fn().mockResolvedValue({}),
+      post: vi.fn().mockResolvedValue({
         id: 'user-1',
         clerkImageUrl: 'https://img.clerk.com/updated',
         avatarUrl: 'https://s3.example.com/cropped',
@@ -134,7 +135,7 @@ describe('AccountPageComponent', () => {
         avatarCropState: null,
         lastModifiedDate: '2026-04-02T00:00:00.000Z',
       }),
-      delete: jest.fn().mockResolvedValue({}),
+      delete: vi.fn().mockResolvedValue({}),
     };
 
     mockUserService = {
@@ -143,14 +144,14 @@ describe('AccountPageComponent', () => {
       avatarUrl: signal(undefined),
       avatarCropState: signal(null),
       hasAvatar: signal(false),
-      load: jest.fn().mockResolvedValue(undefined),
-      setUser: jest.fn(),
-      clearAvatar: jest.fn(),
+      load: vi.fn().mockResolvedValue(undefined),
+      setUser: vi.fn(),
+      clearAvatar: vi.fn(),
     };
 
     mockToast = {
-      success: jest.fn().mockReturnValue(1),
-      error: jest.fn().mockReturnValue(2),
+      success: vi.fn().mockReturnValue(1),
+      error: vi.fn().mockReturnValue(2),
     };
 
     component = await createComponent(
@@ -502,7 +503,7 @@ describe('AccountPageComponent', () => {
     it('does not call clerk.updateProfile when only the photo changes', async () => {
       component.avatarDirty.set(true);
       component.originalFile = new File(['img'], 'photo.jpg');
-      jest.spyOn(component, 'exportCrop').mockResolvedValue(new Blob());
+      vi.spyOn(component, 'exportCrop').mockResolvedValue(new Blob());
 
       await component.onSave();
 
@@ -540,7 +541,7 @@ describe('AccountPageComponent', () => {
     it('does not patch the backend with name fields when the name is unchanged', async () => {
       component.avatarDirty.set(true);
       component.originalFile = new File(['img'], 'photo.jpg');
-      jest.spyOn(component, 'exportCrop').mockResolvedValue(new Blob());
+      vi.spyOn(component, 'exportCrop').mockResolvedValue(new Blob());
 
       await component.onSave();
 
@@ -588,7 +589,7 @@ describe('AccountPageComponent', () => {
     it('shows "Photo updated" when only the photo changes', async () => {
       component.avatarDirty.set(true);
       component.originalFile = new File(['img'], 'photo.jpg');
-      jest.spyOn(component, 'exportCrop').mockResolvedValue(new Blob());
+      vi.spyOn(component, 'exportCrop').mockResolvedValue(new Blob());
 
       await component.onSave();
 
@@ -600,7 +601,7 @@ describe('AccountPageComponent', () => {
       component.lastName.set('Smith');
       component.avatarDirty.set(true);
       component.originalFile = new File(['img'], 'photo.jpg');
-      jest.spyOn(component, 'exportCrop').mockResolvedValue(new Blob());
+      vi.spyOn(component, 'exportCrop').mockResolvedValue(new Blob());
 
       await component.onSave();
 
@@ -627,7 +628,7 @@ describe('AccountPageComponent', () => {
       mockBlob = new Blob(['img'], { type: 'image/jpeg' });
       component.avatarDirty.set(true);
       component.originalFile = new File(['img'], 'photo.jpg');
-      jest.spyOn(component, 'exportCrop').mockResolvedValue(mockBlob);
+      vi.spyOn(component, 'exportCrop').mockResolvedValue(mockBlob);
     });
 
     it('sends both original and cropped files to the backend', async () => {
@@ -701,7 +702,7 @@ describe('AccountPageComponent', () => {
     beforeEach(() => {
       component.savedCropState.set({ zoom: 1, offsetX: 0, offsetY: 0 });
       component.liveCropState.set({ zoom: 2, offsetX: 10, offsetY: 5 });
-      jest.spyOn(component, 'exportCrop').mockResolvedValue(new Blob(['img']));
+      vi.spyOn(component, 'exportCrop').mockResolvedValue(new Blob(['img']));
     });
 
     it('sends the cropped blob and crop state to the backend', async () => {
@@ -771,7 +772,7 @@ describe('AccountPageComponent', () => {
     it('does not patch for crop state when avatarDirty is set', async () => {
       component.avatarDirty.set(true);
       component.originalFile = new File(['img'], 'photo.jpg');
-      jest.spyOn(component, 'exportCrop').mockResolvedValue(new Blob());
+      vi.spyOn(component, 'exportCrop').mockResolvedValue(new Blob());
 
       await component.onSave();
 
@@ -871,7 +872,7 @@ describe('AccountPageComponent', () => {
     it('resets avatarDirty after a successful save', async () => {
       component.avatarDirty.set(true);
       component.originalFile = new File(['img'], 'photo.jpg');
-      jest.spyOn(component, 'exportCrop').mockResolvedValue(new Blob());
+      vi.spyOn(component, 'exportCrop').mockResolvedValue(new Blob());
 
       await component.onSave();
 
@@ -903,7 +904,7 @@ describe('AccountPageComponent', () => {
     it('resets originalFile after a successful save', async () => {
       component.avatarDirty.set(true);
       component.originalFile = new File([''], 'test.jpg');
-      jest.spyOn(component, 'exportCrop').mockResolvedValue(new Blob());
+      vi.spyOn(component, 'exportCrop').mockResolvedValue(new Blob());
 
       await component.onSave();
 
@@ -1035,8 +1036,9 @@ describe('AccountPageComponent', () => {
   describe('exportCrop', () => {
     it('delegates to the avatar editor viewChild', async () => {
       const mockBlob = new Blob(['test']);
-      const mockEditor = { exportCrop: jest.fn().mockResolvedValue(mockBlob) };
-      jest.spyOn(component as never, 'avatarEditor').mockReturnValue(mockEditor as never);
+      const mockEditor = { exportCrop: vi.fn().mockResolvedValue(mockBlob) };
+      // @ts-expect-error - stub the private avatarEditor viewChild signal
+      vi.spyOn(component, 'avatarEditor').mockReturnValue(mockEditor);
 
       const result = await component.exportCrop();
 

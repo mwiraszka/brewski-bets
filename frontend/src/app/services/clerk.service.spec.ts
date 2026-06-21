@@ -1,8 +1,10 @@
+import type { Mock } from 'vitest';
+
 import { TestBed } from '@angular/core/testing';
 
 import { ClerkService } from './clerk.service';
 
-jest.mock('@env', () => ({
+vi.mock('@env', () => ({
   environment: {
     production: false,
     clerkPublishableKey: 'pk_test_abc',
@@ -12,72 +14,82 @@ jest.mock('@env', () => ({
 }));
 
 interface MockSignUp {
-  create: jest.Mock;
-  prepareEmailAddressVerification: jest.Mock;
-  attemptEmailAddressVerification: jest.Mock;
+  create: Mock;
+  prepareEmailAddressVerification: Mock;
+  attemptEmailAddressVerification: Mock;
   firstName: string | null;
   lastName: string | null;
 }
 
 interface MockSignIn {
-  create: jest.Mock;
-  authenticateWithRedirect: jest.Mock;
-  attemptFirstFactor: jest.Mock;
-  attemptSecondFactor: jest.Mock;
+  create: Mock;
+  authenticateWithRedirect: Mock;
+  attemptFirstFactor: Mock;
+  attemptSecondFactor: Mock;
   firstFactorVerification: { status: string } | null;
 }
 
 interface MockClerk {
-  load: jest.Mock;
-  addListener: jest.Mock;
-  setActive: jest.Mock;
-  signOut: jest.Mock;
-  handleRedirectCallback: jest.Mock;
+  load: Mock;
+  addListener: Mock;
+  setActive: Mock;
+  signOut: Mock;
+  handleRedirectCallback: Mock;
   user: {
-    reload: jest.Mock;
-    update: jest.Mock;
-    setProfileImage: jest.Mock;
+    reload: Mock;
+    update: Mock;
+    setProfileImage: Mock;
     imageUrl: string;
   } | null;
-  session: { getToken: jest.Mock } | null;
+  session: { getToken: Mock } | null;
   client: {
     signUp: MockSignUp;
     signIn: MockSignIn;
   };
 }
 
-let mockClerkInstance: MockClerk;
+// vi.mock factories are hoisted above module scope, so the constructed instance
+// is shared through a vi.hoisted holder rather than a plain module variable.
+const mockClerk = vi.hoisted(() => ({ instance: null as MockClerk | null }));
 
-jest.mock('@clerk/clerk-js', () => ({
-  Clerk: jest.fn().mockImplementation(() => {
-    mockClerkInstance = {
-      load: jest.fn().mockResolvedValue(undefined),
-      addListener: jest.fn(),
-      setActive: jest.fn().mockResolvedValue(undefined),
-      signOut: jest.fn().mockResolvedValue(undefined),
-      handleRedirectCallback: jest.fn().mockResolvedValue(undefined),
+vi.mock('@clerk/clerk-js', () => ({
+  // Vitest invokes a mock implementation via `new` when the mock is constructed,
+  // so this must be a constructable function rather than an arrow.
+  Clerk: vi.fn().mockImplementation(function () {
+    mockClerk.instance = {
+      load: vi.fn().mockResolvedValue(undefined),
+      addListener: vi.fn(),
+      setActive: vi.fn().mockResolvedValue(undefined),
+      signOut: vi.fn().mockResolvedValue(undefined),
+      handleRedirectCallback: vi.fn().mockResolvedValue(undefined),
       user: null,
-      session: { getToken: jest.fn().mockResolvedValue('mock-token') },
+      session: { getToken: vi.fn().mockResolvedValue('mock-token') },
       client: {
         signUp: {
-          create: jest.fn(),
-          prepareEmailAddressVerification: jest.fn().mockResolvedValue(undefined),
-          attemptEmailAddressVerification: jest.fn(),
+          create: vi.fn(),
+          prepareEmailAddressVerification: vi.fn().mockResolvedValue(undefined),
+          attemptEmailAddressVerification: vi.fn(),
           firstName: null,
           lastName: null,
         },
         signIn: {
-          create: jest.fn(),
-          authenticateWithRedirect: jest.fn().mockResolvedValue(undefined),
-          attemptFirstFactor: jest.fn(),
-          attemptSecondFactor: jest.fn(),
+          create: vi.fn(),
+          authenticateWithRedirect: vi.fn().mockResolvedValue(undefined),
+          attemptFirstFactor: vi.fn(),
+          attemptSecondFactor: vi.fn(),
           firstFactorVerification: null,
         },
       },
     };
-    return mockClerkInstance;
+    return mockClerk.instance;
   }),
 }));
+
+// The shared instance is constructed lazily by the mocked Clerk; tests read it
+// through this accessor once `service.load()` has run.
+function mockClerkInstance(): MockClerk {
+  return mockClerk.instance as MockClerk;
+}
 
 describe('ClerkService', () => {
   let service: ClerkService;
@@ -95,20 +107,20 @@ describe('ClerkService', () => {
     it('loads clerk and syncs state', async () => {
       await service.load();
 
-      expect(mockClerkInstance.load).toHaveBeenCalled();
+      expect(mockClerkInstance().load).toHaveBeenCalled();
       expect(service.isLoaded()).toBe(true);
     });
 
     it('sets isLoggedIn to true when clerk has a user', async () => {
       await service.load();
-      mockClerkInstance.user = {
-        reload: jest.fn(),
-        update: jest.fn(),
-        setProfileImage: jest.fn(),
+      mockClerkInstance().user = {
+        reload: vi.fn(),
+        update: vi.fn(),
+        setProfileImage: vi.fn(),
         imageUrl: 'https://img.clerk.com/user',
       };
 
-      const listener = mockClerkInstance.addListener.mock.calls[0][0];
+      const listener = mockClerkInstance().addListener.mock.calls[0][0];
       listener();
 
       expect(service.isLoggedIn()).toBe(true);
@@ -117,7 +129,7 @@ describe('ClerkService', () => {
     it('registers a listener that syncs state on changes', async () => {
       await service.load();
 
-      expect(mockClerkInstance.addListener).toHaveBeenCalledWith(expect.any(Function));
+      expect(mockClerkInstance().addListener).toHaveBeenCalledWith(expect.any(Function));
     });
   });
 
@@ -129,7 +141,7 @@ describe('ClerkService', () => {
     it('returns the clerk instance', async () => {
       await service.load();
 
-      expect(service.client).toBe(mockClerkInstance);
+      expect(service.client).toBe(mockClerkInstance());
     });
   });
 
@@ -143,7 +155,7 @@ describe('ClerkService', () => {
     });
 
     it('returns needsVerification false when signup completes immediately', async () => {
-      mockClerkInstance.client.signUp.create.mockResolvedValue({
+      mockClerkInstance().client.signUp.create.mockResolvedValue({
         status: 'complete',
         createdSessionId: 'session-1',
       });
@@ -151,21 +163,23 @@ describe('ClerkService', () => {
       const result = await service.createAccount('a@b.com', 'pass1234', 'John', 'Doe');
 
       expect(result).toEqual({ needsVerification: false });
-      expect(mockClerkInstance.setActive).toHaveBeenCalledWith({ session: 'session-1' });
+      expect(mockClerkInstance().setActive).toHaveBeenCalledWith({
+        session: 'session-1',
+      });
     });
 
     it('returns needsVerification true when email verification is needed', async () => {
-      mockClerkInstance.client.signUp.create.mockResolvedValue({
+      mockClerkInstance().client.signUp.create.mockResolvedValue({
         status: 'missing_requirements',
         prepareEmailAddressVerification:
-          mockClerkInstance.client.signUp.prepareEmailAddressVerification,
+          mockClerkInstance().client.signUp.prepareEmailAddressVerification,
       });
 
       const result = await service.createAccount('a@b.com', 'pass1234', 'John', 'Doe');
 
       expect(result).toEqual({ needsVerification: true });
       expect(
-        mockClerkInstance.client.signUp.prepareEmailAddressVerification,
+        mockClerkInstance().client.signUp.prepareEmailAddressVerification,
       ).toHaveBeenCalledWith({ strategy: 'email_code' });
     });
   });
@@ -180,24 +194,30 @@ describe('ClerkService', () => {
     });
 
     it('sets the active session when verification completes', async () => {
-      mockClerkInstance.client.signUp.attemptEmailAddressVerification.mockResolvedValue({
-        status: 'complete',
-        createdSessionId: 'session-2',
-      });
+      mockClerkInstance().client.signUp.attemptEmailAddressVerification.mockResolvedValue(
+        {
+          status: 'complete',
+          createdSessionId: 'session-2',
+        },
+      );
 
       await service.verifyEmail('123456');
 
-      expect(mockClerkInstance.setActive).toHaveBeenCalledWith({ session: 'session-2' });
+      expect(mockClerkInstance().setActive).toHaveBeenCalledWith({
+        session: 'session-2',
+      });
     });
 
     it('does not set session when verification is not complete', async () => {
-      mockClerkInstance.client.signUp.attemptEmailAddressVerification.mockResolvedValue({
-        status: 'missing_requirements',
-      });
+      mockClerkInstance().client.signUp.attemptEmailAddressVerification.mockResolvedValue(
+        {
+          status: 'missing_requirements',
+        },
+      );
 
       await service.verifyEmail('123456');
 
-      expect(mockClerkInstance.setActive).not.toHaveBeenCalled();
+      expect(mockClerkInstance().setActive).not.toHaveBeenCalled();
     });
   });
 
@@ -211,25 +231,27 @@ describe('ClerkService', () => {
     });
 
     it('creates a sign-in and sets session on success', async () => {
-      mockClerkInstance.client.signIn.create.mockResolvedValue({
+      mockClerkInstance().client.signIn.create.mockResolvedValue({
         status: 'complete',
         createdSessionId: 'session-3',
       });
 
       const result = await service.logIn('user@test.com', 'password');
 
-      expect(mockClerkInstance.client.signIn.create).toHaveBeenCalledWith({
+      expect(mockClerkInstance().client.signIn.create).toHaveBeenCalledWith({
         strategy: 'password',
         identifier: 'user@test.com',
         password: 'password',
       });
-      expect(mockClerkInstance.setActive).toHaveBeenCalledWith({ session: 'session-3' });
+      expect(mockClerkInstance().setActive).toHaveBeenCalledWith({
+        session: 'session-3',
+      });
       expect(result).toEqual({ needsSecondFactor: false });
     });
 
     it('prepares second factor and returns needsSecondFactor true', async () => {
-      const prepareSecondFactor = jest.fn().mockResolvedValue(undefined);
-      mockClerkInstance.client.signIn.create.mockResolvedValue({
+      const prepareSecondFactor = vi.fn().mockResolvedValue(undefined);
+      mockClerkInstance().client.signIn.create.mockResolvedValue({
         status: 'needs_second_factor',
         prepareSecondFactor,
       });
@@ -237,7 +259,7 @@ describe('ClerkService', () => {
       const result = await service.logIn('user@test.com', 'password');
 
       expect(prepareSecondFactor).toHaveBeenCalledWith({ strategy: 'email_code' });
-      expect(mockClerkInstance.setActive).not.toHaveBeenCalled();
+      expect(mockClerkInstance().setActive).not.toHaveBeenCalled();
       expect(result).toEqual({ needsSecondFactor: true });
     });
   });
@@ -252,30 +274,30 @@ describe('ClerkService', () => {
     });
 
     it('attempts second factor and sets session on success', async () => {
-      mockClerkInstance.client.signIn.attemptSecondFactor.mockResolvedValue({
+      mockClerkInstance().client.signIn.attemptSecondFactor.mockResolvedValue({
         status: 'complete',
         createdSessionId: 'session-2fa',
       });
 
       await service.verifyLoginCode('123456');
 
-      expect(mockClerkInstance.client.signIn.attemptSecondFactor).toHaveBeenCalledWith({
+      expect(mockClerkInstance().client.signIn.attemptSecondFactor).toHaveBeenCalledWith({
         strategy: 'email_code',
         code: '123456',
       });
-      expect(mockClerkInstance.setActive).toHaveBeenCalledWith({
+      expect(mockClerkInstance().setActive).toHaveBeenCalledWith({
         session: 'session-2fa',
       });
     });
 
     it('does not set session when verification is not complete', async () => {
-      mockClerkInstance.client.signIn.attemptSecondFactor.mockResolvedValue({
+      mockClerkInstance().client.signIn.attemptSecondFactor.mockResolvedValue({
         status: 'needs_second_factor',
       });
 
       await service.verifyLoginCode('123456');
 
-      expect(mockClerkInstance.setActive).not.toHaveBeenCalled();
+      expect(mockClerkInstance().setActive).not.toHaveBeenCalled();
     });
   });
 
@@ -290,7 +312,7 @@ describe('ClerkService', () => {
       await service.continueWithGoogle();
 
       expect(
-        mockClerkInstance.client.signIn.authenticateWithRedirect,
+        mockClerkInstance().client.signIn.authenticateWithRedirect,
       ).toHaveBeenCalledWith({
         strategy: 'oauth_google',
         redirectUrl: '/sso-callback',
@@ -309,52 +331,52 @@ describe('ClerkService', () => {
     });
 
     it('creates a transferable signup when firstFactorVerification is transferable', async () => {
-      mockClerkInstance.client.signIn.firstFactorVerification = {
+      mockClerkInstance().client.signIn.firstFactorVerification = {
         status: 'transferable',
       };
-      mockClerkInstance.client.signUp.firstName = 'John';
-      mockClerkInstance.client.signUp.lastName = null;
-      mockClerkInstance.client.signUp.create.mockResolvedValue({
+      mockClerkInstance().client.signUp.firstName = 'John';
+      mockClerkInstance().client.signUp.lastName = null;
+      mockClerkInstance().client.signUp.create.mockResolvedValue({
         status: 'complete',
         createdSessionId: 'session-sso',
       });
 
       await service.handleSSOCallback();
 
-      expect(mockClerkInstance.client.signUp.create).toHaveBeenCalledWith({
+      expect(mockClerkInstance().client.signUp.create).toHaveBeenCalledWith({
         transfer: true,
         firstName: 'John',
         lastName: '-',
       });
-      expect(mockClerkInstance.setActive).toHaveBeenCalledWith({
+      expect(mockClerkInstance().setActive).toHaveBeenCalledWith({
         session: 'session-sso',
       });
     });
 
     it('falls back to handleRedirectCallback when not transferable', async () => {
-      mockClerkInstance.client.signIn.firstFactorVerification = {
+      mockClerkInstance().client.signIn.firstFactorVerification = {
         status: 'verified',
       };
 
       await service.handleSSOCallback();
 
-      expect(mockClerkInstance.handleRedirectCallback).toHaveBeenCalledWith({
+      expect(mockClerkInstance().handleRedirectCallback).toHaveBeenCalledWith({
         signInForceRedirectUrl: '/',
         signUpForceRedirectUrl: '/',
       });
     });
 
     it('falls back when transferable signup does not complete', async () => {
-      mockClerkInstance.client.signIn.firstFactorVerification = {
+      mockClerkInstance().client.signIn.firstFactorVerification = {
         status: 'transferable',
       };
-      mockClerkInstance.client.signUp.create.mockResolvedValue({
+      mockClerkInstance().client.signUp.create.mockResolvedValue({
         status: 'missing_requirements',
       });
 
       await service.handleSSOCallback();
 
-      expect(mockClerkInstance.handleRedirectCallback).toHaveBeenCalled();
+      expect(mockClerkInstance().handleRedirectCallback).toHaveBeenCalled();
     });
   });
 
@@ -368,7 +390,7 @@ describe('ClerkService', () => {
 
       await service.logOut();
 
-      expect(mockClerkInstance.signOut).toHaveBeenCalled();
+      expect(mockClerkInstance().signOut).toHaveBeenCalled();
     });
   });
 
@@ -379,11 +401,11 @@ describe('ClerkService', () => {
   describe('sendPasswordResetCode', () => {
     it('creates a sign-in with reset_password_email_code strategy', async () => {
       await service.load();
-      mockClerkInstance.client.signIn.create.mockResolvedValue({});
+      mockClerkInstance().client.signIn.create.mockResolvedValue({});
 
       await service.sendPasswordResetCode('user@test.com');
 
-      expect(mockClerkInstance.client.signIn.create).toHaveBeenCalledWith({
+      expect(mockClerkInstance().client.signIn.create).toHaveBeenCalledWith({
         strategy: 'reset_password_email_code',
         identifier: 'user@test.com',
       });
@@ -400,31 +422,31 @@ describe('ClerkService', () => {
     });
 
     it('attempts first factor and sets session on success', async () => {
-      mockClerkInstance.client.signIn.attemptFirstFactor.mockResolvedValue({
+      mockClerkInstance().client.signIn.attemptFirstFactor.mockResolvedValue({
         status: 'complete',
         createdSessionId: 'session-reset',
       });
 
       await service.resetPassword('123456', 'newpass123');
 
-      expect(mockClerkInstance.client.signIn.attemptFirstFactor).toHaveBeenCalledWith({
+      expect(mockClerkInstance().client.signIn.attemptFirstFactor).toHaveBeenCalledWith({
         strategy: 'reset_password_email_code',
         code: '123456',
         password: 'newpass123',
       });
-      expect(mockClerkInstance.setActive).toHaveBeenCalledWith({
+      expect(mockClerkInstance().setActive).toHaveBeenCalledWith({
         session: 'session-reset',
       });
     });
 
     it('does not set session when reset is not complete', async () => {
-      mockClerkInstance.client.signIn.attemptFirstFactor.mockResolvedValue({
+      mockClerkInstance().client.signIn.attemptFirstFactor.mockResolvedValue({
         status: 'needs_second_factor',
       });
 
       await service.resetPassword('123456', 'newpass123');
 
-      expect(mockClerkInstance.setActive).not.toHaveBeenCalled();
+      expect(mockClerkInstance().setActive).not.toHaveBeenCalled();
     });
   });
 
@@ -435,22 +457,22 @@ describe('ClerkService', () => {
   describe('reloadUser', () => {
     it('reloads the clerk user and syncs state', async () => {
       await service.load();
-      mockClerkInstance.user = {
-        reload: jest.fn().mockResolvedValue(undefined),
-        update: jest.fn(),
-        setProfileImage: jest.fn(),
+      mockClerkInstance().user = {
+        reload: vi.fn().mockResolvedValue(undefined),
+        update: vi.fn(),
+        setProfileImage: vi.fn(),
         imageUrl: 'https://img.clerk.com/user',
       };
 
       await service.reloadUser();
 
-      expect(mockClerkInstance.user.reload).toHaveBeenCalled();
+      expect(mockClerkInstance().user!.reload).toHaveBeenCalled();
       expect(service.isLoggedIn()).toBe(true);
     });
 
     it('handles null user gracefully', async () => {
       await service.load();
-      mockClerkInstance.user = null;
+      mockClerkInstance().user = null;
 
       await service.reloadUser();
 
@@ -473,7 +495,7 @@ describe('ClerkService', () => {
 
     it('returns null when there is no session', async () => {
       await service.load();
-      mockClerkInstance.session = null;
+      mockClerkInstance().session = null;
 
       const token = await service.getToken();
 
@@ -488,16 +510,16 @@ describe('ClerkService', () => {
   describe('updateProfile', () => {
     it('updates the clerk user profile', async () => {
       await service.load();
-      mockClerkInstance.user = {
-        reload: jest.fn(),
-        update: jest.fn().mockResolvedValue(undefined),
-        setProfileImage: jest.fn(),
+      mockClerkInstance().user = {
+        reload: vi.fn(),
+        update: vi.fn().mockResolvedValue(undefined),
+        setProfileImage: vi.fn(),
         imageUrl: '',
       };
 
       await service.updateProfile('Jane', 'Smith');
 
-      expect(mockClerkInstance.user.update).toHaveBeenCalledWith({
+      expect(mockClerkInstance().user!.update).toHaveBeenCalledWith({
         firstName: 'Jane',
         lastName: 'Smith',
       });
@@ -511,16 +533,16 @@ describe('ClerkService', () => {
   describe('setProfileImage', () => {
     it('sets the profile image and returns the new URL', async () => {
       await service.load();
-      mockClerkInstance.user = {
-        reload: jest.fn(),
-        update: jest.fn(),
-        setProfileImage: jest.fn().mockResolvedValue(undefined),
+      mockClerkInstance().user = {
+        reload: vi.fn(),
+        update: vi.fn(),
+        setProfileImage: vi.fn().mockResolvedValue(undefined),
         imageUrl: 'https://img.clerk.com/new',
       };
 
       const result = await service.setProfileImage(new Blob());
 
-      expect(mockClerkInstance.user.setProfileImage).toHaveBeenCalledWith({
+      expect(mockClerkInstance().user!.setProfileImage).toHaveBeenCalledWith({
         file: expect.any(Blob),
       });
       expect(result).toBe('https://img.clerk.com/new');
@@ -528,25 +550,27 @@ describe('ClerkService', () => {
 
     it('sets profile image to null to remove it', async () => {
       await service.load();
-      mockClerkInstance.user = {
-        reload: jest.fn(),
-        update: jest.fn(),
-        setProfileImage: jest.fn().mockResolvedValue(undefined),
+      mockClerkInstance().user = {
+        reload: vi.fn(),
+        update: vi.fn(),
+        setProfileImage: vi.fn().mockResolvedValue(undefined),
         imageUrl: 'https://img.clerk.com/default',
       };
 
       await service.setProfileImage(null);
 
-      expect(mockClerkInstance.user.setProfileImage).toHaveBeenCalledWith({ file: null });
+      expect(mockClerkInstance().user!.setProfileImage).toHaveBeenCalledWith({
+        file: null,
+      });
     });
 
     it('returns undefined when user is null after setProfileImage', async () => {
       await service.load();
-      mockClerkInstance.user = {
-        reload: jest.fn(),
-        update: jest.fn(),
-        setProfileImage: jest.fn().mockImplementation(async () => {
-          mockClerkInstance.user = null;
+      mockClerkInstance().user = {
+        reload: vi.fn(),
+        update: vi.fn(),
+        setProfileImage: vi.fn().mockImplementation(async () => {
+          mockClerkInstance().user = null;
         }),
         imageUrl: '',
       };
@@ -564,11 +588,11 @@ describe('ClerkService', () => {
   describe('changePassword', () => {
     it('updates the password via clerk user', async () => {
       await service.load();
-      const updatePassword = jest.fn().mockResolvedValue(undefined);
-      mockClerkInstance.user = {
-        reload: jest.fn(),
-        update: jest.fn(),
-        setProfileImage: jest.fn(),
+      const updatePassword = vi.fn().mockResolvedValue(undefined);
+      mockClerkInstance().user = {
+        reload: vi.fn(),
+        update: vi.fn(),
+        setProfileImage: vi.fn(),
         imageUrl: '',
         updatePassword,
       } as never;

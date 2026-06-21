@@ -1,10 +1,12 @@
+import type { Mock } from 'vitest';
+
 import { TestBed } from '@angular/core/testing';
 
 import { ClerkService } from '@app/services/clerk.service';
 
 import { ApiError, ApiService } from './api.service';
 
-jest.mock('@env', () => ({
+vi.mock('@env', () => ({
   environment: {
     production: false,
     clerkPublishableKey: 'test-key',
@@ -14,7 +16,7 @@ jest.mock('@env', () => ({
 }));
 
 interface MockClerkService {
-  getToken: jest.Mock<Promise<string | null>>;
+  getToken: Mock<() => Promise<string | null>>;
 }
 
 describe('ApiService', () => {
@@ -23,7 +25,7 @@ describe('ApiService', () => {
 
   beforeEach(() => {
     mockClerk = {
-      getToken: jest.fn().mockResolvedValue('test-token'),
+      getToken: vi.fn().mockResolvedValue('test-token'),
     };
 
     TestBed.configureTestingModule({
@@ -34,11 +36,11 @@ describe('ApiService', () => {
   });
 
   afterEach(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   beforeEach(() => {
-    globalThis.fetch = jest.fn();
+    globalThis.fetch = vi.fn();
   });
 
   // ---------------------------------------------------------------------------
@@ -47,19 +49,19 @@ describe('ApiService', () => {
 
   function mockFetchResponse(body: unknown, status = 200): void {
     const isEmpty = status === 204 || body === undefined;
-    (globalThis.fetch as jest.Mock).mockResolvedValue({
+    (globalThis.fetch as Mock).mockResolvedValue({
       ok: status >= 200 && status < 300,
       status,
-      json: jest.fn().mockResolvedValue(body),
-      text: jest.fn().mockResolvedValue(isEmpty ? '' : JSON.stringify(body)),
+      json: vi.fn().mockResolvedValue(body),
+      text: vi.fn().mockResolvedValue(isEmpty ? '' : JSON.stringify(body)),
     });
   }
 
   function mockFetchError(status: number, errorBody?: { error: string }): void {
-    (globalThis.fetch as jest.Mock).mockResolvedValue({
+    (globalThis.fetch as Mock).mockResolvedValue({
       ok: false,
       status,
-      json: jest.fn().mockResolvedValue(errorBody ?? null),
+      json: vi.fn().mockResolvedValue(errorBody ?? null),
     });
   }
 
@@ -73,7 +75,7 @@ describe('ApiService', () => {
 
       await service.get('/test');
 
-      const call = (globalThis.fetch as jest.Mock).mock.calls[0];
+      const call = (globalThis.fetch as Mock).mock.calls[0];
       const headers = call[1].headers as Headers;
       expect(headers.get('Authorization')).toBe('Bearer test-token');
     });
@@ -84,7 +86,7 @@ describe('ApiService', () => {
 
       await service.get('/test');
 
-      const call = (globalThis.fetch as jest.Mock).mock.calls[0];
+      const call = (globalThis.fetch as Mock).mock.calls[0];
       const headers = call[1].headers as Headers;
       expect(headers.has('Authorization')).toBe(false);
     });
@@ -119,7 +121,7 @@ describe('ApiService', () => {
 
       await service.post('/upload', formData);
 
-      const call = (globalThis.fetch as jest.Mock).mock.calls[0];
+      const call = (globalThis.fetch as Mock).mock.calls[0];
       expect(call[1].method).toBe('POST');
       expect(call[1].body).toBe(formData);
     });
@@ -129,7 +131,7 @@ describe('ApiService', () => {
 
       await service.post('/action');
 
-      const call = (globalThis.fetch as jest.Mock).mock.calls[0];
+      const call = (globalThis.fetch as Mock).mock.calls[0];
       expect(call[1].method).toBe('POST');
       expect(call[1].body).toBeUndefined();
     });
@@ -145,7 +147,7 @@ describe('ApiService', () => {
 
       await service.put('/users/1', { name: 'John' });
 
-      const call = (globalThis.fetch as jest.Mock).mock.calls[0];
+      const call = (globalThis.fetch as Mock).mock.calls[0];
       expect(call[1].method).toBe('PUT');
       expect(call[1].body).toBe(JSON.stringify({ name: 'John' }));
       const headers = call[1].headers as Headers;
@@ -163,7 +165,7 @@ describe('ApiService', () => {
 
       await service.patch('/users/1', { name: 'Jane' });
 
-      const call = (globalThis.fetch as jest.Mock).mock.calls[0];
+      const call = (globalThis.fetch as Mock).mock.calls[0];
       expect(call[1].method).toBe('PATCH');
       expect(call[1].body).toBe(JSON.stringify({ name: 'Jane' }));
       const headers = call[1].headers as Headers;
@@ -181,7 +183,7 @@ describe('ApiService', () => {
 
       await service.delete('/users/1');
 
-      const call = (globalThis.fetch as jest.Mock).mock.calls[0];
+      const call = (globalThis.fetch as Mock).mock.calls[0];
       expect(call[1].method).toBe('DELETE');
     });
   });
@@ -203,7 +205,7 @@ describe('ApiService', () => {
 
       try {
         await service.get('/missing');
-        fail('Expected ApiError');
+        expect.fail('Expected ApiError');
       } catch (e) {
         expect(e).toBeInstanceOf(ApiError);
         expect((e as ApiError).status).toBe(404);
@@ -211,10 +213,10 @@ describe('ApiService', () => {
     });
 
     it('throws ApiError with fallback message when response has no JSON error', async () => {
-      (globalThis.fetch as jest.Mock).mockResolvedValue({
+      (globalThis.fetch as Mock).mockResolvedValue({
         ok: false,
         status: 500,
-        json: jest.fn().mockRejectedValue(new Error('no json')),
+        json: vi.fn().mockRejectedValue(new Error('no json')),
       });
 
       await expect(service.get('/fail')).rejects.toThrow('Request failed (500)');

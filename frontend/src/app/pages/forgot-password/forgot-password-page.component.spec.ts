@@ -1,3 +1,5 @@
+import type { Mock } from 'vitest';
+
 import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
@@ -6,7 +8,7 @@ import { ClerkService } from '@app/services/clerk.service';
 
 import { ForgotPasswordPageComponent } from './forgot-password-page.component';
 
-jest.mock('@env', () => ({
+vi.mock('@env', () => ({
   environment: {
     production: false,
     clerkPublishableKey: 'test-key',
@@ -16,13 +18,13 @@ jest.mock('@env', () => ({
 }));
 
 interface MockClerkService {
-  sendPasswordResetCode: jest.Mock<Promise<void>, [string]>;
-  resetPassword: jest.Mock<Promise<void>, [string, string]>;
-  extractError: jest.Mock<string, [unknown]>;
+  sendPasswordResetCode: Mock<(arg0: string) => Promise<void>>;
+  resetPassword: Mock<(arg0: string, arg1: string) => Promise<void>>;
+  extractError: Mock<(arg0: unknown) => string>;
 }
 
 interface MockRouter {
-  navigate: jest.Mock<Promise<boolean>, [string[]]>;
+  navigate: Mock<(arg0: string[]) => Promise<boolean>>;
 }
 
 describe('ForgotPasswordPageComponent', () => {
@@ -32,13 +34,13 @@ describe('ForgotPasswordPageComponent', () => {
 
   beforeEach(async () => {
     mockClerk = {
-      sendPasswordResetCode: jest.fn().mockResolvedValue(undefined),
-      resetPassword: jest.fn().mockResolvedValue(undefined),
-      extractError: jest.fn().mockReturnValue('Something went wrong'),
+      sendPasswordResetCode: vi.fn().mockResolvedValue(undefined),
+      resetPassword: vi.fn().mockResolvedValue(undefined),
+      extractError: vi.fn().mockReturnValue('Something went wrong'),
     };
 
     mockRouter = {
-      navigate: jest.fn().mockResolvedValue(true),
+      navigate: vi.fn().mockResolvedValue(true),
     };
 
     await TestBed.configureTestingModule({
