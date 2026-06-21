@@ -1,6 +1,9 @@
 import {
+  BadgeComponent,
   BottleIconComponent,
   ButtonComponent,
+  DividerComponent,
+  DropdownComponent,
   EmptyStateComponent,
   SkeletonComponent,
 } from '@eagami/ui';
@@ -16,10 +19,15 @@ import {
 import { RouterLink } from '@angular/router';
 
 import { BetCardComponent } from '@app/components/bet-card/bet-card.component';
-import { type BetWithOpponent } from '@app/models';
 import { BetsService } from '@app/services/bets.service';
 import { UserService } from '@app/services/user.service';
-import { isAwaitingOutcome, isMyTurn, settledNet } from '@app/util';
+import {
+  type BetSortKey,
+  isAwaitingOutcome,
+  isMyTurn,
+  settledNet,
+  sortBetsBy,
+} from '@app/util';
 
 @Component({
   selector: 'bb-home-page',
@@ -29,8 +37,11 @@ import { isAwaitingOutcome, isMyTurn, settledNet } from '@app/util';
   imports: [
     RouterLink,
     BetCardComponent,
+    BadgeComponent,
     BottleIconComponent,
     ButtonComponent,
+    DividerComponent,
+    DropdownComponent,
     EmptyStateComponent,
     SkeletonComponent,
   ],
@@ -58,10 +69,21 @@ export class HomePageComponent implements OnInit {
     ),
   );
 
+  readonly sortKey = signal<BetSortKey>('modified');
+
+  readonly sortOptions = [
+    { label: 'Last modified', value: 'modified' },
+    { label: 'Resolution date', value: 'resolution' },
+    { label: 'Brewskis at stake', value: 'brewskis' },
+    { label: 'Bet title', value: 'title' },
+  ];
+
   readonly openBets = computed(() =>
-    this.bets()
-      .filter(bet => bet.status !== 'settled')
-      .sort((a, b) => this.sortRank(a) - this.sortRank(b)),
+    sortBetsBy(
+      this.bets().filter(bet => bet.status !== 'settled'),
+      this.sortKey(),
+      this.currentUserId(),
+    ),
   );
 
   readonly netStanding = computed(() =>
@@ -98,13 +120,7 @@ export class HomePageComponent implements OnInit {
     }
   }
 
-  private sortRank(bet: BetWithOpponent): number {
-    if (isMyTurn(bet, this.currentUserId()) || isAwaitingOutcome(bet)) {
-      return 0;
-    }
-    if (bet.status === 'active') {
-      return 1;
-    }
-    return 2;
+  onSortChange(value: string): void {
+    this.sortKey.set(value as BetSortKey);
   }
 }

@@ -58,6 +58,68 @@ export function isAwaitingOutcome(bet: Bet, now: Date = new Date()): boolean {
   );
 }
 
+// The most brewskis the user stands to win from a bet: the largest single
+// outcome assigned to them, since exactly one outcome ever resolves. Voided
+// outcomes never pay out, so they are ignored.
+export function brewskisAtStake(bet: Bet, userId: string | undefined): number {
+  const me = positionOf(bet, userId);
+  if (me == null) {
+    return 0;
+  }
+  return bet.results.reduce(
+    (max, result) =>
+      result.isSpecial !== 'void' && result.assignedTo === me
+        ? Math.max(max, result.brewskiCount)
+        : max,
+    0,
+  );
+}
+
+export type BetSortKey = 'title' | 'resolution' | 'brewskis' | 'modified';
+
+// Orders bets for the dashboard. Title, resolution date, and brewskis are read
+// from the agreed terms so the order matches what the cards display. The latter
+// three keys fall back to bet title when their primary value ties or is absent
+// (e.g. a bet with no resolution date), so the order is always deterministic.
+export function sortBetsBy<T extends Bet>(
+  bets: readonly T[],
+  key: BetSortKey,
+  userId: string | undefined,
+): T[] {
+  const decorated = bets.map(bet => {
+    const agreed = withAgreedTerms(bet);
+    return {
+      bet,
+      title: agreed.title,
+      resolution: agreed.resolutionDate
+        ? new Date(agreed.resolutionDate).getTime()
+        : Number.POSITIVE_INFINITY,
+      brewskis: brewskisAtStake(agreed, userId),
+      modified: new Date(bet.lastModifiedDate).getTime(),
+    };
+  });
+
+  const byTitle = (
+    a: (typeof decorated)[number],
+    b: (typeof decorated)[number],
+  ): number => a.title.localeCompare(b.title, undefined, { sensitivity: 'base' });
+
+  decorated.sort((a, b) => {
+    switch (key) {
+      case 'title':
+        return byTitle(a, b);
+      case 'resolution':
+        return a.resolution - b.resolution || byTitle(a, b);
+      case 'brewskis':
+        return b.brewskis - a.brewskis || byTitle(a, b);
+      case 'modified':
+        return b.modified - a.modified || byTitle(a, b);
+    }
+  });
+
+  return decorated.map(entry => entry.bet);
+}
+
 // Net brewskis for a settled bet from the user's perspective: positive means
 // the opponent owes the user, negative means the user owes the opponent.
 // `assignedTo` is the winner of the outcome, so a result assigned to the user

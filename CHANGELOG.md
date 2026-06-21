@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.0] - 2026-06-21
+
+### Added
+
+- Add a "Sort by" control to the home dashboard for ordering open bets by last modified date, resolution date, brewskis at stake, or bet title
+
+### Changed
+
+- Condense the dashboard summary stats into a single compact card with dividers and an attention badge
+
 ## [1.3.4] - 2026-06-21
 
 ### Changed
@@ -690,6 +700,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - PWA manifest and service worker configuration
 - GitHub issue templates
 
+[1.4.0]: https://github.com/mwiraszka/brewski-bets/compare/v1.3.4...v1.4.0
 [1.3.4]: https://github.com/mwiraszka/brewski-bets/compare/v1.3.3...v1.3.4
 [1.3.3]: https://github.com/mwiraszka/brewski-bets/compare/v1.3.2...v1.3.3
 [1.3.2]: https://github.com/mwiraszka/brewski-bets/compare/v1.3.1...v1.3.2

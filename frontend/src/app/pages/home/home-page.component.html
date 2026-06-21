@@ -22,25 +22,33 @@
         }
       </div>
     } @else if (hasBets()) {
-      <div class="stat-tiles">
-        <div class="stat-tile">
-          <span class="stat-tile__value">
+      <div class="stat-card">
+        <div class="stat-card__group">
+          <span class="stat-card__value">
             {{ standingValue() }}
-            <ea-icon-bottle class="stat-tile__unit" />
+            <ea-icon-bottle class="stat-card__unit" />
           </span>
-          <span class="stat-tile__label">{{ standingLabel() }}</span>
+          <span class="stat-card__label">{{ standingLabel() }}</span>
         </div>
-        <div class="stat-tile">
-          <span class="stat-tile__value">{{ activeBetsCount() }}</span>
-          <span class="stat-tile__label">active bets</span>
+        <ea-divider orientation="vertical" />
+        <div class="stat-card__group">
+          <span class="stat-card__value">{{ activeBetsCount() }}</span>
+          <span class="stat-card__label">active bets</span>
         </div>
-        <div class="stat-tile">
+        <ea-divider orientation="vertical" />
+        <div class="stat-card__group">
           <span
-            class="stat-tile__value"
-            [class.stat-tile__value--accent]="attentionCount() > 0">
+            class="stat-card__value"
+            [class.stat-card__value--accent]="attentionCount() > 0">
             {{ attentionCount() }}
           </span>
-          <span class="stat-tile__label">need your attention</span>
+          @if (attentionCount() > 0) {
+            <span class="stat-card__label">
+              <ea-badge variant="warning">needs attention</ea-badge>
+            </span>
+          } @else {
+            <span class="stat-card__label">need your attention</span>
+          }
         </div>
       </div>
 
@@ -67,6 +75,15 @@
           </a>
         </div>
         @if (openBets().length) {
+          <div class="dashboard__sort-bar">
+            <ea-dropdown
+              class="dashboard__sort"
+              label="Sort by"
+              size="sm"
+              [options]="sortOptions"
+              [value]="sortKey()"
+              (valueChange)="onSortChange($event)" />
+          </div>
           <div class="card-grid">
             @for (bet of openBets(); track bet.id) {
               <bb-bet-card
