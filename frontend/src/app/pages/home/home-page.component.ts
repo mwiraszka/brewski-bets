@@ -1,11 +1,10 @@
 import {
-  BadgeComponent,
   BottleIconComponent,
   ButtonComponent,
-  DividerComponent,
   DropdownComponent,
   EmptyStateComponent,
   SkeletonComponent,
+  TooltipDirective,
 } from '@eagami/ui';
 
 import {
@@ -23,10 +22,13 @@ import { BetsService } from '@app/services/bets.service';
 import { UserService } from '@app/services/user.service';
 import {
   type BetSortKey,
+  brewskisAtRisk,
+  brewskisAtStake,
   isAwaitingOutcome,
   isMyTurn,
   settledNet,
   sortBetsBy,
+  withAgreedTerms,
 } from '@app/util';
 
 @Component({
@@ -37,13 +39,12 @@ import {
   imports: [
     RouterLink,
     BetCardComponent,
-    BadgeComponent,
     BottleIconComponent,
     ButtonComponent,
-    DividerComponent,
     DropdownComponent,
     EmptyStateComponent,
     SkeletonComponent,
+    TooltipDirective,
   ],
 })
 export class HomePageComponent implements OnInit {
@@ -90,11 +91,28 @@ export class HomePageComponent implements OnInit {
     this.bets().reduce((sum, bet) => sum + settledNet(bet, this.currentUserId()), 0),
   );
 
-  readonly activeBetsCount = computed(
-    () => this.bets().filter(bet => bet.status === 'active').length,
+  private readonly activeBets = computed(() =>
+    this.bets().filter(bet => bet.status === 'active'),
   );
 
-  readonly attentionCount = computed(() => this.attentionBets().length);
+  readonly activeBetsCount = computed(() => this.activeBets().length);
+
+  // Best-case totals across all active bets: the most the user could still win,
+  // and the most they could still lose, if every active bet broke their way (or
+  // against them). Read from agreed terms so they match what the cards show.
+  readonly possibleWin = computed(() =>
+    this.activeBets().reduce(
+      (sum, bet) => sum + brewskisAtStake(withAgreedTerms(bet), this.currentUserId()),
+      0,
+    ),
+  );
+
+  readonly possibleLoss = computed(() =>
+    this.activeBets().reduce(
+      (sum, bet) => sum + brewskisAtRisk(withAgreedTerms(bet), this.currentUserId()),
+      0,
+    ),
+  );
 
   readonly standingLabel = computed(() => {
     const net = this.netStanding();

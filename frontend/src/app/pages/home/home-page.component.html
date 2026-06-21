@@ -23,32 +23,42 @@
       </div>
     } @else if (hasBets()) {
       <div class="stat-card">
-        <div class="stat-card__group">
+        <div
+          class="stat-card__group"
+          tooltipPosition="bottom"
+          [eaTooltip]="'Your net brewskis across all settled bets: what you are owed or owe overall'">
           <span class="stat-card__value">
             {{ standingValue() }}
             <ea-icon-bottle class="stat-card__unit" />
           </span>
           <span class="stat-card__label">{{ standingLabel() }}</span>
         </div>
-        <ea-divider orientation="vertical" />
-        <div class="stat-card__group">
+        <div
+          class="stat-card__group"
+          tooltipPosition="bottom"
+          [eaTooltip]="'Bets that are agreed and still waiting on their outcome'">
           <span class="stat-card__value">{{ activeBetsCount() }}</span>
           <span class="stat-card__label">active bets</span>
         </div>
-        <ea-divider orientation="vertical" />
-        <div class="stat-card__group">
-          <span
-            class="stat-card__value"
-            [class.stat-card__value--accent]="attentionCount() > 0">
-            {{ attentionCount() }}
+        <div
+          class="stat-card__group"
+          tooltipPosition="bottom"
+          [eaTooltip]="'The most brewskis you could still win if every active bet goes your way'">
+          <span class="stat-card__value stat-card__value--win">
+            {{ possibleWin() }}
+            <ea-icon-bottle class="stat-card__unit stat-card__unit--win" />
           </span>
-          @if (attentionCount() > 0) {
-            <span class="stat-card__label">
-              <ea-badge variant="warning">needs attention</ea-badge>
-            </span>
-          } @else {
-            <span class="stat-card__label">need your attention</span>
-          }
+          <span class="stat-card__label">could win</span>
+        </div>
+        <div
+          class="stat-card__group"
+          tooltipPosition="bottom"
+          [eaTooltip]="'The most brewskis you could still lose if every active bet goes against you'">
+          <span class="stat-card__value stat-card__value--loss">
+            {{ possibleLoss() }}
+            <ea-icon-bottle class="stat-card__unit stat-card__unit--loss" />
+          </span>
+          <span class="stat-card__label">could lose</span>
         </div>
       </div>
 

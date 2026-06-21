@@ -13,7 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Condense the dashboard summary stats into a single compact card with dividers and an attention badge
+- Condense the dashboard summary stats into a single compact card showing your standing, active bets, and the brewskis you could still win or lose, each with an explanatory tooltip
 
 ## [1.3.4] - 2026-06-21
 

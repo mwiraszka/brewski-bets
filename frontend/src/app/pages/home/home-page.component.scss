@@ -42,8 +42,8 @@
 }
 
 .stat-card {
-  display: flex;
-  align-items: stretch;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
   gap: 24px;
   padding: 16px 24px;
   margin-bottom: 32px;
@@ -54,10 +54,21 @@
 }
 
 .stat-card__group {
+  position: relative;
   display: flex;
-  flex: 1;
   flex-direction: column;
   gap: 8px;
+}
+
+// Full-height divider centered in the grid gap, spanning the value and label
+.stat-card__group:not(:first-child)::before {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: -12px;
+  width: 1px;
+  background-color: var(--bb-color-borderDefault);
+  content: '';
 }
 
 .stat-card__value {
@@ -69,13 +80,25 @@
   color: var(--bb-color-textStrong);
 }
 
-.stat-card__value--accent {
-  color: var(--bb-color-primary);
+.stat-card__value--win {
+  color: var(--bb-color-positive);
+}
+
+.stat-card__value--loss {
+  color: var(--bb-color-danger);
 }
 
 .stat-card__unit {
   font-size: 20px;
   color: var(--bb-color-primary);
+}
+
+.stat-card__unit--win {
+  color: var(--bb-color-positive);
+}
+
+.stat-card__unit--loss {
+  color: var(--bb-color-danger);
 }
 
 .stat-card__label {
@@ -141,19 +164,15 @@
   break-inside: avoid;
 }
 
-@include respond-to('lt-md') {
+@include respond-to('lt-sm') {
   .stat-card {
-    flex-direction: column;
-    gap: 16px;
+    grid-template-columns: repeat(2, 1fr);
   }
 
-  .stat-card ea-divider {
+  // In the 2x2 layout, only the second column keeps a divider; the group that
+  // starts the second row (odd-indexed) must not draw one.
+  .stat-card__group:nth-child(odd)::before {
     display: none;
-  }
-
-  .stat-card__group:not(:first-child) {
-    padding-top: 16px;
-    border-top: 1px solid var(--bb-color-borderDefault);
   }
 }
 

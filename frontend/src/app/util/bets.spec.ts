@@ -1,6 +1,7 @@
 import { type Bet, type BetResult } from '@app/models';
 
 import {
+  brewskisAtRisk,
   brewskisAtStake,
   isAwaitingOutcome,
   isMyTurn,
@@ -164,6 +165,39 @@ describe('brewskisAtStake', () => {
 
     expect(brewskisAtStake(bet, 'stranger')).toBe(0);
     expect(brewskisAtStake(bet, undefined)).toBe(0);
+  });
+});
+
+describe('brewskisAtRisk', () => {
+  it('returns the largest outcome the opponent can win', () => {
+    const bet = makeBet({
+      results: [
+        result({ assignedTo: 'user1', brewskiCount: 3 }),
+        result({ assignedTo: 'user2', brewskiCount: 5 }),
+        result({ assignedTo: 'user2', brewskiCount: 8 }),
+      ],
+    });
+
+    expect(brewskisAtRisk(bet, 'user-a')).toBe(8);
+    expect(brewskisAtRisk(bet, 'user-b')).toBe(3);
+  });
+
+  it('ignores voided outcomes', () => {
+    const bet = makeBet({
+      results: [
+        result({ assignedTo: 'user2', brewskiCount: 9, isSpecial: 'void' }),
+        result({ assignedTo: 'user2', brewskiCount: 2 }),
+      ],
+    });
+
+    expect(brewskisAtRisk(bet, 'user-a')).toBe(2);
+  });
+
+  it('is zero when the user is not part of the bet', () => {
+    const bet = makeBet({ results: [result({ assignedTo: 'user1', brewskiCount: 4 })] });
+
+    expect(brewskisAtRisk(bet, 'stranger')).toBe(0);
+    expect(brewskisAtRisk(bet, undefined)).toBe(0);
   });
 });
 

@@ -58,21 +58,32 @@ export function isAwaitingOutcome(bet: Bet, now: Date = new Date()): boolean {
   );
 }
 
-// The most brewskis the user stands to win from a bet: the largest single
-// outcome assigned to them, since exactly one outcome ever resolves. Voided
-// outcomes never pay out, so they are ignored.
-export function brewskisAtStake(bet: Bet, userId: string | undefined): number {
-  const me = positionOf(bet, userId);
-  if (me == null) {
+// The largest single non-void outcome assigned to one side, since exactly one
+// outcome ever resolves. Voided outcomes never pay out, so they are ignored.
+function bestOutcomeFor(bet: Bet, side: BetPosition | null): number {
+  if (side == null) {
     return 0;
   }
   return bet.results.reduce(
     (max, result) =>
-      result.isSpecial !== 'void' && result.assignedTo === me
+      result.isSpecial !== 'void' && result.assignedTo === side
         ? Math.max(max, result.brewskiCount)
         : max,
     0,
   );
+}
+
+// The most brewskis the user stands to win from a bet (their best-case outcome).
+export function brewskisAtStake(bet: Bet, userId: string | undefined): number {
+  return bestOutcomeFor(bet, positionOf(bet, userId));
+}
+
+// The most brewskis the user stands to lose from a bet: the opponent's best-case
+// outcome, which the user pays out if it resolves.
+export function brewskisAtRisk(bet: Bet, userId: string | undefined): number {
+  const me = positionOf(bet, userId);
+  const opponent = me == null ? null : me === 'user1' ? 'user2' : 'user1';
+  return bestOutcomeFor(bet, opponent);
 }
 
 export type BetSortKey = 'title' | 'resolution' | 'brewskis' | 'modified';
