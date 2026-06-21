@@ -70,7 +70,7 @@ export class HomePageComponent implements OnInit {
     ),
   );
 
-  readonly sortKey = signal<BetSortKey>('modified');
+  readonly sortKey = signal<BetSortKey>('title');
 
   readonly sortOptions = [
     { label: 'Last modified', value: 'modified' },
