@@ -1,3 +1,5 @@
+import type { Mock } from 'vitest';
+
 import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
@@ -6,7 +8,7 @@ import { ClerkService } from '@app/services/clerk.service';
 
 import { CreateAccountPageComponent } from './create-account-page.component';
 
-jest.mock('@env', () => ({
+vi.mock('@env', () => ({
   environment: {
     production: false,
     clerkPublishableKey: 'test-key',
@@ -16,17 +18,21 @@ jest.mock('@env', () => ({
 }));
 
 interface MockClerkService {
-  createAccount: jest.Mock<
-    Promise<{ needsVerification: boolean }>,
-    [string, string, string, string]
+  createAccount: Mock<
+    (
+      arg0: string,
+      arg1: string,
+      arg2: string,
+      arg3: string,
+    ) => Promise<{ needsVerification: boolean }>
   >;
-  verifyEmail: jest.Mock<Promise<void>, [string]>;
-  continueWithGoogle: jest.Mock<Promise<void>>;
-  extractError: jest.Mock<string, [unknown]>;
+  verifyEmail: Mock<(arg0: string) => Promise<void>>;
+  continueWithGoogle: Mock<() => Promise<void>>;
+  extractError: Mock<(arg0: unknown) => string>;
 }
 
 interface MockRouter {
-  navigate: jest.Mock<Promise<boolean>, [string[]]>;
+  navigate: Mock<(arg0: string[]) => Promise<boolean>>;
 }
 
 describe('CreateAccountPageComponent', () => {
@@ -36,14 +42,14 @@ describe('CreateAccountPageComponent', () => {
 
   beforeEach(async () => {
     mockClerk = {
-      createAccount: jest.fn().mockResolvedValue({ needsVerification: false }),
-      verifyEmail: jest.fn().mockResolvedValue(undefined),
-      continueWithGoogle: jest.fn().mockResolvedValue(undefined),
-      extractError: jest.fn().mockReturnValue('Something went wrong'),
+      createAccount: vi.fn().mockResolvedValue({ needsVerification: false }),
+      verifyEmail: vi.fn().mockResolvedValue(undefined),
+      continueWithGoogle: vi.fn().mockResolvedValue(undefined),
+      extractError: vi.fn().mockReturnValue('Something went wrong'),
     };
 
     mockRouter = {
-      navigate: jest.fn().mockResolvedValue(true),
+      navigate: vi.fn().mockResolvedValue(true),
     };
 
     await TestBed.configureTestingModule({

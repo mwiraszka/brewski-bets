@@ -1,3 +1,5 @@
+import type { Mock } from 'vitest';
+
 import { type WritableSignal, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 
@@ -6,7 +8,7 @@ import { ClerkService } from '@app/services/clerk.service';
 
 import { type UserRecord, UserService } from './user.service';
 
-jest.mock('@env', () => ({
+vi.mock('@env', () => ({
   environment: {
     production: false,
     clerkPublishableKey: 'test-key',
@@ -21,7 +23,7 @@ interface MockClerkService {
 }
 
 interface MockApiService {
-  get: jest.Mock<Promise<unknown>>;
+  get: Mock<(...args: unknown[]) => Promise<unknown>>;
 }
 
 const MOCK_USER_RECORD: UserRecord = {
@@ -47,7 +49,7 @@ describe('UserService', () => {
     };
 
     mockApi = {
-      get: jest.fn().mockResolvedValue({ ...MOCK_USER_RECORD }),
+      get: vi.fn().mockResolvedValue({ ...MOCK_USER_RECORD }),
     };
 
     TestBed.configureTestingModule({

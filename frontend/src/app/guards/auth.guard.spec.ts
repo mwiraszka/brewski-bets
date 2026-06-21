@@ -1,3 +1,5 @@
+import type { Mock } from 'vitest';
+
 import { type WritableSignal, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { Router, type UrlTree } from '@angular/router';
@@ -8,11 +10,11 @@ import { authGuard, guestGuard, ssoCallbackGuard } from './auth.guard';
 
 interface MockClerkService {
   isLoggedIn: WritableSignal<boolean>;
-  handleSSOCallback: jest.Mock<Promise<void>>;
+  handleSSOCallback: Mock<() => Promise<void>>;
 }
 
 interface MockRouter {
-  createUrlTree: jest.Mock<UrlTree, [string[]]>;
+  createUrlTree: Mock<(arg0: string[]) => UrlTree>;
 }
 
 describe('auth guards', () => {
@@ -23,11 +25,11 @@ describe('auth guards', () => {
   beforeEach(() => {
     mockClerk = {
       isLoggedIn: signal(false),
-      handleSSOCallback: jest.fn().mockResolvedValue(undefined),
+      handleSSOCallback: vi.fn().mockResolvedValue(undefined),
     };
 
     mockRouter = {
-      createUrlTree: jest.fn().mockReturnValue(fakeUrlTree),
+      createUrlTree: vi.fn().mockReturnValue(fakeUrlTree),
     };
 
     TestBed.configureTestingModule({

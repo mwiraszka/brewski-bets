@@ -1,8 +1,10 @@
 import {
   BottleIconComponent,
   ButtonComponent,
+  DropdownComponent,
   EmptyStateComponent,
   SkeletonComponent,
+  TooltipDirective,
 } from '@eagami/ui';
 
 import {
@@ -16,10 +18,18 @@ import {
 import { RouterLink } from '@angular/router';
 
 import { BetCardComponent } from '@app/components/bet-card/bet-card.component';
-import { type BetWithOpponent } from '@app/models';
 import { BetsService } from '@app/services/bets.service';
 import { UserService } from '@app/services/user.service';
-import { isAwaitingOutcome, isMyTurn, settledNet } from '@app/util';
+import {
+  type BetSortKey,
+  brewskisAtRisk,
+  brewskisAtStake,
+  isAwaitingOutcome,
+  isMyTurn,
+  settledNet,
+  sortBetsBy,
+  withAgreedTerms,
+} from '@app/util';
 
 @Component({
   selector: 'bb-home-page',
@@ -31,8 +41,10 @@ import { isAwaitingOutcome, isMyTurn, settledNet } from '@app/util';
     BetCardComponent,
     BottleIconComponent,
     ButtonComponent,
+    DropdownComponent,
     EmptyStateComponent,
     SkeletonComponent,
+    TooltipDirective,
   ],
 })
 export class HomePageComponent implements OnInit {
@@ -58,21 +70,49 @@ export class HomePageComponent implements OnInit {
     ),
   );
 
+  readonly sortKey = signal<BetSortKey>('modified');
+
+  readonly sortOptions = [
+    { label: 'Last modified', value: 'modified' },
+    { label: 'Resolution date', value: 'resolution' },
+    { label: 'Brewskis at stake', value: 'brewskis' },
+    { label: 'Bet title', value: 'title' },
+  ];
+
   readonly openBets = computed(() =>
-    this.bets()
-      .filter(bet => bet.status !== 'settled')
-      .sort((a, b) => this.sortRank(a) - this.sortRank(b)),
+    sortBetsBy(
+      this.bets().filter(bet => bet.status !== 'settled'),
+      this.sortKey(),
+      this.currentUserId(),
+    ),
   );
 
   readonly netStanding = computed(() =>
     this.bets().reduce((sum, bet) => sum + settledNet(bet, this.currentUserId()), 0),
   );
 
-  readonly activeBetsCount = computed(
-    () => this.bets().filter(bet => bet.status === 'active').length,
+  private readonly activeBets = computed(() =>
+    this.bets().filter(bet => bet.status === 'active'),
   );
 
-  readonly attentionCount = computed(() => this.attentionBets().length);
+  readonly activeBetsCount = computed(() => this.activeBets().length);
+
+  // Best-case totals across all active bets: the most the user could still win,
+  // and the most they could still lose, if every active bet broke their way (or
+  // against them). Read from agreed terms so they match what the cards show.
+  readonly possibleWin = computed(() =>
+    this.activeBets().reduce(
+      (sum, bet) => sum + brewskisAtStake(withAgreedTerms(bet), this.currentUserId()),
+      0,
+    ),
+  );
+
+  readonly possibleLoss = computed(() =>
+    this.activeBets().reduce(
+      (sum, bet) => sum + brewskisAtRisk(withAgreedTerms(bet), this.currentUserId()),
+      0,
+    ),
+  );
 
   readonly standingLabel = computed(() => {
     const net = this.netStanding();
@@ -98,13 +138,7 @@ export class HomePageComponent implements OnInit {
     }
   }
 
-  private sortRank(bet: BetWithOpponent): number {
-    if (isMyTurn(bet, this.currentUserId()) || isAwaitingOutcome(bet)) {
-      return 0;
-    }
-    if (bet.status === 'active') {
-      return 1;
-    }
-    return 2;
+  onSortChange(value: string): void {
+    this.sortKey.set(value as BetSortKey);
   }
 }
