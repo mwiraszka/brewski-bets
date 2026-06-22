@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.5.1] - 2026-06-23
+
+### Fixed
+
+- Ensure every release is published reliably with its version tag
+
 ## [1.5.0] - 2026-06-22
 
 ### Added
@@ -727,6 +733,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - PWA manifest and service worker configuration
 - GitHub issue templates
 
+[1.5.1]: https://github.com/mwiraszka/brewski-bets/compare/v1.5.0...v1.5.1
 [1.5.0]: https://github.com/mwiraszka/brewski-bets/compare/v1.4.2...v1.5.0
 [1.4.2]: https://github.com/mwiraszka/brewski-bets/compare/v1.4.1...v1.4.2
 [1.4.1]: https://github.com/mwiraszka/brewski-bets/compare/v1.4.0...v1.4.1

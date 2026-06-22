@@ -48,6 +48,8 @@ jobs:
       contents: write
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Extract Version from Changelog
         id: version
@@ -74,12 +76,26 @@ jobs:
           # Extract content between first and second ## headers
           awk '/^## \[/{if(n++)exit}n' CHANGELOG.md | tail -n +2 > release_notes.md
 
-      - name: Create Tag and Release
+      # Create the tag through git (deterministic) before the release. Letting
+      # `gh release create --target <sha>` create the tag races GitHub's release
+      # backend resolving the just-pushed commit, which intermittently yields a
+      # stuck draft, untagged release.
+      - name: Create and Push Tag
+        if: steps.check_release.outputs.exists == 'false'
+        run: |
+          tag="${{ steps.version.outputs.tag }}"
+          if ! git rev-parse "refs/tags/$tag" >/dev/null 2>&1; then
+            git tag "$tag" "${{ github.sha }}"
+            git push origin "$tag"
+          fi
+
+      - name: Create Release
         if: steps.check_release.outputs.exists == 'false'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh release create ${{ steps.version.outputs.tag }} \
-            --target ${{ github.sha }} \
+          gh release create "${{ steps.version.outputs.tag }}" \
+            --verify-tag \
+            --latest \
             --title "${{ steps.version.outputs.tag }}" \
             --notes-file release_notes.md
