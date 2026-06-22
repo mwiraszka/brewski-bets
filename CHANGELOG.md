@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.2] - 2026-06-22
+
+### Fixed
+
+- Show the dropdown menu on the app background in dark mode, and ensure menus, popovers, and other floating surfaces adopt the dark theme palette
+
 ## [1.4.1] - 2026-06-21
 
 ### Changed
@@ -711,6 +717,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - PWA manifest and service worker configuration
 - GitHub issue templates
 
+[1.4.2]: https://github.com/mwiraszka/brewski-bets/compare/v1.4.1...v1.4.2
 [1.4.1]: https://github.com/mwiraszka/brewski-bets/compare/v1.4.0...v1.4.1
 [1.4.0]: https://github.com/mwiraszka/brewski-bets/compare/v1.3.4...v1.4.0
 [1.3.4]: https://github.com/mwiraszka/brewski-bets/compare/v1.3.3...v1.3.4
