@@ -64,6 +64,7 @@
             [data]="filteredBets()"
             trackBy="id"
             [hoverable]="true"
+            [clickable]="true"
             [(sort)]="sort"
             (click)="onTableClick($event)">
             <ng-template #noData>

@@ -44,6 +44,9 @@ $breakpoints: (
   // library's raw neutrals, which read as an off-palette slate in dark mode
   --color-bg-elevated: var(--bb-color-surfaceRaised);
   --color-bg-muted: var(--bb-color-surfaceMuted);
+  // Sit the dropdown menu on the page background rather than the raised surface,
+  // so it matches the backdrop it opens over
+  --ea-dropdown-menu-background-color: var(--bb-color-appBackground);
   --color-text-primary: var(--bb-color-textStrong);
   --color-text-secondary: var(--bb-color-textBody);
   --color-border-default: var(--bb-color-borderDefault);

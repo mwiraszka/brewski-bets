@@ -1,6 +1,6 @@
 {
   "name": "brewski-bets",
-  "version": "1.4.1",
+  "version": "1.4.2",
   "description": "Frontend for brewski bets, built with Angular",
   "author": "Michal Wiraszka",
   "private": true,
@@ -31,7 +31,7 @@
     "@angular/platform-browser": "22.0.2",
     "@angular/router": "22.0.2",
     "@clerk/clerk-js": "6.20.0",
-    "@eagami/ui": "4.1.1",
+    "@eagami/ui": "4.3.0",
     "rxjs": "7.8.2",
     "tslib": "2.8.1",
     "zone.js": "0.16.2"
