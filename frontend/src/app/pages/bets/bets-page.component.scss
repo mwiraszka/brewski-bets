@@ -23,6 +23,18 @@
   margin-bottom: 16px;
 }
 
+.filters__search {
+  flex: 1;
+  min-width: 0;
+}
+
+// Fixed to the widest option ("Changes pending") so the control never resizes
+// as the selected value changes
+.filters__status {
+  flex: none;
+  width: 200px;
+}
+
 .opponent-cell {
   display: flex;
   align-items: center;

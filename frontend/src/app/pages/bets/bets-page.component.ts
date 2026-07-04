@@ -116,15 +116,15 @@ export class BetsPageComponent implements OnInit {
 
   readonly statusOptions = [
     { label: 'All', value: 'all' },
-    { label: 'Inactive', value: 'inactive' },
+    { label: 'Changes pending', value: 'changes-pending' },
     { label: 'Active', value: 'active' },
     { label: 'Settled', value: 'settled' },
   ];
 
   readonly emptyState = computed(() => {
     switch (this.filterStatus()) {
-      case 'inactive':
-        return { title: 'No inactive bets', description: '' };
+      case 'changes-pending':
+        return { title: 'No bets with changes pending', description: '' };
       case 'active':
         return { title: 'No active bets', description: '' };
       case 'settled':
@@ -151,7 +151,9 @@ export class BetsPageComponent implements OnInit {
     }
 
     const status = this.filterStatus();
-    if (status !== 'all') {
+    if (status === 'changes-pending') {
+      bets = bets.filter(b => this.isChangesPending(b));
+    } else if (status !== 'all') {
       bets = bets.filter(b => b.status === status);
     }
 

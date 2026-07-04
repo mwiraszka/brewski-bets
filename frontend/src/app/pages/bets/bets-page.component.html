@@ -12,10 +12,12 @@
         label="Bets">
         <div class="filters">
           <ea-input
+            class="filters__search"
             label="Search"
             [value]="filterText()"
             (valueChange)="filterText.set($event)" />
           <ea-dropdown
+            class="filters__status"
             label="Status"
             [options]="statusOptions"
             [value]="filterStatus()"
