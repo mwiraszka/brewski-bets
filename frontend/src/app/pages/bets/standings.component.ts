@@ -1,11 +1,22 @@
-import { AvatarComponent, BottleIconComponent, EmptyStateComponent } from '@eagami/ui';
+import {
+  AvatarComponent,
+  BottleIconComponent,
+  DropdownComponent,
+  EmptyStateComponent,
+} from '@eagami/ui';
 
-import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  input,
+  signal,
+} from '@angular/core';
 import { RouterLink } from '@angular/router';
 
 import { BetGraphicComponent } from '@app/graphics';
 import { type BetWithOpponent } from '@app/models';
-import { avatarSrc } from '@app/util';
+import { avatarSrc, settledNet } from '@app/util';
 
 interface StandingBreakdownItem {
   title: string;
@@ -23,13 +34,18 @@ interface OpponentStanding {
   breakdown: StandingBreakdownItem[];
 }
 
-interface VoidBet {
+interface SettledBet {
   id: string;
   title: string;
   iconSlug: string | null;
   iconColor: string | null;
   opponentName: string;
+  outcome: 'resolved' | 'void';
+  net: number;
+  settledDate: number;
 }
+
+type SettledSortKey = 'settlement' | 'name' | 'result';
 
 @Component({
   selector: 'bb-standings',
@@ -41,12 +57,21 @@ interface VoidBet {
     AvatarComponent,
     BetGraphicComponent,
     BottleIconComponent,
+    DropdownComponent,
     EmptyStateComponent,
   ],
 })
 export class StandingsComponent {
   readonly bets = input.required<BetWithOpponent[]>();
   readonly currentUserId = input<string | undefined>(undefined);
+
+  readonly sortKey = signal<SettledSortKey>('settlement');
+
+  readonly sortOptions = [
+    { label: 'Settlement date', value: 'settlement' },
+    { label: 'Name', value: 'name' },
+    { label: 'Result', value: 'result' },
+  ];
 
   readonly standings = computed<OpponentStanding[]>(() => {
     const userId = this.currentUserId();
@@ -92,13 +117,13 @@ export class StandingsComponent {
     return [...byOpponent.values()].sort((a, b) => b.net - a.net);
   });
 
-  // Voided bets settle to no beers, so they carry no net but are still shown,
-  // struck through, so a resolved bet board does not look empty when the only
-  // settled bets were voided
-  readonly voidBets = computed<VoidBet[]>(() =>
-    this.bets()
-      .filter(bet => bet.status === 'settled' && bet.outcome === 'void')
-      .map(bet => ({
+  // Every settled bet gets a card: resolved ones show the net beers won or lost,
+  // voided ones are struck through. Voids settle to no beers, so their net is 0.
+  readonly settledBets = computed<SettledBet[]>(() => {
+    const userId = this.currentUserId();
+    const items = this.bets()
+      .filter(bet => bet.status === 'settled')
+      .map((bet): SettledBet => ({
         id: bet.id,
         title: bet.title,
         iconSlug: bet.iconSlug,
@@ -106,8 +131,27 @@ export class StandingsComponent {
         opponentName: bet.opponent
           ? `${bet.opponent.firstName} ${bet.opponent.lastName}`
           : '',
-      })),
-  );
+        outcome: bet.outcome === 'void' ? 'void' : 'resolved',
+        net: settledNet(bet, userId),
+        settledDate: new Date(bet.lastModifiedDate).getTime(),
+      }));
+
+    const byName = (a: SettledBet, b: SettledBet): number =>
+      a.title.localeCompare(b.title, undefined, { sensitivity: 'base' });
+
+    const key = this.sortKey();
+    return items.sort((a, b) => {
+      switch (key) {
+        case 'name':
+          return byName(a, b);
+        // Most won at the top down to most lost, with voids (net 0) in the centre
+        case 'result':
+          return b.net - a.net || byName(a, b);
+        case 'settlement':
+          return b.settledDate - a.settledDate || byName(a, b);
+      }
+    });
+  });
 
   private readonly maxAbsNet = computed(() =>
     Math.max(1, ...this.standings().map(s => Math.abs(s.net))),
@@ -125,6 +169,14 @@ export class StandingsComponent {
       return `You owe ${Math.abs(net)}`;
     }
     return 'All square';
+  }
+
+  onSortChange(value: string): void {
+    this.sortKey.set(value as SettledSortKey);
+  }
+
+  resultLabel(net: number): string {
+    return net > 0 ? `+${net}` : String(net);
   }
 
   getAvatarSrc(avatarUrl: string | null): string | undefined {

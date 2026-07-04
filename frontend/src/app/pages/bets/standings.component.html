@@ -1,98 +1,125 @@
-@if (standings().length || voidBets().length) {
-  <div class="standings">
-    @for (standing of standings(); track standing.opponentId) {
-      <div class="standing">
-        <div class="standing__head">
-          <ea-avatar
-            [src]="getAvatarSrc(standing.avatarUrl)"
-            [initials]="getInitials(standing.name)"
-            size="xs" />
-          <span class="standing__name">{{ standing.name }}</span>
-          <span
-            class="standing__summary"
-            [class.standing__summary--positive]="standing.net > 0"
-            [class.standing__summary--negative]="standing.net < 0">
-            {{ summary(standing.net) }}
+@if (settledBets().length) {
+  @if (standings().length) {
+    <div class="standings">
+      @for (standing of standings(); track standing.opponentId) {
+        <div class="standing">
+          <div class="standing__head">
+            <ea-avatar
+              [src]="getAvatarSrc(standing.avatarUrl)"
+              [initials]="getInitials(standing.name)"
+              size="xs" />
+            <span class="standing__name">{{ standing.name }}</span>
+            <span
+              class="standing__summary"
+              [class.standing__summary--positive]="standing.net > 0"
+              [class.standing__summary--negative]="standing.net < 0">
+              {{ summary(standing.net) }}
+            </span>
+          </div>
+
+          <div class="standing__track">
+            <div
+              class="standing__center"
+              aria-hidden="true">
+            </div>
+            @if (standing.net < 0) {
+              <div
+                class="standing__bar standing__bar--owe"
+                [style.width.%]="barWidth(standing.net)">
+              </div>
+            } @else if (standing.net > 0) {
+              <div
+                class="standing__bar standing__bar--owed"
+                [style.width.%]="barWidth(standing.net)">
+              </div>
+            }
+
+            <div class="standing__tooltip">
+              <ul class="breakdown">
+                @for (item of standing.breakdown; track $index) {
+                  <li class="breakdown__item">
+                    <span class="breakdown__label">
+                      <bb-bet-graphic
+                        [slug]="item.iconSlug"
+                        [color]="item.iconColor"
+                        [size]="16" />
+                      <span class="breakdown__title">{{ item.title }}</span>
+                    </span>
+                    <span
+                      class="breakdown__beers"
+                      [class.breakdown__beers--owe]="item.iOwe">
+                      {{ item.iOwe ? '-' : '+' }}{{ item.beers }}
+                    </span>
+                  </li>
+                }
+              </ul>
+            </div>
+          </div>
+
+          <ul class="standing__breakdown">
+            @for (item of standing.breakdown; track $index) {
+              <li class="breakdown__item">
+                <span class="breakdown__label">
+                  <bb-bet-graphic
+                    [slug]="item.iconSlug"
+                    [color]="item.iconColor"
+                    [size]="16" />
+                  <span class="breakdown__title">{{ item.title }}</span>
+                </span>
+                <span
+                  class="breakdown__beers"
+                  [class.breakdown__beers--owe]="item.iOwe">
+                  {{ item.iOwe ? '-' : '+' }}{{ item.beers }}
+                </span>
+              </li>
+            }
+          </ul>
+        </div>
+      }
+    </div>
+  }
+
+  <div class="settled">
+    <div class="settled__head">
+      <h3 class="settled__title">Settled bets</h3>
+      <ea-dropdown
+        class="settled__sort"
+        label="Sort by"
+        size="sm"
+        [options]="sortOptions"
+        [value]="sortKey()"
+        (valueChange)="onSortChange($event)" />
+    </div>
+
+    <div class="settled__list">
+      @for (bet of settledBets(); track bet.id) {
+        <a
+          class="settled-bet"
+          [class.settled-bet--void]="bet.outcome === 'void'"
+          [routerLink]="['/bets', bet.id]">
+          <span class="settled-bet__icon">
+            <bb-bet-graphic
+              [slug]="bet.iconSlug"
+              [color]="bet.iconColor"
+              [size]="20" />
           </span>
-        </div>
-
-        <div class="standing__track">
-          <div
-            class="standing__center"
-            aria-hidden="true">
-          </div>
-          @if (standing.net < 0) {
-            <div
-              class="standing__bar standing__bar--owe"
-              [style.width.%]="barWidth(standing.net)">
-            </div>
-          } @else if (standing.net > 0) {
-            <div
-              class="standing__bar standing__bar--owed"
-              [style.width.%]="barWidth(standing.net)">
-            </div>
+          <span class="settled-bet__info">
+            <span class="settled-bet__title">{{ bet.title }}</span>
+            <span class="settled-bet__opponent">vs. {{ bet.opponentName }}</span>
+          </span>
+          @if (bet.outcome === 'void') {
+            <span class="settled-bet__stamp">VOID</span>
+          } @else {
+            <span
+              class="settled-bet__result"
+              [class.settled-bet__result--won]="bet.net > 0"
+              [class.settled-bet__result--lost]="bet.net < 0">
+              {{ resultLabel(bet.net) }}
+            </span>
           }
-
-          <div class="standing__tooltip">
-            <ul class="breakdown">
-              @for (item of standing.breakdown; track $index) {
-                <li class="breakdown__item">
-                  <span class="breakdown__label">
-                    <bb-bet-graphic
-                      [slug]="item.iconSlug"
-                      [color]="item.iconColor"
-                      [size]="16" />
-                    <span class="breakdown__title">{{ item.title }}</span>
-                  </span>
-                  <span
-                    class="breakdown__beers"
-                    [class.breakdown__beers--owe]="item.iOwe">
-                    {{ item.iOwe ? '-' : '+' }}{{ item.beers }}
-                  </span>
-                </li>
-              }
-            </ul>
-          </div>
-        </div>
-
-        <ul class="standing__breakdown">
-          @for (item of standing.breakdown; track $index) {
-            <li class="breakdown__item">
-              <span class="breakdown__label">
-                <bb-bet-graphic
-                  [slug]="item.iconSlug"
-                  [color]="item.iconColor"
-                  [size]="16" />
-                <span class="breakdown__title">{{ item.title }}</span>
-              </span>
-              <span
-                class="breakdown__beers"
-                [class.breakdown__beers--owe]="item.iOwe">
-                {{ item.iOwe ? '-' : '+' }}{{ item.beers }}
-              </span>
-            </li>
-          }
-        </ul>
-      </div>
-    }
-
-    @for (voidBet of voidBets(); track voidBet.id) {
-      <a
-        class="void-bet"
-        [routerLink]="['/bets', voidBet.id]">
-        <span class="void-bet__icon">
-          <bb-bet-graphic
-            [slug]="voidBet.iconSlug"
-            [color]="voidBet.iconColor"
-            [size]="20" />
-        </span>
-        <span class="void-bet__info">
-          <span class="void-bet__title">{{ voidBet.title }}</span>
-          <span class="void-bet__opponent">vs. {{ voidBet.opponentName }}</span>
-        </span>
-        <span class="void-bet__stamp">VOID</span>
-      </a>
-    }
+        </a>
+      }
+    </div>
   </div>
 } @else {
   <ea-empty-state
