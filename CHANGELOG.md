@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.6.0] - 2026-07-04
+
+### Added
+
+- Sort the settled bets in the Standings tab by settlement date, name, or result (most won through most lost, with voids in the middle)
+
+### Changed
+
+- Show a card for every settled bet in the Standings tab, not just voided ones, with each win, loss, and void laid out with tighter spacing and a lighter cross-out on voids
+- Rename the bets "Status" filter's "Inactive" option to "Changes pending" so it matches the badge and covers every bet awaiting a response, and give the control a fixed width so it no longer resizes when you switch selection
+- Tidy the spacing and layout of the settle-bet dialog
+
 ## [1.5.1] - 2026-06-23
 
 ### Fixed
@@ -733,6 +745,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - PWA manifest and service worker configuration
 - GitHub issue templates
 
+[1.6.0]: https://github.com/mwiraszka/brewski-bets/compare/v1.5.1...v1.6.0
 [1.5.1]: https://github.com/mwiraszka/brewski-bets/compare/v1.5.0...v1.5.1
 [1.5.0]: https://github.com/mwiraszka/brewski-bets/compare/v1.4.2...v1.5.0
 [1.4.2]: https://github.com/mwiraszka/brewski-bets/compare/v1.4.1...v1.4.2
