@@ -267,12 +267,11 @@ export const betRoutes = new Hono<AppContext>()
     const otherPosition = userPosition === 'user1' ? 'user2' : 'user1';
     const isMyTurn = existing.pendingAction === userPosition;
     const isResting = existing.pendingAction === null;
-    // The party who proposed a still-pending terms change (it now awaits the
-    // other side) can re-edit or withdraw it.
+    // The party who submitted the still-pending bet or change (it now awaits the
+    // other side) can re-edit or withdraw it. Covers a brand-new bet awaiting
+    // first acceptance as well as a proposed change to an already-agreed one.
     const iAmRequester =
-      existing.previousState != null &&
-      !existing.settlementProposed &&
-      existing.pendingAction === otherPosition;
+      !existing.settlementProposed && existing.pendingAction === otherPosition;
 
     if (body.action === 'accept') {
       if (!isMyTurn) {

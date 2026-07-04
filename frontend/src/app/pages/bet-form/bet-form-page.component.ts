@@ -284,15 +284,16 @@ export class BetFormPageComponent implements OnInit, CanComponentDeactivate {
     () => this.settlementProposed() && this.isMyTurn(),
   );
 
-  // The party who proposed a still-pending change can review it read-only too,
-  // and either re-edit or withdraw it while it waits on the other side.
+  // The party who submitted a still-pending bet or change can review it read-only
+  // too, and either re-edit or withdraw it while it waits on the other side.
+  // Includes a brand-new bet awaiting first acceptance (no previous state).
   readonly isPendingRequester = computed(
     () =>
       this.mode() === 'edit' &&
       !this.isSettled() &&
       !this.settlementProposed() &&
-      !this.isMyTurn() &&
-      this.hasPreviousState(),
+      this.changesPending() &&
+      !this.isMyTurn(),
   );
 
   // Both parties see the bet read-only with proposed terms highlighted until

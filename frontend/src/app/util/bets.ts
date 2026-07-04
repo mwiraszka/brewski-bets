@@ -17,13 +17,14 @@ export function isMyTurn(bet: Bet, userId: string | undefined): boolean {
   return position != null && bet.pendingAction === position;
 }
 
-// True when the user proposed a change that now awaits the other side, so they
-// can re-edit or withdraw it rather than just wait.
+// True when the user submitted the bet, or a change to it, that now awaits the
+// other side, so they can re-edit or withdraw it rather than just wait. Covers a
+// brand-new bet still pending first acceptance as well as a proposed change to an
+// already-agreed one.
 export function isPendingRequester(bet: Bet, userId: string | undefined): boolean {
   return (
     bet.status !== 'settled' &&
     !bet.settlementProposed &&
-    bet.previousState != null &&
     bet.pendingAction != null &&
     !isMyTurn(bet, userId)
   );
