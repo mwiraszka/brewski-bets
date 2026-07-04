@@ -543,14 +543,16 @@
                 (clicked)="startCounter()">
                 Edit
               </ea-button>
-              <ea-button
-                class="btn-reject"
-                variant="secondary"
-                [loading]="actionInFlight() === 'reject'"
-                [disabled]="isBusy()"
-                (clicked)="onWithdraw()">
-                Cancel changes
-              </ea-button>
+              @if (hasPreviousState()) {
+                <ea-button
+                  class="btn-reject"
+                  variant="secondary"
+                  [loading]="actionInFlight() === 'reject'"
+                  [disabled]="isBusy()"
+                  (clicked)="onWithdraw()">
+                  Cancel changes
+                </ea-button>
+              }
             </div>
           } @else if (canSubmitChanges() || canSettle()) {
             <div class="action-row">

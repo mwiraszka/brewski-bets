@@ -3,6 +3,8 @@ import {
   BadgeComponent,
   BottleIconComponent,
   CalendarIconComponent,
+  EditIconComponent,
+  TooltipDirective,
 } from '@eagami/ui';
 
 import { DatePipe } from '@angular/common';
@@ -16,6 +18,7 @@ import {
   initialsOf,
   isAwaitingOutcome,
   isMyTurn,
+  isPendingRequester,
   positionOf,
   withAgreedTerms,
 } from '@app/util';
@@ -32,6 +35,8 @@ import {
     BetGraphicComponent,
     BottleIconComponent,
     CalendarIconComponent,
+    EditIconComponent,
+    TooltipDirective,
   ],
 })
 export class BetCardComponent {
@@ -86,4 +91,16 @@ export class BetCardComponent {
   readonly changesPending = computed(
     () => this.bet().pendingAction != null && this.bet().status !== 'settled',
   );
+
+  readonly canEdit = computed(() => {
+    const bet = this.bet();
+    if (bet.status === 'settled') {
+      return false;
+    }
+    return (
+      this.myTurn() ||
+      (bet.status === 'active' && bet.pendingAction == null) ||
+      isPendingRequester(bet, this.currentUserId())
+    );
+  });
 }

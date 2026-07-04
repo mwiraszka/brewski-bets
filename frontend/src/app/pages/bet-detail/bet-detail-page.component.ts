@@ -164,7 +164,11 @@ export class BetDetailPageComponent implements OnInit {
     if (this.changesPending() && this.myTurn()) {
       return 'Review changes';
     }
-    if (bet && isPendingRequester(bet, this.currentUserId())) {
+    if (
+      bet &&
+      bet.previousState != null &&
+      isPendingRequester(bet, this.currentUserId())
+    ) {
       return 'Review changes';
     }
     return 'Edit bet';
