@@ -1,6 +1,6 @@
 {
   "name": "brewski-bets",
-  "version": "1.5.1",
+  "version": "1.6.0",
   "description": "Frontend for brewski bets, built with Angular",
   "author": "Michal Wiraszka",
   "private": true,
@@ -23,32 +23,32 @@
     "test": "ng test"
   },
   "dependencies": {
-    "@angular/cdk": "22.0.2",
-    "@angular/common": "22.0.2",
-    "@angular/compiler": "22.0.2",
-    "@angular/core": "22.0.2",
-    "@angular/forms": "22.0.2",
-    "@angular/platform-browser": "22.0.2",
-    "@angular/router": "22.0.2",
-    "@clerk/clerk-js": "6.20.0",
-    "@eagami/ui": "4.3.0",
+    "@angular/cdk": "22.0.3",
+    "@angular/common": "22.0.5",
+    "@angular/compiler": "22.0.5",
+    "@angular/core": "22.0.5",
+    "@angular/forms": "22.0.5",
+    "@angular/platform-browser": "22.0.5",
+    "@angular/router": "22.0.5",
+    "@clerk/clerk-js": "6.23.0",
+    "@eagami/ui": "5.2.0",
     "rxjs": "7.8.2",
     "tslib": "2.8.1",
     "zone.js": "0.16.2"
   },
   "devDependencies": {
-    "@angular/build": "22.0.3",
-    "@angular/cli": "22.0.3",
-    "@angular/compiler-cli": "22.0.2",
+    "@angular/build": "22.0.5",
+    "@angular/cli": "22.0.5",
+    "@angular/compiler-cli": "22.0.5",
     "@eslint/js": "10.0.1",
     "@trivago/prettier-plugin-sort-imports": "6.0.2",
-    "eslint": "10.5.0",
-    "eslint-plugin-import-x": "4.16.2",
-    "globals": "17.6.0",
+    "eslint": "10.6.0",
+    "eslint-plugin-import-x": "4.17.1",
+    "globals": "17.7.0",
     "jsdom": "29.1.1",
-    "prettier": "3.8.4",
+    "prettier": "3.9.4",
     "typescript": "6.0.3",
-    "typescript-eslint": "8.61.1",
+    "typescript-eslint": "8.62.1",
     "vitest": "4.1.9"
   },
   "engines": {
@@ -86,7 +86,10 @@
       "js-cookie": ">=3.0.7",
       "webpack-dev-server": ">=5.2.4",
       "ws": ">=8.20.1",
-      "qs": ">=6.15.2"
+      "qs": ">=6.15.2",
+      "sigstore": ">=4.1.1",
+      "@sigstore/core": ">=3.2.1",
+      "@sigstore/verify": ">=3.1.1"
     },
     "peerDependencyRules": {
       "allowedVersions": {

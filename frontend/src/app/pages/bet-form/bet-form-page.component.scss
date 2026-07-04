@@ -469,10 +469,42 @@ fieldset[disabled] {
   color: var(--bb-color-textSecondary);
 }
 
+.settle-body {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.settle-intro {
+  margin: 0;
+  line-height: 1.5;
+  color: var(--bb-color-textSecondary);
+}
+
 .settle-options {
   display: flex;
   flex-direction: column;
   gap: 8px;
+}
+
+.settle-options ::ng-deep .ea-radio {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid var(--bb-color-borderDefault);
+  border-radius: 8px;
+  transition:
+    border-color 0.15s ease,
+    background-color 0.15s ease;
+}
+
+.settle-options ::ng-deep .ea-radio:hover {
+  border-color: var(--bb-color-primary);
+  background-color: var(--bb-color-surfaceHover);
+}
+
+.settle-options ::ng-deep .ea-radio--checked {
+  border-color: var(--bb-color-primary);
+  background-color: var(--bb-color-surfacePrimaryTint);
 }
 
 .back-link {
