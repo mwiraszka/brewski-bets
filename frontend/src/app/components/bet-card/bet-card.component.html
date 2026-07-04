@@ -1,3 +1,13 @@
+@if (canEdit()) {
+  <a
+    class="bet-card__edit"
+    [routerLink]="['/bets', bet().id, 'edit']"
+    aria-label="Edit bet"
+    [eaTooltip]="'Edit bet'">
+    <ea-icon-edit />
+  </a>
+}
+
 <a
   class="bet-card"
   [routerLink]="['/bets', bet().id]">

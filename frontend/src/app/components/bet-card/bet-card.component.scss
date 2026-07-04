@@ -1,5 +1,45 @@
 :host {
+  position: relative;
   display: block;
+}
+
+.bet-card__edit {
+  z-index: 1;
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  opacity: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  font-size: 18px;
+  text-decoration: none;
+  border-radius: 8px;
+  background-color: var(--bb-color-surfaceSubtle);
+  color: var(--bb-color-textSecondary);
+  transition:
+    opacity 0.15s ease,
+    background-color 0.15s ease,
+    color 0.15s ease;
+
+  &:hover {
+    background-color: var(--bb-color-surfaceHover);
+    color: var(--bb-color-textStrong);
+  }
+}
+
+:host:hover .bet-card__edit,
+.bet-card__edit:focus-visible {
+  opacity: 1;
+}
+
+// Touch devices have no hover, so keep the shortcut visible there
+@media (hover: none) {
+  .bet-card__edit {
+    opacity: 1;
+  }
 }
 
 .bet-card {
