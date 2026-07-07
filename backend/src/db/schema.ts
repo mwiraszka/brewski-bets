@@ -20,7 +20,12 @@ export interface BetResult {
   name: string;
   brewskiCount: number;
   assignedTo: 'user1' | 'user2' | null;
+  // Marks the whole-bet VOID pseudo-outcome, distinct from `voided` below which
+  // flags a real outcome the players have individually nullified.
   isSpecial?: 'void';
+  // A live outcome the players have voided so it can no longer resolve or pay
+  // out. It keeps its name and stake but is excluded from the win/loss stakes.
+  voided?: boolean;
 }
 
 // One-step snapshot of a bet's terms and lifecycle state captured just before a

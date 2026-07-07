@@ -36,6 +36,7 @@ interface OutcomeView {
   iOwe: boolean;
   stakeLabel: string;
   isWinner: boolean;
+  voided: boolean;
 }
 
 @Component({
@@ -208,6 +209,7 @@ export class BetDetailPageComponent implements OnInit {
       iOwe: !iWin,
       stakeLabel: iWin ? 'You win' : 'You owe',
       isWinner: bet.selectedResultIndex === index,
+      voided: !!result.voided,
     };
   }
 }

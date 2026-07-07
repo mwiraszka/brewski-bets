@@ -351,6 +351,42 @@ fieldset[disabled] {
   background-color: var(--bb-color-surfaceHover);
 }
 
+.void-icon-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  font-size: 18px;
+  border: none;
+  border-radius: 6px;
+  background-color: transparent;
+  color: var(--bb-color-textMuted);
+  cursor: pointer;
+  transition:
+    background-color 0.15s,
+    color 0.15s;
+}
+
+.void-icon-btn:hover {
+  background-color: var(--bb-color-surfaceHover);
+  color: var(--bb-color-textBody);
+}
+
+.void-icon-btn--active {
+  color: var(--bb-color-primary);
+}
+
+// A voided outcome keeps its inputs on screen but out of play, so dim the name
+// and stake while leaving the void toggle at full strength to restore it
+.outcome-row--void {
+  .outcome-row__name ea-input,
+  .outcome-row__brewskis {
+    opacity: 0.6;
+  }
+}
+
 .outcome-row--special {
   display: flex;
   align-items: center;
@@ -696,6 +732,15 @@ fieldset[disabled] {
 .review-outcome--removed .review-outcome__stake {
   text-decoration: line-through;
   color: var(--bb-color-textMuted);
+}
+
+.review-outcome__line--voided {
+  @include line-strike;
+
+  .review-outcome__name,
+  .review-outcome__stake {
+    opacity: 0.6;
+  }
 }
 
 .review-outcome__tag {

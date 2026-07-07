@@ -186,12 +186,18 @@
                         {{ outcome.previousStakeLabel }}
                       </span>
                     </div>
-                    <div class="review-outcome__line review-outcome__line--new">
+                    <div
+                      class="review-outcome__line review-outcome__line--new"
+                      [class.review-outcome__line--voided]="outcome.voided">
                       <span class="review-outcome__name">{{ outcome.name }}</span>
                       <span class="review-outcome__stake">{{ outcome.stakeLabel }}</span>
                     </div>
                   } @else {
-                    <div class="review-outcome__line">
+                    <div
+                      class="review-outcome__line"
+                      [class.review-outcome__line--voided]="
+                        outcome.voided && outcome.status !== 'removed'
+                      ">
                       @if (outcome.status === 'added') {
                         <span class="review-outcome__tag review-outcome__tag--added">
                           New
@@ -388,15 +394,37 @@
 
             <div class="outcomes-list">
               @for (outcome of outcomes(); track $index; let rowIndex = $index) {
-                <div class="outcome-row">
+                <div
+                  class="outcome-row"
+                  [class.outcome-row--void]="outcome.voided">
                   <div class="outcome-row__name">
                     <ea-input
                       #outcomeInputRef
                       placeholder="e.g. Poland wins"
+                      [disabled]="!!outcome.voided"
                       [value]="outcome.name"
                       [errorMsg]="outcomeDescriptionError(rowIndex, outcome.name)"
                       (valueChange)="updateOutcomeDescription(rowIndex, $event)"
                       (blurred)="markOutcomeDescriptionTouched(rowIndex)" />
+                    @if (
+                      mode() === 'edit' && canEditTerms() && canVoidOutcome(rowIndex)
+                    ) {
+                      <button
+                        type="button"
+                        class="void-icon-btn"
+                        [class.void-icon-btn--active]="outcome.voided"
+                        [attr.aria-label]="
+                          outcome.voided ? 'Restore outcome' : 'Void outcome'
+                        "
+                        [eaTooltip]="outcome.voided ? 'Restore outcome' : 'Void outcome'"
+                        (click)="toggleVoidOutcome(rowIndex)">
+                        @if (outcome.voided) {
+                          <ea-icon-undo />
+                        } @else {
+                          <ea-icon-slash />
+                        }
+                      </button>
+                    }
                     @if (canEditTerms() && outcomes().length > 1) {
                       <button
                         type="button"
@@ -414,6 +442,7 @@
                       <div class="outcome-row__slider">
                         <ea-slider
                           size="sm"
+                          [disabled]="!!outcome.voided"
                           [hasError]="!!outcomeAmountError(outcome, rowIndex)"
                           [min]="-maxBrewskiCount"
                           [max]="maxBrewskiCount"

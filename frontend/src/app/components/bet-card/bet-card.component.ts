@@ -73,10 +73,15 @@ export class BetCardComponent {
           name: result.name,
           beers: result.brewskiCount,
           iWin,
+          voided: !!result.voided,
           stakeLabel: iWin ? 'Win' : 'Lose',
         };
       })
       .sort((a, b) => {
+        // Voided outcomes are out of play, so they sink to the bottom
+        if (a.voided !== b.voided) {
+          return a.voided ? 1 : -1;
+        }
         // Wins first (most won to least), then losses (least lost to most)
         if (a.iWin !== b.iWin) {
           return a.iWin ? -1 : 1;

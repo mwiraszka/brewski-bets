@@ -149,10 +149,21 @@ describe('brewskisAtStake', () => {
     expect(brewskisAtStake(bet, 'user-b')).toBe(5);
   });
 
-  it('ignores voided outcomes', () => {
+  it('ignores the whole-bet void pseudo-outcome', () => {
     const bet = makeBet({
       results: [
         result({ assignedTo: 'user1', brewskiCount: 9, isSpecial: 'void' }),
+        result({ assignedTo: 'user1', brewskiCount: 2 }),
+      ],
+    });
+
+    expect(brewskisAtStake(bet, 'user-a')).toBe(2);
+  });
+
+  it('ignores individually voided outcomes', () => {
+    const bet = makeBet({
+      results: [
+        result({ assignedTo: 'user1', brewskiCount: 9, voided: true }),
         result({ assignedTo: 'user1', brewskiCount: 2 }),
       ],
     });
@@ -182,10 +193,21 @@ describe('brewskisAtRisk', () => {
     expect(brewskisAtRisk(bet, 'user-b')).toBe(3);
   });
 
-  it('ignores voided outcomes', () => {
+  it('ignores the whole-bet void pseudo-outcome', () => {
     const bet = makeBet({
       results: [
         result({ assignedTo: 'user2', brewskiCount: 9, isSpecial: 'void' }),
+        result({ assignedTo: 'user2', brewskiCount: 2 }),
+      ],
+    });
+
+    expect(brewskisAtRisk(bet, 'user-a')).toBe(2);
+  });
+
+  it('ignores individually voided outcomes', () => {
+    const bet = makeBet({
+      results: [
+        result({ assignedTo: 'user2', brewskiCount: 9, voided: true }),
         result({ assignedTo: 'user2', brewskiCount: 2 }),
       ],
     });

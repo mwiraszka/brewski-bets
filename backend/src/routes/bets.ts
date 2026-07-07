@@ -16,6 +16,7 @@ const betResultSchema = z.object({
   name: z.string().min(1),
   brewskiCount: z.number().int().min(0),
   assignedTo: z.enum(['user1', 'user2']).nullable(),
+  voided: z.boolean().optional(),
 });
 
 const iconSlugSchema = z
@@ -340,6 +341,9 @@ export const betRoutes = new Hono<AppContext>()
       const index = body.selectedResultIndex;
       if (index == null || index < 0 || index >= currentResults.length) {
         return c.json({ error: 'Invalid result index' }, 400);
+      }
+      if (currentResults[index]?.voided) {
+        return c.json({ error: 'Cannot settle to a voided outcome' }, 400);
       }
       updates.selectedResultIndex = index;
       updates.settlementProposed = true;

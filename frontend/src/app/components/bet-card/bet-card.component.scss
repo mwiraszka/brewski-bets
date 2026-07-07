@@ -1,3 +1,5 @@
+@use '../../../styles/mixins' as *;
+
 :host {
   position: relative;
   display: block;
@@ -145,6 +147,15 @@
   display: flex;
   align-items: flex-start;
   gap: 8px;
+}
+
+.bet-card__outcome--void {
+  @include line-strike;
+
+  .bet-card__outcome-name,
+  .bet-card__outcome-stake {
+    opacity: 0.6;
+  }
 }
 
 .bet-card__outcome-name {

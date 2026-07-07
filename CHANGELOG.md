@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.7.0] - 2026-07-08
+
+### Added
+
+- Void individual outcomes while editing a bet: each outcome now has a void toggle you can undo in a later edit, a voided outcome no longer counts toward the "could win" or "could lose" totals on the dashboard, and it appears struck through with a thin grey line wherever it is shown
+
 ## [1.6.1] - 2026-07-04
 
 ### Added
@@ -755,6 +761,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - PWA manifest and service worker configuration
 - GitHub issue templates
 
+[1.7.0]: https://github.com/mwiraszka/brewski-bets/compare/v1.6.1...v1.7.0
 [1.6.1]: https://github.com/mwiraszka/brewski-bets/compare/v1.6.0...v1.6.1
 [1.6.0]: https://github.com/mwiraszka/brewski-bets/compare/v1.5.1...v1.6.0
 [1.5.1]: https://github.com/mwiraszka/brewski-bets/compare/v1.5.0...v1.5.1
