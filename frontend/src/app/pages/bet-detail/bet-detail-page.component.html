@@ -95,7 +95,8 @@
             <li
               class="outcome"
               [class.outcome--winner]="outcome.isWinner"
-              [class.outcome--void]="isVoid()">
+              [class.outcome--void]="isVoid()"
+              [class.outcome--voided]="outcome.voided && !isVoid()">
               <span class="outcome__name">{{ outcome.name }}</span>
               <span
                 class="outcome__stake"

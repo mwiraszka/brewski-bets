@@ -72,6 +72,27 @@ $breakpoints: (
   }
 }
 
+/// Thin grey horizontal strike across an element, for a single voided outcome.
+/// Unlike the diagonal pen-strike used for a whole voided bet, this stays level.
+/// Fade the element's text separately so the line itself stays crisp.
+/// @param {Length} $overhang - how far the line extends past each horizontal edge
+@mixin line-strike($overhang: 0) {
+  position: relative;
+
+  &::after {
+    z-index: 1;
+    position: absolute;
+    top: 50%;
+    right: -$overhang;
+    left: -$overhang;
+    height: 1px;
+    background-color: var(--bb-color-strikethrough);
+    pointer-events: none;
+    transform: translateY(-50%);
+    content: '';
+  }
+}
+
 /// Responsive breakpoint manager
 /// @access public
 /// @param {String} $breakpoint - Breakpoint

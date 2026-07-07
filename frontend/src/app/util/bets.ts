@@ -59,15 +59,16 @@ export function isAwaitingOutcome(bet: Bet, now: Date = new Date()): boolean {
   );
 }
 
-// The largest single non-void outcome assigned to one side, since exactly one
-// outcome ever resolves. Voided outcomes never pay out, so they are ignored.
+// The largest single outcome assigned to one side, since exactly one outcome
+// ever resolves. The whole-bet VOID pseudo-outcome and any individually voided
+// outcomes never pay out, so they are ignored.
 function bestOutcomeFor(bet: Bet, side: BetPosition | null): number {
   if (side == null) {
     return 0;
   }
   return bet.results.reduce(
     (max, result) =>
-      result.isSpecial !== 'void' && result.assignedTo === side
+      result.isSpecial !== 'void' && !result.voided && result.assignedTo === side
         ? Math.max(max, result.brewskiCount)
         : max,
     0,

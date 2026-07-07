@@ -14,11 +14,13 @@ import {
   RadioGroupComponent,
   SearchIconComponent,
   SkeletonComponent,
+  SlashIconComponent,
   SliderComponent,
   TextareaComponent,
   ToastService,
   TooltipDirective,
   TrashIconComponent,
+  UndoIconComponent,
 } from '@eagami/ui';
 
 import { DatePipe } from '@angular/common';
@@ -76,6 +78,7 @@ interface ReviewOutcome {
   status: 'unchanged' | 'changed' | 'added' | 'removed';
   name: string;
   stakeLabel: string;
+  voided: boolean;
   previousName?: string;
   previousStakeLabel?: string;
 }
@@ -104,10 +107,12 @@ interface ReviewOutcome {
     RouterLink,
     SearchIconComponent,
     SkeletonComponent,
+    SlashIconComponent,
     SliderComponent,
     TextareaComponent,
     TooltipDirective,
     TrashIconComponent,
+    UndoIconComponent,
   ],
 })
 export class BetFormPageComponent implements OnInit, CanComponentDeactivate {
@@ -356,6 +361,7 @@ export class BetFormPageComponent implements OnInit, CanComponentDeactivate {
         status: 'unchanged' as const,
         name: outcome.name,
         stakeLabel: stake(outcome),
+        voided: !!outcome.voided,
       }));
     }
 
@@ -369,18 +375,30 @@ export class BetFormPageComponent implements OnInit, CanComponentDeactivate {
         const changed =
           next.name !== before.name ||
           next.brewskiCount !== before.brewskiCount ||
-          next.assignedTo !== before.assignedTo;
+          next.assignedTo !== before.assignedTo ||
+          !!next.voided !== !!before.voided;
         rows.push({
           status: changed ? 'changed' : 'unchanged',
           name: next.name,
           stakeLabel: stake(next),
+          voided: !!next.voided,
           previousName: changed ? before.name : undefined,
           previousStakeLabel: changed ? stake(before) : undefined,
         });
       } else if (next) {
-        rows.push({ status: 'added', name: next.name, stakeLabel: stake(next) });
+        rows.push({
+          status: 'added',
+          name: next.name,
+          stakeLabel: stake(next),
+          voided: !!next.voided,
+        });
       } else if (before) {
-        rows.push({ status: 'removed', name: before.name, stakeLabel: stake(before) });
+        rows.push({
+          status: 'removed',
+          name: before.name,
+          stakeLabel: stake(before),
+          voided: !!before.voided,
+        });
       }
     }
     return rows;
@@ -437,7 +455,10 @@ export class BetFormPageComponent implements OnInit, CanComponentDeactivate {
     }
     return this.bet.results
       .map((result, index) => ({ result, index }))
-      .filter(({ result }) => !result.isSpecial || result.isSpecial === 'void')
+      .filter(
+        ({ result }) =>
+          (!result.isSpecial && !result.voided) || result.isSpecial === 'void',
+      )
       .map(({ result, index }) => ({
         value: String(index),
         label: result.isSpecial === 'void' ? 'Void the bet' : result.name,
@@ -468,17 +489,23 @@ export class BetFormPageComponent implements OnInit, CanComponentDeactivate {
     if (!this.iconSlug()) {
       return false;
     }
-    if (!this.outcomes().length) {
+    if (!this.liveOutcomes().length) {
       return false;
     }
-    if (this.outcomes().some(outcome => !outcome.name.trim())) {
+    if (this.liveOutcomes().some(outcome => !outcome.name.trim())) {
       return false;
     }
-    if (this.outcomes().some(outcome => outcome.brewskiCount <= 0)) {
+    if (this.liveOutcomes().some(outcome => outcome.brewskiCount <= 0)) {
       return false;
     }
     return true;
   });
+
+  // Outcomes still in play. Voided outcomes keep their name and stake but no
+  // longer resolve, so they are exempt from validation and stake requirements.
+  private readonly liveOutcomes = computed(() =>
+    this.outcomes().filter(outcome => !outcome.voided),
+  );
 
   readonly formSnapshot = computed(() =>
     JSON.stringify({
@@ -605,6 +632,25 @@ export class BetFormPageComponent implements OnInit, CanComponentDeactivate {
     });
   }
 
+  toggleVoidOutcome(index: number): void {
+    this.outcomes.update(outcomes =>
+      outcomes.map((outcome, i) =>
+        i === index ? { ...outcome, voided: !outcome.voided } : outcome,
+      ),
+    );
+  }
+
+  // The void toggle is offered while un-voiding is always possible, and while
+  // voiding would still leave at least one outcome in play (a bet needs a live
+  // outcome to resolve to).
+  canVoidOutcome(index: number): boolean {
+    const outcomes = this.outcomes();
+    if (outcomes[index]?.voided) {
+      return true;
+    }
+    return outcomes.filter(outcome => !outcome.voided).length > 1;
+  }
+
   updateOutcomeDescription(index: number, description: string): void {
     const trimmed = description.slice(0, OUTCOME_MAX_LENGTH);
     this.outcomes.update(outcomes =>
@@ -661,6 +707,9 @@ export class BetFormPageComponent implements OnInit, CanComponentDeactivate {
   }
 
   outcomeDescriptionError(index: number, description: string): string {
+    if (this.outcomes()[index]?.voided) {
+      return '';
+    }
     const empty = !description.trim();
     if (!empty) {
       return '';
@@ -672,7 +721,7 @@ export class BetFormPageComponent implements OnInit, CanComponentDeactivate {
   }
 
   outcomeAmountError(outcome: BetResult, index: number): string {
-    if (outcome.brewskiCount > 0) {
+    if (outcome.voided || outcome.brewskiCount > 0) {
       return '';
     }
     if (this.submitAttempted()) {
@@ -699,13 +748,13 @@ export class BetFormPageComponent implements OnInit, CanComponentDeactivate {
     if (!this.iconSlug()) {
       return false;
     }
-    if (!this.outcomes().length) {
+    if (!this.liveOutcomes().length) {
       return false;
     }
-    if (this.outcomes().some(outcome => !outcome.name.trim())) {
+    if (this.liveOutcomes().some(outcome => !outcome.name.trim())) {
       return false;
     }
-    if (this.outcomes().some(outcome => outcome.brewskiCount <= 0)) {
+    if (this.liveOutcomes().some(outcome => outcome.brewskiCount <= 0)) {
       return false;
     }
 
@@ -731,6 +780,7 @@ export class BetFormPageComponent implements OnInit, CanComponentDeactivate {
             name: outcome.name,
             brewskiCount: outcome.brewskiCount,
             assignedTo: outcome.assignedTo,
+            voided: outcome.voided ?? false,
           })),
         });
         this.toast.success('Bet submitted for review');
@@ -745,6 +795,7 @@ export class BetFormPageComponent implements OnInit, CanComponentDeactivate {
             name: outcome.name,
             brewskiCount: outcome.brewskiCount,
             assignedTo: outcome.assignedTo,
+            voided: outcome.voided ?? false,
           })),
           action: 'submit',
         });

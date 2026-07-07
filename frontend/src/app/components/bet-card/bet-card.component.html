@@ -46,7 +46,9 @@
   @if (outcomes().length) {
     <ul class="bet-card__outcomes">
       @for (outcome of outcomes(); track $index) {
-        <li class="bet-card__outcome">
+        <li
+          class="bet-card__outcome"
+          [class.bet-card__outcome--void]="outcome.voided">
           <span class="bet-card__outcome-name">{{ outcome.name }}</span>
           <span
             class="bet-card__outcome-stake"
