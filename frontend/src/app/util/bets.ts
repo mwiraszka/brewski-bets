@@ -42,6 +42,7 @@ export function withAgreedTerms<T extends Bet>(bet: T): T {
   return {
     ...bet,
     title: prev.title,
+    event: prev.event,
     description: prev.description,
     iconSlug: prev.iconSlug,
     iconColor: prev.iconColor,
@@ -86,6 +87,21 @@ export function brewskisAtRisk(bet: Bet, userId: string | undefined): number {
   const me = positionOf(bet, userId);
   const opponent = me == null ? null : me === 'user1' ? 'user2' : 'user1';
   return bestOutcomeFor(bet, opponent);
+}
+
+// The agreed event, matching the terms the bet lists display via withAgreedTerms
+export function agreedEvent(bet: Bet): string {
+  return bet.previousState?.event ?? bet.event;
+}
+
+export function distinctEvents(bets: readonly Bet[]): string[] {
+  return [...new Set(bets.map(agreedEvent))]
+    .filter(Boolean)
+    .sort((a, b) => a.localeCompare(b, undefined, { sensitivity: 'base' }));
+}
+
+export function signedLabel(value: number): string {
+  return value > 0 ? `+${value}` : String(value);
 }
 
 export type BetSortKey = 'title' | 'resolution' | 'brewskis' | 'modified';

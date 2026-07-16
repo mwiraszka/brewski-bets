@@ -6,6 +6,7 @@ import {
   CalendarIconComponent,
   CardComponent,
   EditIconComponent,
+  FlagIconComponent,
   SkeletonComponent,
   ToastService,
   TrophyIconComponent,
@@ -53,6 +54,7 @@ interface OutcomeView {
     CalendarIconComponent,
     CardComponent,
     EditIconComponent,
+    FlagIconComponent,
     SkeletonComponent,
     BetGraphicComponent,
     TrophyIconComponent,
@@ -94,6 +96,7 @@ export class BetDetailPageComponent implements OnInit {
   });
 
   readonly displayTitle = computed(() => this.view()?.title ?? '');
+  readonly displayEvent = computed(() => this.view()?.event ?? '');
   readonly displayIconSlug = computed(() => this.view()?.iconSlug ?? null);
   readonly displayIconColor = computed(() => this.view()?.iconColor ?? null);
   readonly displayDescription = computed(() => this.view()?.description ?? null);

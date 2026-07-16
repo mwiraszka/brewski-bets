@@ -32,6 +32,7 @@ export interface BetResult {
 // `submit` overwrites them, so a `reject` can restore the prior agreed version.
 export interface BetSnapshot {
   title: string;
+  event: string;
   description: string | null;
   iconSlug: string | null;
   iconColor: string | null;
@@ -90,6 +91,7 @@ export const friendships = pgTable(
 export const bets = pgTable('bets', {
   id: uuid('id').primaryKey().defaultRandom(),
   title: text('title').notNull(),
+  event: text('event').notNull(),
   description: text('description'),
   iconSlug: text('icon_slug'),
   iconColor: text('icon_color'),

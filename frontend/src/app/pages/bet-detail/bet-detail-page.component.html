@@ -65,6 +65,13 @@
         <p class="detail-description">{{ description }}</p>
       }
 
+      @if (displayEvent(); as event) {
+        <div class="detail-meta">
+          <ea-icon-flag class="detail-meta__icon" />
+          <span>{{ event }}</span>
+        </div>
+      }
+
       @if (displayResolutionDate(); as resolutionDate) {
         <div class="detail-meta">
           <ea-icon-calendar class="detail-meta__icon" />

@@ -1,11 +1,13 @@
-import { Injectable, inject, signal } from '@angular/core';
+import { Injectable, computed, inject, signal } from '@angular/core';
 
 import { type Bet, type BetResult, type BetWithOpponent } from '@app/models';
+import { distinctEvents } from '@app/util';
 
 import { ApiService } from './api.service';
 
 export interface CreateBetPayload {
   title: string;
+  event: string;
   description: string | null;
   iconSlug: string | null;
   iconColor: string | null;
@@ -16,6 +18,7 @@ export interface CreateBetPayload {
 
 export interface UpdateBetPayload {
   title?: string;
+  event?: string;
   description?: string | null;
   iconSlug?: string | null;
   iconColor?: string | null;
@@ -39,6 +42,12 @@ export class BetsService {
 
   readonly bets = this._bets.asReadonly();
   readonly pendingCount = this._pendingCount.asReadonly();
+
+  readonly events = computed(() => distinctEvents(this._bets()));
+
+  // Events unchecked in the event filters. App-wide so the selection survives
+  // navigating between the dashboard and the bets page
+  readonly hiddenEvents = signal<ReadonlySet<string>>(new Set<string>());
 
   // True once bets have been fetched at least this session, so pages can
   // render cached data immediately and refresh in the background

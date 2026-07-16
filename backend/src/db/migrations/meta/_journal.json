@@ -71,6 +71,13 @@
       "when": 1781354134747,
       "tag": "0009_eminent_giant_man",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1784158616787,
+      "tag": "0010_bet_event",
+      "breakpoints": true
     }
   ]
 }
