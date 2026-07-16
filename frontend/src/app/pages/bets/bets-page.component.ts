@@ -94,10 +94,19 @@ export class BetsPageComponent implements OnInit {
   readonly filterText = signal('');
   readonly filterStatus = signal('all');
   readonly events = this.betsService.events;
-  readonly hiddenEvents = this.betsService.hiddenEvents;
+  readonly selectedEvent = this.betsService.selectedEvent;
+
+  // Resolve the stored selection to a real event so exactly one is always
+  // active: falls back to the first event whenever the stored one is unset or
+  // no longer exists (e.g. its last bet was deleted)
+  readonly effectiveEvent = computed(() => {
+    const events = this.events();
+    const selected = this.selectedEvent();
+    return selected && events.includes(selected) ? selected : (events[0] ?? '');
+  });
 
   readonly eventFilteredBets = computed(() =>
-    this.allBets().filter(bet => !this.hiddenEvents().has(agreedEvent(bet))),
+    this.allBets().filter(bet => agreedEvent(bet) === this.effectiveEvent()),
   );
   readonly sort = signal<DataTableSortState>({ column: '', direction: null });
 

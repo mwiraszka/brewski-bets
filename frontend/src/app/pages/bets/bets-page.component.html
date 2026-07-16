@@ -12,8 +12,10 @@
         label="Bets">
         <bb-event-filter
           class="tab-event-filter"
+          mode="single"
           [events]="events()"
-          [(hiddenEvents)]="hiddenEvents" />
+          [selectedEvent]="effectiveEvent()"
+          (selectedEventChange)="selectedEvent.set($event)" />
         <div class="filters">
           <ea-input
             class="filters__search"
@@ -90,8 +92,10 @@
         label="Standings">
         <bb-event-filter
           class="tab-event-filter"
+          mode="single"
           [events]="events()"
-          [(hiddenEvents)]="hiddenEvents" />
+          [selectedEvent]="effectiveEvent()"
+          (selectedEventChange)="selectedEvent.set($event)" />
         @if (loading()) {
           <div class="standings-skeleton">
             @for (_ of skeletonRows; track $index) {
