@@ -1,6 +1,6 @@
 {
   "name": "brewski-bets",
-  "version": "1.8.0",
+  "version": "1.9.0",
   "private": true,
   "scripts": {
     "dev": "concurrently --kill-others --names \"tunnel,api,web\" --prefix-colors \"yellow,green,cyan\" \"pnpm -C backend tunnel\" \"pnpm -C backend dev\" \"pnpm -C frontend start\"",

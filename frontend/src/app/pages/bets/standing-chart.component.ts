@@ -1,3 +1,4 @@
+import { BottleIconComponent } from '@eagami/ui';
 import {
   CategoryScale,
   Chart,
@@ -7,6 +8,7 @@ import {
   LinearScale,
   PointElement,
   Tooltip,
+  type TooltipModel,
 } from 'chart.js';
 
 import { formatDate } from '@angular/common';
@@ -16,9 +18,11 @@ import {
   DestroyRef,
   type ElementRef,
   LOCALE_ID,
+  computed,
   effect,
   inject,
   input,
+  signal,
   viewChild,
 } from '@angular/core';
 
@@ -42,14 +46,32 @@ export interface StandingChartPoint {
   running: number;
 }
 
-// Running brewski balance against one opponent: a stepped line that holds each
-// balance until the next settlement. Polarity is carried by position against the
-// emphasized zero line first, with the app's owe/owed colors as reinforcement.
+interface ChartTip {
+  title: string;
+  delta: number | null;
+  balance: number;
+  settledDate: string | null;
+  x: number;
+  y: number;
+}
+
+const MIN_SEGMENT_WIDTH = 20;
+const AXIS_GUTTER_WIDTH = 60;
+// Half the tip's max-width, so a clamped tip never overflows the shell
+const TIP_EDGE_MARGIN = 90;
+// Keeps the tip, rendered above its anchor, inside the chart's own height
+const TIP_MIN_ANCHOR_Y = 104;
+
+// Running brewski balance against one opponent. Each dot is a settled bet drawn
+// at the pre-bet balance, so the step to its right shows that bet's effect; the
+// dot, its step, and its tooltip result all share the win/loss color. A final
+// neutral dot marks today's balance.
 @Component({
   selector: 'bb-standing-chart',
   templateUrl: './standing-chart.component.html',
   styleUrl: './standing-chart.component.scss',
   changeDetection: ChangeDetectionStrategy.Eager,
+  imports: [BottleIconComponent],
 })
 export class StandingChartComponent {
   private readonly themeService = inject(ThemeService);
@@ -60,6 +82,13 @@ export class StandingChartComponent {
   readonly ariaLabel = input('');
 
   private readonly canvas = viewChild<ElementRef<HTMLCanvasElement>>('canvas');
+  private readonly scroller = viewChild<ElementRef<HTMLElement>>('scroller');
+
+  readonly tip = signal<ChartTip | null>(null);
+
+  readonly minWidth = computed(
+    () => AXIS_GUTTER_WIDTH + MIN_SEGMENT_WIDTH * (this.points().length + 1),
+  );
 
   private chart: Chart<'line', number[], string> | null = null;
   private chartKey = '';
@@ -81,6 +110,7 @@ export class StandingChartComponent {
         return;
       }
       this.chartKey = key;
+      this.tip.set(null);
       this.chart?.destroy();
       this.chart = this.buildChart(canvas, points);
     });
@@ -92,15 +122,16 @@ export class StandingChartComponent {
     canvas: HTMLCanvasElement,
     points: StandingChartPoint[],
   ): Chart<'line', number[], string> {
-    const styles = getComputedStyle(canvas);
+    // Tokens are defined on :root; resolving them off the root element also
+    // works while the canvas itself is not attached yet, which returns empty
+    // strings that chart.js would otherwise silently render as black
+    const styles = getComputedStyle(document.documentElement);
     const token = (name: string): string => styles.getPropertyValue(name).trim();
     const positive = token('--bb-color-positive');
     const positiveSubtle = token('--bb-color-positiveSubtle');
     const danger = token('--bb-color-danger');
     const dangerSubtle = token('--bb-color-dangerSubtle');
-    const textStrong = token('--bb-color-textStrong');
     const textSecondary = token('--bb-color-textSecondary');
-    const borderDefault = token('--bb-color-borderDefault');
     const borderFaint = token('--bb-color-borderFaint');
     const borderDivider = token('--bb-color-borderDivider');
     const surfaceRaised = token('--bb-color-surfaceRaised');
@@ -108,32 +139,36 @@ export class StandingChartComponent {
     const colorFor = (value: number): string =>
       value > 0 ? positive : value < 0 ? danger : textSecondary;
 
+    // Dot i sits at the balance before bet i; the terminal dot is today's balance
+    const values = [...points.map(p => p.running - p.delta), this.finalBalance(points)];
+    const labels = [
+      ...points.map(p => formatDate(p.settledAt, 'MMM d', this.locale)),
+      'Today',
+    ];
+
     return new Chart(canvas, {
       type: 'line',
       data: {
-        labels: [
-          'Start',
-          ...points.map(p => formatDate(p.settledAt, 'MMM d', this.locale)),
-        ],
+        labels,
         datasets: [
           {
-            data: [0, ...points.map(p => p.running)],
+            data: values,
+            // 'after' draws the vertical at the segment's start point, so a
+            // bet's rise or fall appears immediately to the right of its dot
             stepped: 'after',
             borderWidth: 2,
             borderColor: textSecondary,
-            // A step-after segment is drawn held at its start value, so its
-            // polarity (and color) follows p0, not the destination point
             segment: {
-              borderColor: ctx => colorFor(ctx.p0.parsed.y ?? 0),
+              borderColor: ctx => colorFor(points[ctx.p0DataIndex]?.delta ?? 0),
             },
             pointRadius: 4,
             pointHoverRadius: 6,
             pointBorderWidth: 2,
             pointBorderColor: surfaceRaised,
             pointBackgroundColor: ctx =>
-              ctx.dataIndex === 0
-                ? textSecondary
-                : colorFor(points[ctx.dataIndex - 1].delta),
+              ctx.dataIndex < points.length
+                ? colorFor(points[ctx.dataIndex].delta)
+                : textSecondary,
             fill: {
               target: 'origin',
               above: positiveSubtle,
@@ -176,40 +211,62 @@ export class StandingChartComponent {
         },
         plugins: {
           tooltip: {
-            displayColors: false,
-            backgroundColor: surfaceRaised,
-            titleColor: textStrong,
-            bodyColor: textSecondary,
-            footerColor: textSecondary,
-            footerFont: { weight: 'normal', size: 11 },
-            borderColor: borderDefault,
-            borderWidth: 1,
-            padding: 12,
-            callbacks: {
-              title: items => {
-                const index = items[0]?.dataIndex ?? 0;
-                return index === 0 ? 'Start' : points[index - 1].title;
-              },
-              label: item => {
-                if (item.dataIndex === 0) {
-                  return 'All square';
-                }
-                const point = points[item.dataIndex - 1];
-                return [
-                  `${signedLabel(point.delta)} brewskis`,
-                  `Balance: ${signedLabel(point.running)}`,
-                ];
-              },
-              footer: items => {
-                const index = items[0]?.dataIndex ?? 0;
-                return index === 0
-                  ? ''
-                  : formatDate(points[index - 1].settledAt, 'mediumDate', this.locale);
-              },
-            },
+            enabled: false,
+            external: context => this.updateTip(context.tooltip, points),
           },
         },
       },
+    });
+  }
+
+  private finalBalance(points: StandingChartPoint[]): number {
+    return points.length ? points[points.length - 1].running : 0;
+  }
+
+  signed(value: number): string {
+    return signedLabel(value);
+  }
+
+  hideTip(): void {
+    this.tip.set(null);
+  }
+
+  private updateTip(tooltip: TooltipModel<'line'>, points: StandingChartPoint[]): void {
+    if (tooltip.opacity === 0 || !tooltip.dataPoints?.length) {
+      this.tip.set(null);
+      return;
+    }
+
+    const scroller = this.scroller()?.nativeElement;
+    const index = tooltip.dataPoints[0].dataIndex;
+    const bet = index < points.length ? points[index] : null;
+
+    const rawX = tooltip.caretX - (scroller?.scrollLeft ?? 0);
+    const maxX = (scroller?.clientWidth ?? 0) - TIP_EDGE_MARGIN;
+    const x = Math.min(Math.max(rawX, TIP_EDGE_MARGIN), Math.max(maxX, TIP_EDGE_MARGIN));
+    const y = Math.max(tooltip.caretY, TIP_MIN_ANCHOR_Y);
+
+    // The handler fires on every pointer move; skip the signal write while the
+    // hovered point is unchanged
+    const current = this.tip();
+    if (
+      current &&
+      current.x === x &&
+      current.y === y &&
+      current.title === (bet ? bet.title : 'Today')
+    ) {
+      return;
+    }
+
+    this.tip.set({
+      title: bet ? bet.title : 'Today',
+      delta: bet ? bet.delta : null,
+      balance: bet ? bet.running : this.finalBalance(points),
+      settledDate: bet
+        ? `Settled ${formatDate(bet.settledAt, 'mediumDate', this.locale)}`
+        : null,
+      x,
+      y,
     });
   }
 }

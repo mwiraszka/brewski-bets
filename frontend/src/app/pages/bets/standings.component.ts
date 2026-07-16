@@ -140,8 +140,8 @@ export class StandingsComponent {
         name: tally.name,
         avatarUrl: tally.avatarUrl,
         net: tally.net,
-        record: `${tally.wins} won · ${tally.losses} lost`,
-        chartLabel: `Running brewski balance with ${tally.name}: ${tally.wins} won, ${tally.losses} lost, ${this.summary(tally.net).toLowerCase()}`,
+        record: `${tally.wins} bets won · ${tally.losses} bets lost`,
+        chartLabel: `Running brewski balance with ${tally.name}: ${tally.wins} bets won, ${tally.losses} bets lost, ${this.summary(tally.net).toLowerCase()}`,
         points: tally.points,
       }))
       .sort((a, b) => b.net - a.net);

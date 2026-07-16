@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.9.0] - 2026-07-16
+
+### Changed
+
+- Rework the standings balance chart: each bet's dot now sits where its result takes effect, with the rise or fall drawn to its right in the same win/loss colour as the dot, and a neutral "Today" dot marking the current balance
+- Label everything in the chart tooltip: the bet's result and running balance in green or red with the beer bottle unit, plus the settlement date
+- Show the beer bottle unit beside brewski numbers in the standings summary and settled bet results
+- Clarify the standings header with "Opponent:" before the name and a record of bets won and lost
+- Let the standings chart scroll horizontally on narrow screens instead of squeezing the steps together
+
+### Fixed
+
+- Restore the standings chart colours in dark mode, where the lines, fills, and tooltips all rendered black
+
 ## [1.8.0] - 2026-07-16
 
 ### Added
@@ -773,6 +787,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - PWA manifest and service worker configuration
 - GitHub issue templates
 
+[1.9.0]: https://github.com/mwiraszka/brewski-bets/compare/v1.8.0...v1.9.0
 [1.8.0]: https://github.com/mwiraszka/brewski-bets/compare/v1.7.0...v1.8.0
 [1.7.0]: https://github.com/mwiraszka/brewski-bets/compare/v1.6.1...v1.7.0
 [1.6.1]: https://github.com/mwiraszka/brewski-bets/compare/v1.6.0...v1.6.1
