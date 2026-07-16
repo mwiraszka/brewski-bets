@@ -33,11 +33,13 @@ import {
 } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 
+import { EventFilterComponent } from '@app/components/event-filter/event-filter.component';
 import { BetGraphicComponent } from '@app/graphics';
 import { type BetWithOpponent } from '@app/models';
 import { BetsService } from '@app/services/bets.service';
 import { UserService } from '@app/services/user.service';
 import {
+  agreedEvent,
   avatarSrc,
   initialsOf,
   isAwaitingOutcome,
@@ -65,6 +67,7 @@ import { StandingsComponent } from './standings.component';
     DropdownComponent,
     EditIconComponent,
     EmptyStateComponent,
+    EventFilterComponent,
     InputComponent,
     SkeletonComponent,
     StandingsComponent,
@@ -90,6 +93,12 @@ export class BetsPageComponent implements OnInit {
   readonly allBets = this.betsService.bets;
   readonly filterText = signal('');
   readonly filterStatus = signal('all');
+  readonly events = this.betsService.events;
+  readonly hiddenEvents = this.betsService.hiddenEvents;
+
+  readonly eventFilteredBets = computed(() =>
+    this.allBets().filter(bet => !this.hiddenEvents().has(agreedEvent(bet))),
+  );
   readonly sort = signal<DataTableSortState>({ column: '', direction: null });
 
   readonly deleteDialogOpen = signal(false);
@@ -139,7 +148,7 @@ export class BetsPageComponent implements OnInit {
 
   readonly filteredBets = computed(() => {
     // Show the agreed terms, not an unaccepted pending proposal
-    let bets = this.betsService.bets().map(withAgreedTerms);
+    let bets = this.eventFilteredBets().map(withAgreedTerms);
 
     const text = this.filterText().toLowerCase().trim();
     if (text) {

@@ -18,10 +18,12 @@ import {
 import { RouterLink } from '@angular/router';
 
 import { BetCardComponent } from '@app/components/bet-card/bet-card.component';
+import { EventFilterComponent } from '@app/components/event-filter/event-filter.component';
 import { BetsService } from '@app/services/bets.service';
 import { UserService } from '@app/services/user.service';
 import {
   type BetSortKey,
+  agreedEvent,
   brewskisAtRisk,
   brewskisAtStake,
   isAwaitingOutcome,
@@ -39,6 +41,7 @@ import {
   imports: [
     RouterLink,
     BetCardComponent,
+    EventFilterComponent,
     BottleIconComponent,
     ButtonComponent,
     DropdownComponent,
@@ -79,9 +82,18 @@ export class HomePageComponent implements OnInit {
     { label: 'Bet title', value: 'title' },
   ];
 
+  readonly events = this.betsService.events;
+  readonly hiddenEvents = this.betsService.hiddenEvents;
+
+  readonly hasOpenBets = computed(() =>
+    this.bets().some(bet => bet.status !== 'settled'),
+  );
+
   readonly openBets = computed(() =>
     sortBetsBy(
-      this.bets().filter(bet => bet.status !== 'settled'),
+      this.bets().filter(
+        bet => bet.status !== 'settled' && !this.hiddenEvents().has(agreedEvent(bet)),
+      ),
       this.sortKey(),
       this.currentUserId(),
     ),
