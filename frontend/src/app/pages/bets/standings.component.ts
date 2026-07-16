@@ -1,17 +1,6 @@
-import {
-  AvatarComponent,
-  BottleIconComponent,
-  DropdownComponent,
-  EmptyStateComponent,
-} from '@eagami/ui';
+import { AvatarComponent, BottleIconComponent, EmptyStateComponent } from '@eagami/ui';
 
-import {
-  ChangeDetectionStrategy,
-  Component,
-  computed,
-  input,
-  signal,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
 import { RouterLink } from '@angular/router';
 
 import { BetGraphicComponent } from '@app/graphics';
@@ -54,8 +43,6 @@ interface SettledBet {
   settledDate: number;
 }
 
-type SettledSortKey = 'settlement' | 'name' | 'result';
-
 @Component({
   selector: 'bb-standings',
   templateUrl: './standings.component.html',
@@ -66,7 +53,6 @@ type SettledSortKey = 'settlement' | 'name' | 'result';
     AvatarComponent,
     BetGraphicComponent,
     BottleIconComponent,
-    DropdownComponent,
     EmptyStateComponent,
     StandingChartComponent,
   ],
@@ -74,14 +60,6 @@ type SettledSortKey = 'settlement' | 'name' | 'result';
 export class StandingsComponent {
   readonly bets = input.required<BetWithOpponent[]>();
   readonly currentUserId = input<string | undefined>(undefined);
-
-  readonly sortKey = signal<SettledSortKey>('settlement');
-
-  readonly sortOptions = [
-    { label: 'Settlement date', value: 'settlement' },
-    { label: 'Name', value: 'name' },
-    { label: 'Result', value: 'result' },
-  ];
 
   readonly standings = computed<OpponentStanding[]>(() => {
     const userId = this.currentUserId();
@@ -169,18 +147,9 @@ export class StandingsComponent {
     const byName = (a: SettledBet, b: SettledBet): number =>
       a.title.localeCompare(b.title, undefined, { sensitivity: 'base' });
 
-    const key = this.sortKey();
-    return items.sort((a, b) => {
-      switch (key) {
-        case 'name':
-          return byName(a, b);
-        // Most won at the top down to most lost, with voids (net 0) in the centre
-        case 'result':
-          return b.net - a.net || byName(a, b);
-        case 'settlement':
-          return b.settledDate - a.settledDate || byName(a, b);
-      }
-    });
+    // Oldest settlement first, so the list reads in the same chronological order
+    // as the chart above runs left to right
+    return items.sort((a, b) => a.settledDate - b.settledDate || byName(a, b));
   });
 
   summary(net: number): string {
@@ -191,10 +160,6 @@ export class StandingsComponent {
       return `You owe ${Math.abs(net)}`;
     }
     return 'All square';
-  }
-
-  onSortChange(value: string): void {
-    this.sortKey.set(value as SettledSortKey);
   }
 
   resultLabel(net: number): string {

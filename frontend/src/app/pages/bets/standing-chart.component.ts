@@ -59,8 +59,6 @@ const MIN_SEGMENT_WIDTH = 20;
 const AXIS_GUTTER_WIDTH = 60;
 // Half the tip's max-width, so a clamped tip never overflows the shell
 const TIP_EDGE_MARGIN = 90;
-// Keeps the tip, rendered above its anchor, inside the chart's own height
-const TIP_MIN_ANCHOR_Y = 104;
 
 // Running brewski balance against one opponent. Each dot is a settled bet drawn
 // at the pre-bet balance, so the step to its right shows that bet's effect; the
@@ -244,7 +242,8 @@ export class StandingChartComponent {
     const rawX = tooltip.caretX - (scroller?.scrollLeft ?? 0);
     const maxX = (scroller?.clientWidth ?? 0) - TIP_EDGE_MARGIN;
     const x = Math.min(Math.max(rawX, TIP_EDGE_MARGIN), Math.max(maxX, TIP_EDGE_MARGIN));
-    const y = Math.max(tooltip.caretY, TIP_MIN_ANCHOR_Y);
+    // Anchor at the hovered dot; the tip's own transform drops it just below
+    const y = tooltip.caretY;
 
     // The handler fires on every pointer move; skip the signal write while the
     // hovered point is unchanged

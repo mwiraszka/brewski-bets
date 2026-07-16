@@ -52,8 +52,15 @@ sup {
 }
 
 ea-empty-state {
+  // Inherited by both the title and description text
+  font-style: italic;
   --ea-empty-state-title-font-weight: 400;
   --ea-empty-state-title-color: var(--bb-color-textSecondary);
   --ea-empty-state-description-color: var(--bb-color-textFaint);
   --ea-empty-state-media-color: var(--bb-color-iconFaint);
+}
+
+// Keep any action button or link in the empty state upright, not italic
+ea-empty-state .ea-empty-state__actions {
+  font-style: normal;
 }

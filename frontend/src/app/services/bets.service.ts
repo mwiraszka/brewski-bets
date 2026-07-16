@@ -45,9 +45,14 @@ export class BetsService {
 
   readonly events = computed(() => distinctEvents(this._bets()));
 
-  // Events unchecked in the event filters. App-wide so the selection survives
-  // navigating between the dashboard and the bets page
+  // Events unchecked in the dashboard's multi-select filter. App-wide so the
+  // selection survives navigating away and back
   readonly hiddenEvents = signal<ReadonlySet<string>>(new Set<string>());
+
+  // The single event chosen in the bets page's radio filter, shared across its
+  // Bets and Standings tabs. Empty until the user picks one; the bets page
+  // resolves it to a real event so exactly one is always active
+  readonly selectedEvent = signal<string>('');
 
   // True once bets have been fetched at least this session, so pages can
   // render cached data immediately and refresh in the background

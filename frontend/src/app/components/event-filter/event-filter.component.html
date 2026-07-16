@@ -1,13 +1,28 @@
 @if (events().length) {
-  <fieldset
-    class="event-filter"
-    aria-label="Filter by event">
-    @for (event of events(); track event) {
-      <ea-checkbox
-        size="sm"
-        [label]="event"
-        [checked]="isChecked(event)"
-        (checkedChange)="toggle(event, $event)" />
-    }
-  </fieldset>
+  @if (mode() === 'single') {
+    <ea-radio-group
+      ariaLabel="Filter by event"
+      orientation="horizontal"
+      size="sm"
+      [value]="selectedEvent()"
+      (changed)="selectedEvent.set($event)">
+      @for (event of events(); track event) {
+        <ea-radio
+          [value]="event"
+          [label]="event" />
+      }
+    </ea-radio-group>
+  } @else {
+    <fieldset
+      class="event-filter"
+      aria-label="Filter by event">
+      @for (event of events(); track event) {
+        <ea-checkbox
+          size="sm"
+          [label]="event"
+          [checked]="isChecked(event)"
+          (checkedChange)="toggle(event, $event)" />
+      }
+    </fieldset>
+  }
 }
