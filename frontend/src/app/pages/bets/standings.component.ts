@@ -3,7 +3,7 @@ import { AvatarComponent, BottleIconComponent, EmptyStateComponent } from '@eaga
 import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
 import { RouterLink } from '@angular/router';
 
-import { BetGraphicComponent } from '@app/graphics';
+import { BetGraphicComponent, SpilledBottleComponent } from '@app/graphics';
 import { type BetWithOpponent } from '@app/models';
 import { avatarSrc, settledNet, signedLabel } from '@app/util';
 
@@ -52,6 +52,7 @@ interface SettledBet {
     RouterLink,
     AvatarComponent,
     BetGraphicComponent,
+    SpilledBottleComponent,
     BottleIconComponent,
     EmptyStateComponent,
     StandingChartComponent,

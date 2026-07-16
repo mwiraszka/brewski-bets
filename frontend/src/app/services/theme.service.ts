@@ -4,8 +4,8 @@ import { Injectable, inject, signal } from '@angular/core';
 export type ThemeMode = 'light' | 'dark';
 
 const STORAGE_KEY = 'bb-theme';
-const THEME_COLOR_LIGHT = '#fcfbfa';
-const THEME_COLOR_DARK = '#16181d';
+const THEME_COLOR_LIGHT = '#f3f7fa';
+const THEME_COLOR_DARK = '#121516';
 
 @Injectable({ providedIn: 'root' })
 export class ThemeService {
