@@ -17,7 +17,6 @@
   --bb-color-surfaceHover: #f5f5f5;
   --bb-color-surfaceDisabled: #f0f0f0;
   --bb-color-surfacePrimaryTint: #fdf8ec;
-  --bb-color-surfaceCreamWarm: #fcfaf2;
   --bb-color-surfaceWarningTint: #fff3e0;
   --bb-color-surfaceAuth: #2e3440;
   --bb-color-surfaceAuthTranslucent: #2e344080;
@@ -67,7 +66,7 @@
   // Tokens not redeclared are stable across themes (e.g. `--bb-color-white`,
   // `--bb-color-secondary`, `surfaceAuth`).
 
-  --bb-color-appBackground: #16181d;
+  --bb-color-appBackground: #1b1e24;
 
   --bb-color-primary: #d4b96a;
   --bb-color-primarySemiTransparent: rgba(212, 185, 106, 0.32);
@@ -79,7 +78,6 @@
   --bb-color-surfaceHover: #2a2d35;
   --bb-color-surfaceDisabled: #1c1e22;
   --bb-color-surfacePrimaryTint: rgba(203, 168, 85, 0.12);
-  --bb-color-surfaceCreamWarm: rgba(203, 168, 85, 0.2);
   --bb-color-surfaceWarningTint: rgba(245, 158, 11, 0.15);
 
   --bb-color-borderDefault: #2c2f36;

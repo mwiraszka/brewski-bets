@@ -5,12 +5,7 @@
   flex: 1;
   justify-content: center;
   width: 100%;
-  background: linear-gradient(
-    135deg,
-    var(--bb-color-appBackground) 0%,
-    var(--bb-color-surfaceCreamWarm) 50%,
-    var(--bb-color-appBackground) 100%
-  );
+  background-color: var(--bb-color-appBackground);
 }
 
 .dashboard {
@@ -106,6 +101,12 @@
 .stat-card__label {
   font-size: 14px;
   color: var(--bb-color-textSecondary);
+  transition: color 0.15s ease;
+}
+
+// Pairs each section's tooltip with an on-card cue: its muted label brightens
+.stat-card__group:hover .stat-card__label {
+  color: var(--bb-color-textStrong);
 }
 
 .dashboard__sort-bar {
@@ -150,9 +151,15 @@
   font-size: 15px;
 }
 
-.dashboard__empty-note {
-  font-size: 15px;
-  color: var(--bb-color-textSecondary);
+// Collapses with the adjacent section margins to leave exactly 32px each side
+.dashboard__section-divider {
+  height: 1px;
+  margin: 32px 0;
+  background-color: var(--bb-color-borderDefault);
+}
+
+.dashboard__empty-state {
+  display: block;
 }
 
 // Masonry layout so a card with many outcomes only grows its own column instead
