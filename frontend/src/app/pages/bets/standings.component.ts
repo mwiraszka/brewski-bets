@@ -16,22 +16,31 @@ import { RouterLink } from '@angular/router';
 
 import { BetGraphicComponent } from '@app/graphics';
 import { type BetWithOpponent } from '@app/models';
-import { avatarSrc, settledNet } from '@app/util';
+import { avatarSrc, settledNet, signedLabel } from '@app/util';
 
-interface StandingBreakdownItem {
-  title: string;
-  iconSlug: string | null;
-  iconColor: string | null;
-  beers: number;
-  iOwe: boolean;
-}
+import {
+  StandingChartComponent,
+  type StandingChartPoint,
+} from './standing-chart.component';
 
 interface OpponentStanding {
   opponentId: string;
   name: string;
   avatarUrl: string | null;
   net: number;
-  breakdown: StandingBreakdownItem[];
+  record: string;
+  chartLabel: string;
+  points: StandingChartPoint[];
+}
+
+interface OpponentTally {
+  opponentId: string;
+  name: string;
+  avatarUrl: string | null;
+  net: number;
+  wins: number;
+  losses: number;
+  points: StandingChartPoint[];
 }
 
 interface SettledBet {
@@ -59,6 +68,7 @@ type SettledSortKey = 'settlement' | 'name' | 'result';
     BottleIconComponent,
     DropdownComponent,
     EmptyStateComponent,
+    StandingChartComponent,
   ],
 })
 export class StandingsComponent {
@@ -75,13 +85,17 @@ export class StandingsComponent {
 
   readonly standings = computed<OpponentStanding[]>(() => {
     const userId = this.currentUserId();
-    const byOpponent = new Map<string, OpponentStanding>();
+    const byOpponent = new Map<string, OpponentTally>();
 
-    for (const bet of this.bets()) {
-      if (bet.status !== 'settled' || bet.outcome !== 'resolved') {
-        continue;
-      }
+    // Chronological so each opponent's chart accumulates a running balance
+    const resolvedBets = this.bets()
+      .filter(bet => bet.status === 'settled' && bet.outcome === 'resolved')
+      .sort(
+        (a, b) =>
+          new Date(a.lastModifiedDate).getTime() - new Date(b.lastModifiedDate).getTime(),
+      );
 
+    for (const bet of resolvedBets) {
       const index = bet.selectedResultIndex;
       const winner = index != null ? bet.results[index] : undefined;
       if (!winner || winner.assignedTo == null || !bet.opponent) {
@@ -90,31 +104,47 @@ export class StandingsComponent {
 
       const myPosition = bet.user1Id === userId ? 'user1' : 'user2';
       const iOwe = winner.assignedTo !== myPosition;
-      const beers = winner.brewskiCount;
+      const delta = iOwe ? -winner.brewskiCount : winner.brewskiCount;
 
-      let standing = byOpponent.get(bet.opponent.id);
-      if (!standing) {
-        standing = {
+      let tally = byOpponent.get(bet.opponent.id);
+      if (!tally) {
+        tally = {
           opponentId: bet.opponent.id,
           name: `${bet.opponent.firstName} ${bet.opponent.lastName}`,
           avatarUrl: bet.opponent.avatarUrl,
           net: 0,
-          breakdown: [],
+          wins: 0,
+          losses: 0,
+          points: [],
         };
-        byOpponent.set(bet.opponent.id, standing);
+        byOpponent.set(bet.opponent.id, tally);
       }
 
-      standing.net += iOwe ? -beers : beers;
-      standing.breakdown.push({
+      tally.net += delta;
+      if (iOwe) {
+        tally.losses++;
+      } else {
+        tally.wins++;
+      }
+      tally.points.push({
+        settledAt: new Date(bet.lastModifiedDate),
         title: bet.title,
-        iconSlug: bet.iconSlug,
-        iconColor: bet.iconColor,
-        beers,
-        iOwe,
+        delta,
+        running: tally.net,
       });
     }
 
-    return [...byOpponent.values()].sort((a, b) => b.net - a.net);
+    return [...byOpponent.values()]
+      .map(tally => ({
+        opponentId: tally.opponentId,
+        name: tally.name,
+        avatarUrl: tally.avatarUrl,
+        net: tally.net,
+        record: `${tally.wins} won · ${tally.losses} lost`,
+        chartLabel: `Running brewski balance with ${tally.name}: ${tally.wins} won, ${tally.losses} lost, ${this.summary(tally.net).toLowerCase()}`,
+        points: tally.points,
+      }))
+      .sort((a, b) => b.net - a.net);
   });
 
   // Every settled bet gets a card: resolved ones show the net beers won or lost,
@@ -153,14 +183,6 @@ export class StandingsComponent {
     });
   });
 
-  private readonly maxAbsNet = computed(() =>
-    Math.max(1, ...this.standings().map(s => Math.abs(s.net))),
-  );
-
-  barWidth(net: number): number {
-    return (Math.abs(net) / this.maxAbsNet()) * 50;
-  }
-
   summary(net: number): string {
     if (net > 0) {
       return `Owes you ${net}`;
@@ -176,7 +198,7 @@ export class StandingsComponent {
   }
 
   resultLabel(net: number): string {
-    return net > 0 ? `+${net}` : String(net);
+    return signedLabel(net);
   }
 
   getAvatarSrc(avatarUrl: string | null): string | undefined {
