@@ -29,7 +29,6 @@
           </ul>
         } @else if (friends().length === 0) {
           <ea-empty-state
-            size="sm"
             headingLevel="h3"
             title="No friends yet">
             <ea-icon-users slot="media" />
@@ -177,7 +176,6 @@
 
           @if (incomingRequests().length === 0 && sentRequests().length === 0) {
             <ea-empty-state
-              size="sm"
               headingLevel="h3"
               title="No pending requests">
               <ea-icon-inbox slot="media" />
@@ -200,7 +198,6 @@
           <p class="empty-state">Searching...</p>
         } @else if (searchQuery().length >= 2 && searchResults().length === 0) {
           <ea-empty-state
-            size="sm"
             headingLevel="h3"
             title="No users found">
             <ea-icon-search slot="media" />
