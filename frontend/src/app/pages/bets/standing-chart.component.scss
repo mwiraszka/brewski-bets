@@ -26,7 +26,7 @@
   background-color: var(--bb-color-surfaceRaised);
   color: var(--bb-color-textBody);
   pointer-events: none;
-  transform: translate(-50%, calc(-100% - 12px));
+  transform: translate(-50%, 10px);
 }
 
 .chart-tip__title {
