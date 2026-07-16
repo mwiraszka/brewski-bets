@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.10.0] - 2026-07-17
+
+### Changed
+
+- Replace the dashboard's "no open bets" text with a centered placeholder that has an icon and matches the empty state on the Bets page
+- Rename the dashboard's "Open bets" section to "Active bets" and set it apart from "Needs your attention" with a divider
+- Brighten a dashboard stat card's text when you hover over it, pairing the on-card cue with its tooltip
+- Swap the home page's tinted gradient background for the app's standard background, lightened slightly in dark mode
+- Enlarge the dark mode toggle in the account menu and narrow the menu
+- Reword the bet form's Event field hint to explain that events group related bets
+
 ## [1.9.0] - 2026-07-16
 
 ### Changed
@@ -787,6 +798,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - PWA manifest and service worker configuration
 - GitHub issue templates
 
+[1.10.0]: https://github.com/mwiraszka/brewski-bets/compare/v1.9.0...v1.10.0
 [1.9.0]: https://github.com/mwiraszka/brewski-bets/compare/v1.8.0...v1.9.0
 [1.8.0]: https://github.com/mwiraszka/brewski-bets/compare/v1.7.0...v1.8.0
 [1.7.0]: https://github.com/mwiraszka/brewski-bets/compare/v1.6.1...v1.7.0
