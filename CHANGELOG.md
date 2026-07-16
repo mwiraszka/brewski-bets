@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.11.1] - 2026-07-17
+
+### Changed
+
+- Refresh the light and dark mode background colours across the app
+- Resize the account menu's dark mode toggle, line it up with its label, and narrow the menu
+- Space the event filter evenly above and below on the Bets and Standings tabs
+
 ## [1.11.0] - 2026-07-17
 
 ### Added
@@ -814,6 +822,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - PWA manifest and service worker configuration
 - GitHub issue templates
 
+[1.11.1]: https://github.com/mwiraszka/brewski-bets/compare/v1.11.0...v1.11.1
 [1.11.0]: https://github.com/mwiraszka/brewski-bets/compare/v1.10.0...v1.11.0
 [1.10.0]: https://github.com/mwiraszka/brewski-bets/compare/v1.9.0...v1.10.0
 [1.9.0]: https://github.com/mwiraszka/brewski-bets/compare/v1.8.0...v1.9.0
