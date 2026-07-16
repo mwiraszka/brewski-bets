@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Add a required event field to every bet so bets are grouped by what they are about: pick an existing event from the dropdown or type a brand-new one, and when you only have a single event so far the field fills itself in; all existing bets are labelled "2026 FIFA World Cup"
+- Add a required event field to every bet so bets are grouped by what they are about: pick an existing event from the dropdown or type a brand-new one, and when you only have a single event so far the field fills itself in
 - Filter bets by event with checkboxes next to the dashboard's sort control and at the top of both Bets page tabs; unchecking an event hides its bets everywhere on that page, and the selection carries over as you move between pages
 - Show each bet's event on the bet view page
 
