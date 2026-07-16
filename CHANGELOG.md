@@ -5,6 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.11.0] - 2026-07-17
+
+### Added
+
+- Add more object icons (archive, hard drive, speaker, truck, and more) to the bet graphic picker
+- Allow up to 10 outcomes per bet, up from 5
+
+### Changed
+
+- Filter the Bets and Standings tabs to a single event with radio buttons, so the standings chart tracks one event's progression at a time
+- Always order settled bets by settlement date to match the chart above, and remove the standings sort control
+- Move the standings chart tooltip just below the hovered point so it no longer covers it
+- Italicize empty-state text across the app, and give the dashboard's empty state the heading, supporting line, and "active bets" wording used elsewhere
+- Show only the opponent's name in bold on the standings, not the "Opponent:" label
+- Resize the account menu's dark mode toggle
+
 ## [1.10.0] - 2026-07-17
 
 ### Changed
@@ -798,6 +814,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - PWA manifest and service worker configuration
 - GitHub issue templates
 
+[1.11.0]: https://github.com/mwiraszka/brewski-bets/compare/v1.10.0...v1.11.0
 [1.10.0]: https://github.com/mwiraszka/brewski-bets/compare/v1.9.0...v1.10.0
 [1.9.0]: https://github.com/mwiraszka/brewski-bets/compare/v1.8.0...v1.9.0
 [1.8.0]: https://github.com/mwiraszka/brewski-bets/compare/v1.7.0...v1.8.0
