@@ -73,11 +73,13 @@
             }
           </div>
         </section>
+
+        <div class="dashboard__section-divider"></div>
       }
 
       <section class="dashboard__section">
         <div class="dashboard__section-head">
-          <h2 class="dashboard__section-title">Open bets</h2>
+          <h2 class="dashboard__section-title">Active bets</h2>
           <a
             class="dashboard__see-all bb-text-link"
             routerLink="/bets">
@@ -106,22 +108,25 @@
               }
             </div>
           } @else {
-            <p class="dashboard__empty-note">No open bets for the selected events</p>
+            <ea-empty-state
+              class="dashboard__empty-state"
+              headingLevel="h3"
+              title="No open bets for the selected events">
+              <ea-icon-bottle slot="media" />
+            </ea-empty-state>
           }
         } @else {
-          <p class="dashboard__empty-note">
-            No open bets right now. Your settled bets live in
-            <a
-              class="bb-text-link"
-              routerLink="/bets"
-              >all bets</a
-            >.
-          </p>
+          <ea-empty-state
+            class="dashboard__empty-state"
+            headingLevel="h3"
+            title="No open bets right now"
+            description="Your settled bets live under all bets">
+            <ea-icon-bottle slot="media" />
+          </ea-empty-state>
         }
       </section>
     } @else {
       <ea-empty-state
-        size="md"
         headingLevel="h2"
         title="No bets yet"
         description="Kick things off with your first wager">
