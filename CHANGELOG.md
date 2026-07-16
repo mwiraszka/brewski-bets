@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.8.0] - 2026-07-16
+
+### Added
+
+- Add a required event field to every bet so bets are grouped by what they are about: pick an existing event from the dropdown or type a brand-new one, and when you only have a single event so far the field fills itself in
+- Filter bets by event with checkboxes next to the dashboard's sort control and at the top of both Bets page tabs; unchecking an event hides its bets everywhere on that page, and the selection carries over as you move between pages
+- Show each bet's event on the bet view page
+
+### Changed
+
+- Replace the standings summary bar and its cramped hover tooltip with a running balance chart per opponent: it traces every settled bet over time around a zero line, shows the win/loss record next to the player's name, and reveals each bet's title, result, and settlement date on hover
+
 ## [1.7.0] - 2026-07-08
 
 ### Added
@@ -761,6 +773,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - PWA manifest and service worker configuration
 - GitHub issue templates
 
+[1.8.0]: https://github.com/mwiraszka/brewski-bets/compare/v1.7.0...v1.8.0
 [1.7.0]: https://github.com/mwiraszka/brewski-bets/compare/v1.6.1...v1.7.0
 [1.6.1]: https://github.com/mwiraszka/brewski-bets/compare/v1.6.0...v1.6.1
 [1.6.0]: https://github.com/mwiraszka/brewski-bets/compare/v1.5.1...v1.6.0

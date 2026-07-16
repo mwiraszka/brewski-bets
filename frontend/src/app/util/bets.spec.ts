@@ -3,6 +3,7 @@ import { type Bet, type BetResult } from '@app/models';
 import {
   brewskisAtRisk,
   brewskisAtStake,
+  distinctEvents,
   isAwaitingOutcome,
   isMyTurn,
   positionOf,
@@ -14,6 +15,7 @@ function makeBet(overrides: Partial<Bet> = {}): Bet {
   return {
     id: 'bet-1',
     title: 'Test bet',
+    event: 'Test event',
     description: null,
     iconSlug: null,
     iconColor: null,
@@ -220,6 +222,25 @@ describe('brewskisAtRisk', () => {
 
     expect(brewskisAtRisk(bet, 'stranger')).toBe(0);
     expect(brewskisAtRisk(bet, undefined)).toBe(0);
+  });
+});
+
+describe('distinctEvents', () => {
+  it('returns unique events sorted alphabetically, case-insensitively', () => {
+    const bets = [
+      makeBet({ id: '1', event: 'euro 2028' }),
+      makeBet({ id: '2', event: '2026 FIFA World Cup' }),
+      makeBet({ id: '3', event: 'euro 2028' }),
+      makeBet({ id: '4', event: 'Darts night' }),
+    ];
+
+    const events = distinctEvents(bets);
+
+    expect(events).toEqual(['2026 FIFA World Cup', 'Darts night', 'euro 2028']);
+  });
+
+  it('returns an empty list when there are no bets', () => {
+    expect(distinctEvents([])).toEqual([]);
   });
 });
 

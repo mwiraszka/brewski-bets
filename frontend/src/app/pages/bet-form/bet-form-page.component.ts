@@ -1,5 +1,6 @@
 import {
   AlertCircleIconComponent,
+  AutocompleteComponent,
   AvatarComponent,
   BadgeComponent,
   ButtonComponent,
@@ -67,6 +68,7 @@ const DEFAULT_ICON_COLOR = '#cba855';
 const MAX_BREWSKI_COUNT = 6;
 const MAX_OUTCOMES = 5;
 const TITLE_MAX_LENGTH = 50;
+const EVENT_MAX_LENGTH = 50;
 const DESCRIPTION_MAX_LENGTH = 300;
 const OUTCOME_MAX_LENGTH = 50;
 const ICON_FILTER_MAX_LENGTH = 30;
@@ -91,6 +93,7 @@ interface ReviewOutcome {
   imports: [
     DatePipe,
     AlertCircleIconComponent,
+    AutocompleteComponent,
     AvatarComponent,
     BadgeComponent,
     BetGraphicComponent,
@@ -125,6 +128,8 @@ export class BetFormPageComponent implements OnInit, CanComponentDeactivate {
 
   @ViewChild('titleInputRef', { read: ElementRef })
   private titleInputRef?: ElementRef<HTMLElement>;
+  @ViewChild('eventInputRef', { read: ElementRef })
+  private eventInputRef?: ElementRef<HTMLElement>;
   @ViewChild('iconFilterInputRef', { read: ElementRef })
   private iconFilterInputRef?: ElementRef<HTMLElement>;
   @ViewChildren('outcomeInputRef', { read: ElementRef })
@@ -157,6 +162,7 @@ export class BetFormPageComponent implements OnInit, CanComponentDeactivate {
   private leaveResolver: ((leave: boolean) => void) | null = null;
 
   readonly title = signal('');
+  readonly event = signal('');
   readonly description = signal('');
   readonly iconSlug = signal<string | null>(null);
   readonly iconColor = signal<string>(DEFAULT_ICON_COLOR);
@@ -170,6 +176,7 @@ export class BetFormPageComponent implements OnInit, CanComponentDeactivate {
   readonly settleIndex = signal('');
 
   readonly titleTouched = signal(false);
+  readonly eventTouched = signal(false);
   readonly friendTouched = signal(false);
   readonly iconTouched = signal(false);
   readonly outcomeDescriptionTouched = signal<Set<number>>(new Set());
@@ -183,6 +190,17 @@ export class BetFormPageComponent implements OnInit, CanComponentDeactivate {
     }
     if (this.titleTouched() || this.submitAttempted()) {
       return 'Title is required';
+    }
+    return '';
+  });
+
+  readonly eventError = computed(() => {
+    const empty = !this.event().trim();
+    if (!empty) {
+      return '';
+    }
+    if (this.eventTouched() || this.submitAttempted()) {
+      return 'Event is required';
     }
     return '';
   });
@@ -221,6 +239,10 @@ export class BetFormPageComponent implements OnInit, CanComponentDeactivate {
   );
 
   readonly currentUserId = computed(() => this.userService.user()?.id);
+
+  readonly eventOptions = computed(() =>
+    this.betsService.events().map(event => ({ value: event, label: event })),
+  );
 
   readonly isBusy = computed(() => this.actionInFlight() !== null);
 
@@ -315,6 +337,12 @@ export class BetFormPageComponent implements OnInit, CanComponentDeactivate {
     return prev != null && prev.title !== this.title();
   });
   readonly previousTitle = computed(() => this.previousSnapshot()?.title ?? '');
+
+  readonly eventChanged = computed(() => {
+    const prev = this.previousSnapshot();
+    return prev != null && prev.event !== this.event();
+  });
+  readonly previousEvent = computed(() => this.previousSnapshot()?.event ?? '');
 
   readonly descriptionChanged = computed(() => {
     const prev = this.previousSnapshot();
@@ -483,6 +511,9 @@ export class BetFormPageComponent implements OnInit, CanComponentDeactivate {
     if (!this.title().trim()) {
       return false;
     }
+    if (!this.event().trim()) {
+      return false;
+    }
     if (this.mode() === 'create' && !this.selectedFriendId()) {
       return false;
     }
@@ -510,6 +541,7 @@ export class BetFormPageComponent implements OnInit, CanComponentDeactivate {
   readonly formSnapshot = computed(() =>
     JSON.stringify({
       title: this.title(),
+      event: this.event(),
       description: this.description(),
       iconSlug: this.iconSlug(),
       iconColor: this.iconColor(),
@@ -549,13 +581,23 @@ export class BetFormPageComponent implements OnInit, CanComponentDeactivate {
       }
     }
 
-    await this.friendsService.loadFriends();
+    await Promise.all([
+      this.friendsService.loadFriends(),
+      // Existing-event suggestions are a convenience; the field still accepts
+      // free text, so a failed refresh is not an error
+      this.betsService.loadBets().catch(() => undefined),
+    ]);
+    if (this.mode() === 'create' && this.eventOptions().length === 1) {
+      this.event.set(this.eventOptions()[0].value);
+    }
+
     this.initialSnapshot = this.formSnapshot();
     this.loading.set(false);
   }
 
   private applyBetToForm(bet: BetWithOpponent): void {
     this.title.set(bet.title);
+    this.event.set(bet.event);
     this.description.set(bet.description ?? '');
     this.iconSlug.set(bet.iconSlug);
     this.iconColor.set(bet.iconColor ?? DEFAULT_ICON_COLOR);
@@ -671,6 +713,14 @@ export class BetFormPageComponent implements OnInit, CanComponentDeactivate {
     }
   }
 
+  setEvent(value: string): void {
+    const trimmed = value.slice(0, EVENT_MAX_LENGTH);
+    this.event.set(trimmed);
+    if (value !== trimmed) {
+      this.syncNativeInput(this.eventInputRef, trimmed);
+    }
+  }
+
   setIconFilter(value: string): void {
     const trimmed = value.slice(0, ICON_FILTER_MAX_LENGTH);
     this.iconFilter.set(trimmed);
@@ -738,27 +788,7 @@ export class BetFormPageComponent implements OnInit, CanComponentDeactivate {
 
   private validate(): boolean {
     this.submitAttempted.set(true);
-
-    if (!this.title().trim()) {
-      return false;
-    }
-    if (this.mode() === 'create' && !this.selectedFriendId()) {
-      return false;
-    }
-    if (!this.iconSlug()) {
-      return false;
-    }
-    if (!this.liveOutcomes().length) {
-      return false;
-    }
-    if (this.liveOutcomes().some(outcome => !outcome.name.trim())) {
-      return false;
-    }
-    if (this.liveOutcomes().some(outcome => outcome.brewskiCount <= 0)) {
-      return false;
-    }
-
-    return true;
+    return this.isFormValid();
   }
 
   async onSubmitForReview(): Promise<void> {
@@ -771,6 +801,7 @@ export class BetFormPageComponent implements OnInit, CanComponentDeactivate {
       if (this.mode() === 'create') {
         await this.betsService.createBet({
           title: this.title(),
+          event: this.event().trim(),
           description: this.description(),
           iconSlug: this.iconSlug(),
           iconColor: this.selectedColorable() ? this.iconColor() : null,
@@ -787,6 +818,7 @@ export class BetFormPageComponent implements OnInit, CanComponentDeactivate {
       } else if (this.bet) {
         await this.betsService.updateBet(this.bet.id, {
           title: this.title(),
+          event: this.event().trim(),
           description: this.description(),
           iconSlug: this.iconSlug(),
           iconColor: this.selectedColorable() ? this.iconColor() : null,

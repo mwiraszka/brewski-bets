@@ -35,8 +35,11 @@ const descriptionSchema = z.string().max(1000).nullable().optional();
 
 const resolutionDateSchema = z.iso.datetime({ offset: true }).nullable().optional();
 
+const eventSchema = z.string().trim().min(1).max(50);
+
 const createBetSchema = z.object({
   title: z.string().min(1),
+  event: eventSchema,
   description: descriptionSchema,
   iconSlug: iconSlugSchema,
   iconColor: iconColorSchema,
@@ -47,6 +50,7 @@ const createBetSchema = z.object({
 
 const updateBetSchema = z.object({
   title: z.string().min(1).optional(),
+  event: eventSchema.optional(),
   description: descriptionSchema,
   iconSlug: iconSlugSchema,
   iconColor: iconColorSchema,
@@ -64,6 +68,7 @@ function normalizeDescription(value: string | null | undefined): string | null {
 function snapshotState(bet: typeof bets.$inferSelect): BetSnapshot {
   return {
     title: bet.title,
+    event: bet.event,
     description: bet.description,
     iconSlug: bet.iconSlug,
     iconColor: bet.iconColor,
@@ -126,6 +131,7 @@ export const betRoutes = new Hono<AppContext>()
       .insert(bets)
       .values({
         title: body.title,
+        event: body.event,
         description: normalizeDescription(body.description),
         iconSlug: body.iconSlug ?? null,
         iconColor: body.iconColor ?? null,
@@ -313,6 +319,9 @@ export const betRoutes = new Hono<AppContext>()
       if (body.title !== undefined) {
         updates.title = body.title;
       }
+      if (body.event !== undefined) {
+        updates.event = body.event;
+      }
       if (body.description !== undefined) {
         updates.description = normalizeDescription(body.description);
       }
@@ -377,6 +386,7 @@ export const betRoutes = new Hono<AppContext>()
     } else if (existing.previousState) {
       const snap = existing.previousState;
       updates.title = snap.title;
+      updates.event = snap.event;
       updates.description = snap.description;
       updates.iconSlug = snap.iconSlug;
       updates.iconColor = snap.iconColor;

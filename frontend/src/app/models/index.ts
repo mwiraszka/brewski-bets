@@ -68,6 +68,7 @@ export type BetStatus = 'inactive' | 'active' | 'settled';
 // the reviewer can see what is being changed and a reject can restore them.
 export interface BetSnapshot {
   title: string;
+  event: string;
   description: string | null;
   iconSlug: string | null;
   iconColor: string | null;
@@ -83,6 +84,7 @@ export interface BetSnapshot {
 export interface Bet {
   id: string;
   title: string;
+  event: string;
   description: string | null;
   iconSlug: string | null;
   iconColor: string | null;

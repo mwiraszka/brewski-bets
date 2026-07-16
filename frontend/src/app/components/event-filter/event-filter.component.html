@@ -1,0 +1,13 @@
+@if (events().length) {
+  <fieldset
+    class="event-filter"
+    aria-label="Filter by event">
+    @for (event of events(); track event) {
+      <ea-checkbox
+        size="sm"
+        [label]="event"
+        [checked]="isChecked(event)"
+        (checkedChange)="toggle(event, $event)" />
+    }
+  </fieldset>
+}

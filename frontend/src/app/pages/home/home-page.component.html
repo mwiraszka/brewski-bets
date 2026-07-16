@@ -84,8 +84,11 @@
             See all bets
           </a>
         </div>
-        @if (openBets().length) {
+        @if (hasOpenBets()) {
           <div class="dashboard__sort-bar">
+            <bb-event-filter
+              [events]="events()"
+              [(hiddenEvents)]="hiddenEvents" />
             <ea-dropdown
               class="dashboard__sort"
               label="Sort by"
@@ -94,13 +97,17 @@
               [value]="sortKey()"
               (valueChange)="onSortChange($event)" />
           </div>
-          <div class="card-grid">
-            @for (bet of openBets(); track bet.id) {
-              <bb-bet-card
-                [bet]="bet"
-                [currentUserId]="currentUserId()" />
-            }
-          </div>
+          @if (openBets().length) {
+            <div class="card-grid">
+              @for (bet of openBets(); track bet.id) {
+                <bb-bet-card
+                  [bet]="bet"
+                  [currentUserId]="currentUserId()" />
+              }
+            </div>
+          } @else {
+            <p class="dashboard__empty-note">No open bets for the selected events</p>
+          }
         } @else {
           <p class="dashboard__empty-note">
             No open bets right now. Your settled bets live in

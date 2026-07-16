@@ -26,6 +26,7 @@
   --bb-color-borderDefault: #e0e0e0;
   --bb-color-borderSubtle: #e8e8e8;
   --bb-color-borderDivider: #d0d0d0;
+  --bb-color-borderFaint: rgba(224, 224, 224, 0.5);
 
   /* Text */
   --bb-color-primaryText: #1a1a1a;
@@ -41,6 +42,7 @@
   --bb-color-danger: #e53935;
   --bb-color-dangerSubtle: rgba(229, 57, 53, 0.12);
   --bb-color-positive: #2e7d32;
+  --bb-color-positiveSubtle: rgba(46, 125, 50, 0.12);
   --bb-color-textPreview: #e65100;
 
   /* Effects / overlays */
@@ -83,6 +85,7 @@
   --bb-color-borderDefault: #2c2f36;
   --bb-color-borderSubtle: #232529;
   --bb-color-borderDivider: #383b42;
+  --bb-color-borderFaint: rgba(44, 47, 54, 0.5);
 
   --bb-color-primaryText: #f0f0f0;
   --bb-color-textStrong: #f0f0f0;
@@ -97,6 +100,7 @@
   --bb-color-danger: #f87171;
   --bb-color-dangerSubtle: rgba(248, 113, 113, 0.18);
   --bb-color-positive: #66bb6a;
+  --bb-color-positiveSubtle: rgba(102, 187, 106, 0.18);
   --bb-color-textPreview: #ff9544;
 
   --bb-color-glassBackground: rgba(20, 22, 26, 0.55);

@@ -10,6 +10,10 @@
       <ea-tab
         value="bets"
         label="Bets">
+        <bb-event-filter
+          class="tab-event-filter"
+          [events]="events()"
+          [(hiddenEvents)]="hiddenEvents" />
         <div class="filters">
           <ea-input
             class="filters__search"
@@ -85,6 +89,10 @@
       <ea-tab
         value="standings"
         label="Standings">
+        <bb-event-filter
+          class="tab-event-filter"
+          [events]="events()"
+          [(hiddenEvents)]="hiddenEvents" />
         @if (loading()) {
           <div class="standings-skeleton">
             @for (_ of skeletonRows; track $index) {
@@ -113,7 +121,7 @@
           </div>
         } @else {
           <bb-standings
-            [bets]="allBets()"
+            [bets]="eventFilteredBets()"
             [currentUserId]="currentUserId()" />
         }
       </ea-tab>
