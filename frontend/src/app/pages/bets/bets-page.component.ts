@@ -1,7 +1,6 @@
 import {
   AvatarComponent,
   BadgeComponent,
-  BottleIconComponent,
   ButtonComponent,
   CardComponent,
   type DataTableColumn,
@@ -34,7 +33,7 @@ import {
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 
 import { EventFilterComponent } from '@app/components/event-filter/event-filter.component';
-import { BetGraphicComponent } from '@app/graphics';
+import { BetGraphicComponent, SpilledBottleComponent } from '@app/graphics';
 import { type BetWithOpponent } from '@app/models';
 import { BetsService } from '@app/services/bets.service';
 import { UserService } from '@app/services/user.service';
@@ -59,7 +58,7 @@ import { StandingsComponent } from './standings.component';
     AvatarComponent,
     BadgeComponent,
     BetGraphicComponent,
-    BottleIconComponent,
+    SpilledBottleComponent,
     ButtonComponent,
     CardComponent,
     DataTableComponent,

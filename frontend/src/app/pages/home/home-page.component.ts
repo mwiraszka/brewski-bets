@@ -19,6 +19,7 @@ import { RouterLink } from '@angular/router';
 
 import { BetCardComponent } from '@app/components/bet-card/bet-card.component';
 import { EventFilterComponent } from '@app/components/event-filter/event-filter.component';
+import { SpilledBottleComponent } from '@app/graphics';
 import { BetsService } from '@app/services/bets.service';
 import { UserService } from '@app/services/user.service';
 import {
@@ -42,6 +43,7 @@ import {
     RouterLink,
     BetCardComponent,
     EventFilterComponent,
+    SpilledBottleComponent,
     BottleIconComponent,
     ButtonComponent,
     DropdownComponent,

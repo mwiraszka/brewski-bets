@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Refresh the light and dark mode background colours across the app
 - Resize the account menu's dark mode toggle, line it up with its label, and narrow the menu
 - Space the event filter evenly above and below on the Bets and Standings tabs
+- Replace the beer icon in the empty states with a tipped, spilling beer bottle
 
 ## [1.11.0] - 2026-07-17
 
