@@ -9,7 +9,9 @@
               [initials]="getInitials(standing.name)"
               size="xs" />
             <div class="standing__info">
-              <span class="standing__name">Opponent: {{ standing.name }}</span>
+              <span class="standing__name">
+                <span class="standing__name-label">Opponent:</span> {{ standing.name }}
+              </span>
               <span class="standing__record">{{ standing.record }}</span>
             </div>
             <span
@@ -32,16 +34,7 @@
   }
 
   <div class="settled">
-    <div class="settled__head">
-      <h3 class="settled__title">Settled bets</h3>
-      <ea-dropdown
-        class="settled__sort"
-        label="Sort by"
-        size="sm"
-        [options]="sortOptions"
-        [value]="sortKey()"
-        (valueChange)="onSortChange($event)" />
-    </div>
+    <h3 class="settled__title">Settled bets</h3>
 
     <div class="settled__list">
       @for (bet of settledBets(); track bet.id) {
@@ -78,7 +71,7 @@
   <ea-empty-state
     headingLevel="h3"
     title="No settled bets yet"
-    description="Once you settle a bet, the running beer tally shows up here">
+    description="Once you settle a bet, the running beer tally for the event shows up here">
     <ea-icon-bottle slot="media" />
   </ea-empty-state>
 }
