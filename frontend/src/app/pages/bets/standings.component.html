@@ -9,7 +9,7 @@
               [initials]="getInitials(standing.name)"
               size="xs" />
             <div class="standing__info">
-              <span class="standing__name">{{ standing.name }}</span>
+              <span class="standing__name">Opponent: {{ standing.name }}</span>
               <span class="standing__record">{{ standing.record }}</span>
             </div>
             <span
@@ -17,6 +17,9 @@
               [class.standing__summary--positive]="standing.net > 0"
               [class.standing__summary--negative]="standing.net < 0">
               {{ summary(standing.net) }}
+              @if (standing.net !== 0) {
+                <ea-icon-bottle class="standing__summary-icon" />
+              }
             </span>
           </div>
 
@@ -64,6 +67,7 @@
               [class.settled-bet__result--won]="bet.net > 0"
               [class.settled-bet__result--lost]="bet.net < 0">
               {{ resultLabel(bet.net) }}
+              <ea-icon-bottle class="settled-bet__result-icon" />
             </span>
           }
         </a>

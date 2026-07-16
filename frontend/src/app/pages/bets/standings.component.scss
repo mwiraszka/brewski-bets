@@ -40,6 +40,9 @@
 }
 
 .standing__summary {
+  display: flex;
+  align-items: center;
+  gap: 4px;
   font-size: 14px;
   font-weight: 600;
   color: var(--bb-color-textSecondary);
@@ -51,6 +54,10 @@
   &--negative {
     color: var(--bb-color-danger);
   }
+}
+
+.standing__summary-icon {
+  font-size: 16px;
 }
 
 .settled {
@@ -142,7 +149,10 @@
 }
 
 .settled-bet__result {
+  display: flex;
   flex: none;
+  align-items: center;
+  gap: 4px;
   font-size: 20px;
   font-weight: 700;
   color: var(--bb-color-textSecondary);
@@ -154,6 +164,10 @@
   &--lost {
     color: var(--bb-color-danger);
   }
+}
+
+.settled-bet__result-icon {
+  font-size: 18px;
 }
 
 .settled-bet__title {
