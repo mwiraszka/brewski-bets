@@ -125,30 +125,11 @@
   margin-bottom: 32px;
 }
 
-.dashboard__section-head {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 16px;
-  margin-bottom: 16px;
-}
-
 .dashboard__section-title {
+  margin-bottom: 16px;
   font-size: 20px;
   font-weight: 600;
   color: var(--bb-color-textStrong);
-}
-
-.dashboard__section .dashboard__section-title {
-  margin-bottom: 16px;
-}
-
-.dashboard__section-head .dashboard__section-title {
-  margin-bottom: 0;
-}
-
-.dashboard__see-all {
-  font-size: 15px;
 }
 
 // Collapses with the adjacent section margins to leave exactly 32px each side

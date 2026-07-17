@@ -20,6 +20,7 @@ import { RouterLink } from '@angular/router';
 import { BetCardComponent } from '@app/components/bet-card/bet-card.component';
 import { EventFilterComponent } from '@app/components/event-filter/event-filter.component';
 import { SpilledBottleComponent } from '@app/graphics';
+import { type Bet } from '@app/models';
 import { BetsService } from '@app/services/bets.service';
 import { UserService } from '@app/services/user.service';
 import {
@@ -75,7 +76,8 @@ export class HomePageComponent implements OnInit {
     ),
   );
 
-  readonly sortKey = signal<BetSortKey>('title');
+  readonly pendingSortKey = signal<BetSortKey>('title');
+  readonly activeSortKey = signal<BetSortKey>('title');
 
   readonly sortOptions = [
     { label: 'Last modified', value: 'modified' },
@@ -87,26 +89,28 @@ export class HomePageComponent implements OnInit {
   readonly events = this.betsService.events;
   readonly hiddenEvents = this.betsService.hiddenEvents;
 
-  readonly hasOpenBets = computed(() =>
-    this.bets().some(bet => bet.status !== 'settled'),
-  );
-
-  readonly openBets = computed(() =>
-    sortBetsBy(
-      this.bets().filter(
-        bet => bet.status !== 'settled' && !this.hiddenEvents().has(agreedEvent(bet)),
-      ),
-      this.sortKey(),
-      this.currentUserId(),
-    ),
-  );
-
-  readonly netStanding = computed(() =>
-    this.bets().reduce((sum, bet) => sum + settledNet(bet, this.currentUserId()), 0),
+  private readonly pendingBets = computed(() =>
+    this.bets().filter(bet => bet.status === 'inactive'),
   );
 
   private readonly activeBets = computed(() =>
     this.bets().filter(bet => bet.status === 'active'),
+  );
+
+  readonly hasPendingBets = computed(() => this.pendingBets().length > 0);
+
+  readonly hasActiveBets = computed(() => this.activeBets().length > 0);
+
+  readonly visiblePendingBets = computed(() =>
+    this.visibleSorted(this.pendingBets(), this.pendingSortKey()),
+  );
+
+  readonly visibleActiveBets = computed(() =>
+    this.visibleSorted(this.activeBets(), this.activeSortKey()),
+  );
+
+  readonly netStanding = computed(() =>
+    this.bets().reduce((sum, bet) => sum + settledNet(bet, this.currentUserId()), 0),
   );
 
   readonly activeBetsCount = computed(() => this.activeBets().length);
@@ -152,7 +156,19 @@ export class HomePageComponent implements OnInit {
     }
   }
 
-  onSortChange(value: string): void {
-    this.sortKey.set(value as BetSortKey);
+  onPendingSortChange(value: string): void {
+    this.pendingSortKey.set(value as BetSortKey);
+  }
+
+  onActiveSortChange(value: string): void {
+    this.activeSortKey.set(value as BetSortKey);
+  }
+
+  private visibleSorted<T extends Bet>(bets: readonly T[], key: BetSortKey): T[] {
+    return sortBetsBy(
+      bets.filter(bet => !this.hiddenEvents().has(agreedEvent(bet))),
+      key,
+      this.currentUserId(),
+    );
   }
 }

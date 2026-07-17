@@ -78,15 +78,8 @@
       }
 
       <section class="dashboard__section">
-        <div class="dashboard__section-head">
-          <h2 class="dashboard__section-title">Active bets</h2>
-          <a
-            class="dashboard__see-all bb-text-link"
-            routerLink="/bets">
-            See all bets
-          </a>
-        </div>
-        @if (hasOpenBets()) {
+        <h2 class="dashboard__section-title">Pending bets</h2>
+        @if (hasPendingBets()) {
           <div class="dashboard__sort-bar">
             <bb-event-filter
               [events]="events()"
@@ -96,12 +89,55 @@
               label="Sort by"
               size="sm"
               [options]="sortOptions"
-              [value]="sortKey()"
-              (valueChange)="onSortChange($event)" />
+              [value]="pendingSortKey()"
+              (valueChange)="onPendingSortChange($event)" />
           </div>
-          @if (openBets().length) {
+          @if (visiblePendingBets().length) {
             <div class="card-grid">
-              @for (bet of openBets(); track bet.id) {
+              @for (bet of visiblePendingBets(); track bet.id) {
+                <bb-bet-card
+                  [bet]="bet"
+                  [currentUserId]="currentUserId()" />
+              }
+            </div>
+          } @else {
+            <ea-empty-state
+              class="dashboard__empty-state"
+              headingLevel="h3"
+              title="No pending bets for the selected events"
+              description="Show more events to see your pending bets">
+              <bb-spilled-bottle slot="media" />
+            </ea-empty-state>
+          }
+        } @else {
+          <ea-empty-state
+            class="dashboard__empty-state"
+            headingLevel="h3"
+            title="No pending bets right now"
+            description="Bets waiting on acceptance show up here">
+            <bb-spilled-bottle slot="media" />
+          </ea-empty-state>
+        }
+      </section>
+
+      <section class="dashboard__section">
+        <h2 class="dashboard__section-title">Active bets</h2>
+        @if (hasActiveBets()) {
+          <div class="dashboard__sort-bar">
+            <bb-event-filter
+              [events]="events()"
+              [(hiddenEvents)]="hiddenEvents" />
+            <ea-dropdown
+              class="dashboard__sort"
+              label="Sort by"
+              size="sm"
+              [options]="sortOptions"
+              [value]="activeSortKey()"
+              (valueChange)="onActiveSortChange($event)" />
+          </div>
+          @if (visibleActiveBets().length) {
+            <div class="card-grid">
+              @for (bet of visibleActiveBets(); track bet.id) {
                 <bb-bet-card
                   [bet]="bet"
                   [currentUserId]="currentUserId()" />
