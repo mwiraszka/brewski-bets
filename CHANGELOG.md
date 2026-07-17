@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.12.0] - 2026-07-17
+
+### Added
+
+- Add a "Pending bets" section to the dashboard, sitting between "Needs your attention" and "Active bets", which gathers every bet still waiting on acceptance and gives it its own event filter and sort control
+
+### Changed
+
+- Shrink the toast notifications so they take up less of the screen
+- Remove the dashboard's "See all bets" link
+
+### Fixed
+
+- Limit the dashboard's "Active bets" section to bets that are actually active, so pending ones no longer show up alongside them
+
 ## [1.11.1] - 2026-07-17
 
 ### Changed
@@ -823,6 +838,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - PWA manifest and service worker configuration
 - GitHub issue templates
 
+[1.12.0]: https://github.com/mwiraszka/brewski-bets/compare/v1.11.1...v1.12.0
 [1.11.1]: https://github.com/mwiraszka/brewski-bets/compare/v1.11.0...v1.11.1
 [1.11.0]: https://github.com/mwiraszka/brewski-bets/compare/v1.10.0...v1.11.0
 [1.10.0]: https://github.com/mwiraszka/brewski-bets/compare/v1.9.0...v1.10.0
