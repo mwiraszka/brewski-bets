@@ -76,17 +76,21 @@ jobs:
           # Extract content between first and second ## headers
           awk '/^## \[/{if(n++)exit}n' CHANGELOG.md | tail -n +2 > release_notes.md
 
-      # Create the tag through git (deterministic) before the release. Letting
-      # `gh release create --target <sha>` create the tag races GitHub's release
-      # backend resolving the just-pushed commit, which intermittently yields a
-      # stuck draft, untagged release.
-      - name: Create and Push Tag
+      # Create the tag ref through the same REST API the release step reads, so
+      # it is authoritative immediately. A git push is eventually consistent
+      # with the API, which otherwise races and aborts the release with "tag
+      # doesn't exist". Skipped when the tag already exists (e.g. a prior run
+      # created the tag but failed before creating the release).
+      - name: Create Tag
         if: steps.check_release.outputs.exists == 'false'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           tag="${{ steps.version.outputs.tag }}"
           if ! git rev-parse "refs/tags/$tag" >/dev/null 2>&1; then
-            git tag "$tag" "${{ github.sha }}"
-            git push origin "$tag"
+            gh api "repos/${{ github.repository }}/git/refs" \
+              -f ref="refs/tags/$tag" \
+              -f sha="${{ github.sha }}"
           fi
 
       - name: Create Release
