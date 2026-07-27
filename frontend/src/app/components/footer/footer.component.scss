@@ -10,11 +10,31 @@
 }
 
 .footer-top {
+  position: relative;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
   gap: 8px;
+}
+
+// Out of flow so it centres on the page regardless of the side content widths
+.footer-wordmark {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  transform: translate(-50%, -50%);
+
+  &::before,
+  &::after {
+    width: 50px;
+    height: 1px;
+    background-color: var(--bb-color-borderDivider);
+    content: '';
+  }
 }
 
 .footer-meta {
@@ -63,12 +83,7 @@
   background-color: var(--bb-color-borderDivider);
 }
 
-.footer-bottom {
-  display: flex;
-  align-items: center;
-}
-
-@include respond-to('lt-sm') {
+@include respond-to('lt-md') {
   .footer {
     align-items: center;
   }
@@ -77,5 +92,17 @@
     flex-direction: column;
     align-items: center;
     gap: 4px;
+  }
+
+  .footer-wordmark {
+    position: static;
+    order: 1;
+    margin-top: 8px;
+    transform: none;
+
+    &::before,
+    &::after {
+      display: none;
+    }
   }
 }

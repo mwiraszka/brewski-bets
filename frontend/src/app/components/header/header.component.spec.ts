@@ -129,8 +129,8 @@ describe('HeaderComponent', () => {
       expect(component.showLoginButton()).toBe(false);
     });
 
-    it('returns false on /', () => {
-      expect(component.showLoginButton()).toBe(false);
+    it('returns true on / so guests on the welcome screen can log in', () => {
+      expect(component.showLoginButton()).toBe(true);
     });
 
     it('returns false on /login', () => {

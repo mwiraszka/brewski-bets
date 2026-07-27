@@ -6,7 +6,12 @@ import { Router, type UrlTree } from '@angular/router';
 
 import { ClerkService } from '@app/services/clerk.service';
 
-import { authGuard, guestGuard, ssoCallbackGuard } from './auth.guard';
+import {
+  authGuard,
+  guestGuard,
+  loggedInMatchGuard,
+  ssoCallbackGuard,
+} from './auth.guard';
 
 interface MockClerkService {
   isLoggedIn: WritableSignal<boolean>;
@@ -37,6 +42,32 @@ describe('auth guards', () => {
         { provide: ClerkService, useValue: mockClerk },
         { provide: Router, useValue: mockRouter },
       ],
+    });
+  });
+
+  // ---------------------------------------------------------------------------
+  // loggedInMatchGuard
+  // ---------------------------------------------------------------------------
+
+  describe('loggedInMatchGuard', () => {
+    it('matches when the user is logged in', () => {
+      mockClerk.isLoggedIn.set(true);
+
+      const result = TestBed.runInInjectionContext(() =>
+        loggedInMatchGuard({} as never, {} as never, {} as never),
+      );
+
+      expect(result).toBe(true);
+    });
+
+    it('does not match when the user is not logged in', () => {
+      mockClerk.isLoggedIn.set(false);
+
+      const result = TestBed.runInInjectionContext(() =>
+        loggedInMatchGuard({} as never, {} as never, {} as never),
+      );
+
+      expect(result).toBe(false);
     });
   });
 

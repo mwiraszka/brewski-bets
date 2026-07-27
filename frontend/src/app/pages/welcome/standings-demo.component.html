@@ -1,0 +1,22 @@
+<div class="standing">
+  <div class="standing__head">
+    <ea-avatar
+      src="assets/barry-duffman.png"
+      alt="Barry Duffman"
+      size="xs" />
+    <div class="standing__info">
+      <span class="standing__name">
+        <span class="standing__name-label">Opponent:</span> Barry Duffman
+      </span>
+      <span class="standing__record">10 bets won · 7 bets lost</span>
+    </div>
+    <span class="standing__summary">
+      Owes you 6
+      <ea-icon-bottle class="standing__summary-icon" />
+    </span>
+  </div>
+
+  <bb-standing-chart
+    [points]="points"
+    ariaLabel="Example running brewski balance with Barry Duffman: 10 bets won, 7 bets lost, owes you 6" />
+</div>

@@ -78,7 +78,7 @@ export class HeaderComponent implements OnInit {
   readonly previewInfo = environment.preview;
 
   readonly isLoggedIn = computed(() => this.clerk.isLoggedIn());
-  private readonly hideLoginButtonRoutes = new Set(['/', '/login']);
+  private readonly hideLoginButtonRoutes = new Set(['/login']);
   readonly showLoginButton = computed(
     () =>
       this.clerk.isLoaded() &&

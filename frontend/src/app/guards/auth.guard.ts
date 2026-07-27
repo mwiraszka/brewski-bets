@@ -1,7 +1,13 @@
 import { inject } from '@angular/core';
-import { type CanActivateFn, Router } from '@angular/router';
+import { type CanActivateFn, type CanMatchFn, Router } from '@angular/router';
 
 import { ClerkService } from '@app/services/clerk.service';
+
+// Falls through to the next route with the same path instead of redirecting,
+// so guests can be served public content at the same URL
+export const loggedInMatchGuard: CanMatchFn = () => {
+  return inject(ClerkService).isLoggedIn();
+};
 
 export const authGuard: CanActivateFn = () => {
   const clerk = inject(ClerkService);

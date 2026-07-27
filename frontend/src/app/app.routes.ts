@@ -1,6 +1,11 @@
 import { type Routes } from '@angular/router';
 
-import { authGuard, guestGuard, ssoCallbackGuard } from '@app/guards/auth.guard';
+import {
+  authGuard,
+  guestGuard,
+  loggedInMatchGuard,
+  ssoCallbackGuard,
+} from '@app/guards/auth.guard';
 import { unsavedChangesGuard } from '@app/guards/unsaved-changes.guard';
 
 export const routes: Routes = [
@@ -8,7 +13,7 @@ export const routes: Routes = [
     path: '',
     loadComponent: () =>
       import('./pages/home/home-page.component').then(c => c.HomePageComponent),
-    canActivate: [authGuard],
+    canMatch: [loggedInMatchGuard],
   },
   {
     path: 'account',
@@ -61,6 +66,13 @@ export const routes: Routes = [
         c => c.AuthLayoutComponent,
       ),
     children: [
+      {
+        path: '',
+        loadComponent: () =>
+          import('./pages/welcome/welcome-page.component').then(
+            c => c.WelcomePageComponent,
+          ),
+      },
       {
         path: 'create-account',
         loadComponent: () =>

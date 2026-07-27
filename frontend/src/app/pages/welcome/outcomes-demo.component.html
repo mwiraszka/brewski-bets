@@ -1,0 +1,51 @@
+<div
+  class="demo"
+  inert>
+  <ea-card variant="outlined">
+    <label class="field-label field-label--required">Outcomes</label>
+
+    <div class="outcomes-list">
+      @for (outcome of outcomes; track outcome.name) {
+        <div class="outcome-row">
+          <div class="outcome-row__name">
+            <ea-input [value]="outcome.name" />
+          </div>
+          <div class="outcome-row__brewskis">
+            <div class="outcome-row__slider-row">
+              <span class="outcome-row__user">You</span>
+              <div class="outcome-row__slider">
+                <ea-slider
+                  size="sm"
+                  [min]="-maxBrewskiCount"
+                  [max]="maxBrewskiCount"
+                  [step]="1"
+                  [value]="outcome.amount" />
+                <div
+                  class="slider-ticks"
+                  aria-hidden="true">
+                  @for (tick of sliderTicks; track $index; let tickIndex = $index) {
+                    @if (tick !== 0) {
+                      <span
+                        class="slider-ticks__tick"
+                        [style.--tick-index]="tickIndex">
+                        {{ tick }}
+                      </span>
+                    }
+                  }
+                </div>
+              </div>
+              <span class="outcome-row__user">Them</span>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+
+    <ea-button variant="secondary">
+      <span class="btn-content">
+        <ea-icon-plus />
+        Add outcome
+      </span>
+    </ea-button>
+  </ea-card>
+</div>

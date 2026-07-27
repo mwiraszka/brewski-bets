@@ -1,0 +1,29 @@
+<div
+  class="demo"
+  inert>
+  <ea-card variant="outlined">
+    <div class="form-field">
+      <ea-dropdown
+        label="Bet against"
+        [required]="true"
+        [options]="friendOptions"
+        value="barry" />
+    </div>
+
+    <div class="form-field">
+      <ea-input
+        label="Title"
+        [required]="true"
+        value="Spain vs. Argentina" />
+    </div>
+
+    <div class="form-field">
+      <ea-autocomplete
+        label="Event"
+        hint="Group related bets under a shared event"
+        [required]="true"
+        [options]="[]"
+        value="2026 FIFA World Cup" />
+    </div>
+  </ea-card>
+</div>
