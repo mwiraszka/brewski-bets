@@ -15,7 +15,7 @@
   justify-content: center;
   padding: 24px 16px;
 
-  @include respond-to('gt-lg') {
+  @include respond-to('gt-md') {
     flex: none;
     width: 50%;
   }
@@ -27,6 +27,13 @@
   align-items: center;
   width: 100%;
   max-width: 460px;
+
+  // The welcome screen's three-step row needs more room than the auth forms,
+  // and it fills the panel height so its call to action can sit at the bottom
+  &:has(bb-welcome-page) {
+    align-self: stretch;
+    max-width: 560px;
+  }
 }
 
 .bg-preloader {
@@ -36,7 +43,7 @@
 .bg-panel {
   display: none;
 
-  @include respond-to('gt-lg') {
+  @include respond-to('gt-md') {
     position: relative;
     overflow: hidden;
     display: block;
@@ -78,12 +85,12 @@
   left: 50%;
   display: flex;
   flex-direction: column;
-  font-size: 108px;
+  font-size: clamp(72px, 10vw, 108px);
   font-weight: 100;
+  line-height: 0.56;
   font-family: 'Righteous', sans-serif;
   color: var(--bb-color-primaryText);
   transform: translate(-50%, -50%);
-  line-height: 60px;
 }
 
 .slogan-broskis,

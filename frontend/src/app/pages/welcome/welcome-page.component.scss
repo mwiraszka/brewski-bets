@@ -1,0 +1,73 @@
+@use '../../../styles/auth-shared';
+
+:host {
+  display: flex;
+  container-type: inline-size;
+  flex: 1;
+  flex-direction: column;
+  width: 100%;
+}
+
+.welcome {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 32px;
+}
+
+.description {
+  font-size: 18px;
+  line-height: 28px;
+  text-align: center;
+  color: var(--bb-color-textPrimaryDark);
+}
+
+.how-it-works ::ng-deep {
+  .ea-stepper__connector {
+    min-width: 8px;
+  }
+
+  .ea-stepper__label {
+    font-size: 16px;
+    white-space: nowrap;
+  }
+
+  .ea-stepper__circle {
+    font-size: 17px;
+    font-family: 'Righteous', sans-serif;
+    border-color: var(--bb-color-primary);
+    color: var(--bb-color-primary);
+  }
+
+  .ea-stepper__button--active .ea-stepper__circle {
+    border-color: var(--bb-color-primary);
+    background-color: var(--bb-color-primary);
+    color: var(--bb-color-textInverse);
+  }
+
+  // Container width, not the viewport, decides the fit: the hero panel can
+  // halve the available space on mid-size screens
+  @container (width <= 540px) {
+    .ea-stepper__list {
+      align-self: center;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 8px;
+    }
+
+    .ea-stepper__connector {
+      flex: none;
+      align-self: flex-start;
+      width: 1px;
+      min-width: 0;
+      height: 12px;
+      // Centered under the 2em circle rendered at 17px (34px wide)
+      margin-left: 17px;
+    }
+  }
+}
+
+.cta {
+  margin-top: auto;
+  font-size: 16px;
+}
