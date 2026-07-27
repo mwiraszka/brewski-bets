@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.13.0] - 2026-07-27
+
+### Added
+
+- Welcome logged-out visitors with a public intro screen at the root URL, describing what Brewski Bets is and walking through how it works in three steps, each with a themed live preview of the app (the create-bet form, its outcomes section, and a sample standings chart), instead of redirecting straight to the login screen
+
+### Changed
+
+- Show the hero image beside the login and welcome screens on tablet-sized displays, not just desktops
+- Centre the eagami wordmark on the footer's single line, flanked by thin divider lines, dropping it below the links on narrow screens
+- Describe the app's purpose in the page metadata used by search engines and link previews
+
 ## [1.12.1] - 2026-07-21
 
 ### Fixed
@@ -844,6 +856,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - PWA manifest and service worker configuration
 - GitHub issue templates
 
+[1.13.0]: https://github.com/mwiraszka/brewski-bets/compare/v1.12.1...v1.13.0
 [1.12.1]: https://github.com/mwiraszka/brewski-bets/compare/v1.12.0...v1.12.1
 [1.12.0]: https://github.com/mwiraszka/brewski-bets/compare/v1.11.1...v1.12.0
 [1.11.1]: https://github.com/mwiraszka/brewski-bets/compare/v1.11.0...v1.11.1
