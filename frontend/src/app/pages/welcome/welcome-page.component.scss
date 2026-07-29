@@ -12,17 +12,72 @@
   display: flex;
   flex: 1;
   flex-direction: column;
-  gap: 32px;
+  gap: 64px;
 }
 
 .description {
   font-size: 18px;
   line-height: 28px;
   text-align: center;
+  text-wrap: balance;
   color: var(--bb-color-textPrimaryDark);
+
+  // Container width, not the viewport, decides the fit: the hero panel halves
+  // the available space. Shares the threshold the stepper lays out against so
+  // the panel adopts its roomier desktop proportions all at once
+  @container (width > 540px) {
+    font-size: 26px;
+    line-height: 40px;
+  }
+}
+
+// Each sentence keeps its own line, and wraps on its own terms when the panel
+// is too narrow to hold it
+.description__line {
+  display: block;
+
+  & + & {
+    margin-top: 8px;
+  }
+}
+
+.description__brand {
+  font-family: 'Righteous', sans-serif;
+  color: var(--bb-color-primary);
+}
+
+.description__accent {
+  font-weight: 700;
+  color: var(--bb-color-primary);
+}
+
+// The tight line-height pulls the box in to the text, so the stroke slung under
+// it keeps its distance as the type scales
+.description__swoosh {
+  position: relative;
+  display: inline-block;
+  line-height: 1;
+}
+
+// Stretched to the width of the word it sits under, with the stroke held at a
+// true 3px so widening the word thins nothing. Curve shape lives in the path
+.description__swoosh-line {
+  position: absolute;
+  top: 100%;
+  right: -2px;
+  left: -2px;
+  overflow: visible;
+  height: 7px;
+  color: var(--bb-color-primary);
 }
 
 .how-it-works ::ng-deep {
+  // Matches the gap the stepper sits below, so each step's demo is spaced off
+  // its number the same way the row is spaced off the intro text
+  .ea-stepper {
+    gap: 64px;
+  }
+
   .ea-stepper__connector {
     min-width: 8px;
   }
