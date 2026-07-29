@@ -1,5 +1,8 @@
 <article class="legal-page">
-  <h2 class="legal-title">Privacy Policy</h2>
+  <h2 class="legal-title">
+    <ea-icon-shield class="legal-title__icon" />
+    Privacy Policy
+  </h2>
   <p class="effective-date">Effective date: March 17, 2026</p>
 
   <section id="introduction">
@@ -85,11 +88,11 @@
     </p>
   </section>
 
-  @if (showReturnToLogin()) {
+  @if (showReturnHome()) {
     <a
-      routerLink="/login"
-      class="return-to-login">
-      Return to login
+      routerLink="/"
+      class="return-home">
+      Return home
     </a>
   }
 </article>

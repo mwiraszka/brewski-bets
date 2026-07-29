@@ -5,6 +5,28 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.14.0] - 2026-07-29
+
+### Changed
+
+- Give the welcome screen's intro a livelier treatment, splitting it into two
+  sentences on their own lines, setting it in roomier type on wider screens,
+  picking out the app's name and what is at stake, and sweeping a curved brand
+  stroke under the payoff word
+- Pare the welcome screen's outcomes preview back to a single Spain and Argentina
+  outcome so the second step reads at a glance
+- Space each welcome step's preview further below its number, matching the gap
+  above the step row
+- Head the Privacy Policy and Terms of Service pages with an icon, and point
+  their closing link home rather than to the login screen
+- Separate the footer's Privacy Policy and Terms of Service links with a dot
+  instead of a vertical line, and style them as links
+- Add "All rights reserved." beside the footer's copyright and drop the version
+  number
+- Resize the eagami wordmark in the footer to suit the updated component, and drop
+  the divider lines that flanked it
+- Lower every underlined link's underline so it no longer crowds the text
+
 ## [1.13.0] - 2026-07-27
 
 ### Added
@@ -856,6 +878,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - PWA manifest and service worker configuration
 - GitHub issue templates
 
+[1.14.0]: https://github.com/mwiraszka/brewski-bets/compare/v1.13.0...v1.14.0
 [1.13.0]: https://github.com/mwiraszka/brewski-bets/compare/v1.12.1...v1.13.0
 [1.12.1]: https://github.com/mwiraszka/brewski-bets/compare/v1.12.0...v1.12.1
 [1.12.0]: https://github.com/mwiraszka/brewski-bets/compare/v1.11.1...v1.12.0

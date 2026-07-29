@@ -29,8 +29,6 @@ export class OutcomesDemoComponent {
 
   readonly outcomes = [
     { name: '2-1 for Spain', amount: -4 },
-    { name: '1-0 for Spain', amount: -2 },
     { name: '2-0 for Argentina', amount: 2 },
-    { name: '5-0 for Argentina', amount: 6 },
   ];
 }

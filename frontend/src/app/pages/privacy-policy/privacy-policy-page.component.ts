@@ -1,3 +1,5 @@
+import { ShieldIconComponent } from '@eagami/ui';
+
 import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
 
@@ -8,12 +10,12 @@ import { ClerkService } from '@app/services/clerk.service';
   templateUrl: './privacy-policy-page.component.html',
   styleUrl: './privacy-policy-page.component.scss',
   changeDetection: ChangeDetectionStrategy.Eager,
-  imports: [RouterLink],
+  imports: [RouterLink, ShieldIconComponent],
 })
 export class PrivacyPolicyPageComponent {
   private readonly clerk = inject(ClerkService);
 
-  readonly showReturnToLogin = computed(
+  readonly showReturnHome = computed(
     () => this.clerk.isLoaded() && !this.clerk.isLoggedIn(),
   );
 }

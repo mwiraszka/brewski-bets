@@ -1,5 +1,8 @@
 <article class="legal-page">
-  <h2 class="legal-title">Terms of Service</h2>
+  <h2 class="legal-title">
+    <ea-icon-file-text class="legal-title__icon" />
+    Terms of Service
+  </h2>
   <p class="effective-date">Effective date: March 17, 2026</p>
 
   <section id="acceptance-of-terms">
@@ -79,11 +82,11 @@
     </p>
   </section>
 
-  @if (showReturnToLogin()) {
+  @if (showReturnHome()) {
     <a
-      routerLink="/login"
-      class="return-to-login">
-      Return to login
+      routerLink="/"
+      class="return-home">
+      Return home
     </a>
   }
 </article>
