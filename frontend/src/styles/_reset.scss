@@ -80,6 +80,8 @@ body {
 a {
   font-style: normal;
   text-decoration: none;
+  // Nudges every underline off the descenders it otherwise crowds
+  text-underline-offset: 2px;
 
   &:hover,
   & > *:hover {
