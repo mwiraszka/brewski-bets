@@ -2,20 +2,18 @@
   <div class="footer-top">
     <div class="footer-meta">
       <span class="copyright">&copy; {{ currentYear }} Brewski Bets</span>
-      <a
-        class="version"
-        [href]="releaseUrl"
-        target="_blank"
-        rel="noopener noreferrer">
-        v{{ version }}
-      </a>
+      <span
+        class="footer-separator"
+        aria-hidden="true">
+      </span>
+      <span class="copyright">All rights reserved.</span>
     </div>
 
     <div class="footer-wordmark">
       <ea-eagami-wordmark
         variant="byline"
         layout="inline"
-        [size]="26" />
+        [size]="13" />
     </div>
 
     <div class="footer-links">
@@ -24,7 +22,10 @@
         class="footer-link">
         Privacy Policy
       </a>
-      <span class="footer-separator"></span>
+      <span
+        class="footer-dot"
+        aria-hidden="true">
+      </span>
       <a
         routerLink="/terms-of-service"
         class="footer-link">
