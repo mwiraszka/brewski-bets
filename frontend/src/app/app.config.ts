@@ -1,3 +1,5 @@
+import { provideStaleBuildReload } from '@eagami/ui/router';
+
 import {
   type ApplicationConfig,
   inject,
@@ -15,6 +17,7 @@ export const appConfig: ApplicationConfig = {
   providers: [
     provideZoneChangeDetection({ eventCoalescing: true }),
     provideRouter(routes, withPreloading(PreloadAllModules)),
+    provideStaleBuildReload(),
     provideAppInitializer(async () => {
       const clerk = inject(ClerkService);
       const user = inject(UserService);
