@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.14.1] - 2026-10-26
 
+### Added
+
+- Report errors on the site and in the API to Sentry so they can be fixed
+  quickly
+
 ### Changed
 
 - Update third-party packages
