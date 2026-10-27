@@ -1,4 +1,5 @@
 import { serve } from '@hono/node-server';
+import * as Sentry from '@sentry/node';
 import { eq } from 'drizzle-orm';
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
@@ -11,6 +12,16 @@ import { friendRoutes } from './routes/friends.js';
 import { userRoutes } from './routes/users.js';
 import { webhookRoutes } from './routes/webhooks.js';
 import type { AppBindings, AppContext } from './types/index.js';
+
+Sentry.init({
+  dsn: process.env['SENTRY_DSN'],
+  // Vercel injects VERCEL_ENV (production/preview); local runs report development
+  environment: process.env['VERCEL_ENV'] ?? 'development',
+  enabled: !!process.env['SENTRY_DSN'],
+  tracesSampleRate: 0,
+  // Its module hooks only record spans, and cannot reach the modules in a bundled function
+  enableRuntimeChannelInjection: false,
+});
 
 const bindings = process.env as unknown as AppBindings;
 
@@ -25,8 +36,11 @@ let cachedDb: Db | null = null;
 
 export const app = new Hono<AppContext>().basePath('/api');
 
-app.onError((err, c) => {
+app.onError(async (err, c) => {
   console.error(`[api] ${c.req.method} ${c.req.path} failed:`, err);
+  Sentry.captureException(err);
+  // Vercel can freeze the function once the response is sent, losing a queued report
+  await Sentry.flush(2000);
   return c.json({ error: 'Internal server error' }, 500);
 });
 

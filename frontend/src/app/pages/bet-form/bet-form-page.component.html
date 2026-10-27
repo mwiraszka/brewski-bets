@@ -297,8 +297,8 @@
               </label>
               <ea-textarea
                 id="bet-description"
-                [maxlength]="descriptionMaxLength"
-                [maxHeight]="200"
+                [maxLength]="descriptionMaxLength"
+                maxHeight="200px"
                 [(value)]="description" />
             }
           </div>
@@ -467,7 +467,6 @@
                         <ea-slider
                           size="sm"
                           [disabled]="!!outcome.voided"
-                          [hasError]="!!outcomeAmountError(outcome, rowIndex)"
                           [min]="-maxBrewskiCount"
                           [max]="maxBrewskiCount"
                           [step]="1"
