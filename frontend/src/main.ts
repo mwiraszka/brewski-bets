@@ -11,7 +11,9 @@ import { appConfig } from './app/app.config';
 Sentry.init({
   dsn: environment.sentryDsn,
   environment: environment.sentryEnvironment,
-  enabled: !!environment.sentryDsn,
+  // Every supported browser defines isSecureContext; runtimes without it are scripted
+  // clients posing as browsers, and their errors come from their own stubs
+  enabled: !!environment.sentryDsn && 'isSecureContext' in globalThis,
   tracesSampleRate: 0,
   // Raised by browser extensions running on the page, not by the app
   ignoreErrors: [/runtime\.sendMessage/, /Extension context invalidated/],
